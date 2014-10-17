@@ -26,7 +26,7 @@ import org.fit.cssbox.io.DocumentSource;
 import org.fit.cssbox.layout.BrowserCanvas;
 import org.fit.cssbox.layout.BrowserConfig;
 import org.fit.cssbox.pdf.PdfBrowserCanvas;
-import org.fit.layout.model.BoxTree;
+import org.fit.layout.impl.BoxTree;
 import org.apache.pdfbox.exceptions.CryptographyException;
 import org.apache.pdfbox.exceptions.InvalidPasswordException;
 import org.apache.pdfbox.pdmodel.PDDocument;

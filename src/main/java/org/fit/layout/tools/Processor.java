@@ -13,8 +13,8 @@ import java.net.URL;
 import java.util.Vector;
 
 import org.fit.cssbox.layout.Viewport;
-import org.fit.layout.model.AreaTree;
-import org.fit.layout.model.BoxTree;
+import org.fit.layout.impl.AreaTree;
+import org.fit.layout.impl.BoxTree;
 
 /**
  * Implementation of the basic processes.
