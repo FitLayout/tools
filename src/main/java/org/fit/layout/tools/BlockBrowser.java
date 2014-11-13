@@ -3,8 +3,6 @@
  */
 package org.fit.layout.tools;
 
-import javax.swing.*;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -26,7 +24,11 @@ import org.fit.cssbox.io.DocumentSource;
 import org.fit.cssbox.layout.BrowserCanvas;
 import org.fit.cssbox.layout.BrowserConfig;
 import org.fit.cssbox.pdf.PdfBrowserCanvas;
-import org.fit.layout.impl.BoxTree;
+import org.fit.layout.model.Area;
+import org.fit.layout.model.Box;
+import org.fit.layout.model.Page;
+import org.fit.layout.model.Tag;
+import org.fit.segm.grouping.AreaTree;
 import org.apache.pdfbox.exceptions.CryptographyException;
 import org.apache.pdfbox.exceptions.InvalidPasswordException;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -43,8 +45,13 @@ import java.awt.GridBagConstraints;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
 import java.awt.GridLayout;
 
@@ -81,10 +88,13 @@ public class BlockBrowser
 {
     public static BlockBrowser browser;
 
+    public static final double TAG_PROBABILITY_THRESHOLD = 0.5; 
+    
     private BrowserConfig config;
     private Processor proc;
-    /*private BoxTree btree;
+    private Page page;
     private AreaTree atree;
+    /*private BoxTree btree;
     private LogicalTree ltree;
     private FeatureAnalyzer features;
     private ArticleExtractor ex;
@@ -100,8 +110,6 @@ public class BlockBrowser
     private boolean dispFinished = false;
     private boolean areasync = true;
     private boolean logsync = true;
-
-    private Date startDate, layoutDate, styleDate, parseDate, treeDate; //for performance measuring
 
     private JFrame mainWindow = null;  //  @jve:decl-index=0:visual-constraint="-239,28"
     private JPanel mainPanel = null;
@@ -224,24 +232,14 @@ public class BlockBrowser
         consoleText.insert(s, consoleText.getCaretPosition());
     }
     
-    public BoxTree getBtree()
-    {
-        return proc.getBoxTree();
-    }
-    
-    public AreaTree getAtree()
-    {
-        return proc.getAreaTree();
-    }
-    
     /**
      * Refresh the trees.
      */
     public void refresh()
     {
-        boxTree.setModel(new DefaultTreeModel(proc.getBoxTree().getRoot()));
-        areaTree.setModel(new DefaultTreeModel(proc.getAreaTree().getRoot()));
-        logicalTree.setModel(new DefaultTreeModel(proc.getLogicalTree().getRoot()));
+        boxTree.setModel(new BoxTreeModel(proc.getPage().getRoot()));
+        areaTree.setModel(new AreaTreeModel(proc.getAreaTree().getRoot()));
+        //logicalTree.setModel(new DefaultTreeModel(proc.getLogicalTree().getRoot()));
     }
     
     //=============================================================================================================
@@ -265,10 +263,15 @@ public class BlockBrowser
                 !urlstring.startsWith("ftp:") &&
                 !urlstring.startsWith("file:"))
                     urlstring = "http://" + urlstring;
-            
-            DocumentSource src = new DefaultDocumentSource(urlstring);
-            currentUrl = src.getURL();
-            contentCanvas = createContentCanvas(src);
+
+            proc = new Processor() {
+                protected void treesCompleted()
+                {
+                    refresh();
+                }
+            };
+            page = proc.renderPage(urlstring, contentScroll.getSize());
+            contentCanvas = createContentCanvas();
             
             contentCanvas.addMouseListener(new MouseListener() {
                 public void mouseClicked(MouseEvent e)
@@ -289,14 +292,14 @@ public class BlockBrowser
                 public void mouseMoved(MouseEvent e) 
                 { 
                     String s = "Absolute: " + e.getX() + ":" + e.getY();
-                    DefaultMutableTreeNode node = (DefaultMutableTreeNode) areaTree.getLastSelectedPathComponent();
-                    if (node != null && node instanceof AreaNode)
+                    Area node = (Area) areaTree.getLastSelectedPathComponent();
+                    if (node != null)
                     {
-                        AreaNode area = (AreaNode) node;
-                        int rx = e.getX() - area.getX();
-                        int ry = e.getY() - area.getY();
+                        Area area = (Area) node;
+                        int rx = e.getX() - area.getX1();
+                        int ry = e.getY() - area.getY1();
                         s += "  Relative: " + rx + ":" + ry;
-                        if (area.getArea().contains(e.getX(), e.getY()))
+                        /*if (area.getBounds().contains(e.getX(), e.getY()))
                         {
                             AreaGrid grid = area.getGrid();
                             if (grid != null)
@@ -305,13 +308,12 @@ public class BlockBrowser
                                 int gy = grid.findCellY(e.getY());
                                 s += "  Grid: " + gx + ":" + gy;
                             }
-                        }
+                        }*/
                     }
                     statusText.setText(s);
                 }
             });
             contentScroll.setViewportView(contentCanvas);
-            layoutDate = new Date();
             
             proc = new Processor() {
                 protected void treesCompleted()
@@ -319,34 +321,13 @@ public class BlockBrowser
                     refresh();
                 }
             };
-            proc.segmentPage(((BrowserCanvas) contentCanvas).getViewport());
-            treeDate = new Date();
+            proc.segmentPage(page);
 
-            /*AreaNode node = atree.getAreaByName("731:");
-            if (node != null)
-            {
-                TreePath select = new TreePath(node.getPath());
-                areaTree.setSelectionPath(select);
-                areaTree.expandPath(select);
-            }*/
-            
-            //=============================================================================
-            
-            System.out.println();
-            System.out.println("Statistics");
-            System.out.println("----------");
-            System.out.println("Load&parse: "+ (parseDate.getTime() - startDate.getTime()) + " ms");
-            System.out.println("Compute styles: "+ (styleDate.getTime() - parseDate.getTime()) + " ms");
-            System.out.println("Layout: "+ (layoutDate.getTime() - styleDate.getTime()) + " ms");
-            System.out.println("Segmentation: "+ (treeDate.getTime() - layoutDate.getTime()) + " ms");
-            
             dispFinished = true;
             saveButton.setEnabled(true);
             saveLogicalButton.setEnabled(true);
             saveRDFButton.setEnabled(true);
             treeCompButton.setEnabled(true);
-            if (proc.getEvalData() != null)
-                evaluationButton.setEnabled(true);
             
         } catch (Exception e) {
             System.err.println("*** Error: "+e.getMessage());
@@ -355,78 +336,19 @@ public class BlockBrowser
     }
     
     /** Creates the appropriate canvas based on the file type */
-    private BrowserCanvas createContentCanvas(DocumentSource src) throws IOException, SAXException
+    private JPanel createContentCanvas()
     {
-        InputStream is = src.getInputStream();
-        String mime = src.getContentType();
-        if (mime == null)
-            mime = "text/html";
-        int p = mime.indexOf(';');
-        if (p != -1)
-            mime = mime.substring(0, p).trim();
-        System.out.println("File type: " + mime);
-        
-        startDate = new Date();
-        
-        if (mime.equals("application/pdf"))
-        {
-            PDDocument doc = loadPdf(is);
-            parseDate = new Date();
-            styleDate = new Date();
-            return new PdfBrowserCanvas(doc, null, contentScroll.getSize(), src.getURL());
-        }
-        else
-        {
-            DOMSource parser = new DefaultDOMSource(src);
-            Document doc = parser.parse();
-            parseDate = new Date();
-            
-            DOMAnalyzer da = new DOMAnalyzer(doc, src.getURL());
-            da.attributesToStyles();
-            da.addStyleSheet(null, CSSNorm.stdStyleSheet(), DOMAnalyzer.Origin.AGENT);
-            da.addStyleSheet(null, CSSNorm.userStyleSheet(), DOMAnalyzer.Origin.AGENT);
-            da.getStyleSheets();
-            styleDate = new Date();
-            
-            BrowserCanvas ret = new BrowserCanvas(da.getRoot(), da, src.getURL());
-            ret.getConfig().setLoadImages(false);
-            ret.getConfig().setLoadBackgroundImages(false);
-            ret.createLayout(contentScroll.getSize());
-            return ret;
-        }
+        if (contentCanvas != null)
+            contentCanvas = new BrowserPanel(page);
+        return contentCanvas;
     }
-    
-    private PDDocument loadPdf(InputStream is) throws IOException
-    {
-        PDDocument document = null;
-        document = PDDocument.load(is);
-        if( document.isEncrypted() )
-        {
-            try
-            {
-                document.decrypt("");
-            }
-            catch( InvalidPasswordException e )
-            {
-                System.err.println( "Error: Document is encrypted with a password." );
-                System.exit( 1 );
-            }
-            catch( CryptographyException e )
-            {
-                System.err.println( "Error: Document is encrypted with a password." );
-                System.exit( 1 );
-            }
-        }
-        return document;
-    }
-    
     
     /** This is called when the browser canvas is clicked */
     private void canvasClick(int x, int y)
     {
-        if (lookupButton.isSelected())
+        /*if (lookupButton.isSelected())
         {
-            AreaNode node = proc.getAreaTree().getAreaAt(x, y);
+            Area node = proc.getAreaTree().getAreaAt(x, y);
             if (node != null)
             {
                 showAreaInTree(node);
@@ -463,50 +385,39 @@ public class BlockBrowser
                 //System.out.println("Extracted: " + s);
             }
             extractButton.setSelected(false);
-        }
+        }*/
     }
     
-    private void showBoxInTree(BoxNode node)
+    private void showBoxInTree(Box node)
     {
-        TreePath select = new TreePath(node.getPath());
+        /*TreePath select = new TreePath(node.getPath());
         boxTree.setSelectionPath(select);
-        boxTree.expandPath(select);
+        boxTree.expandPath(select);*/
     }
     
-    private void showAreaInTree(AreaNode node)
+    private void showAreaInTree(Area node)
     {
-        TreePath select = new TreePath(node.getPath());
+        /*TreePath select = new TreePath(node.getPath());
         areaTree.setSelectionPath(select);
         //areaTree.expandPath(select);
-        areaTree.scrollPathToVisible(new TreePath(node.getPath()));
+        areaTree.scrollPathToVisible(new TreePath(node.getPath()));*/
     }
     
-    private void showAreaInLogicalTree(AreaNode node)
+    private void showAreaInLogicalTree(Area node)
     {
-        LogicalNode lnode = proc.getLogicalTree().findArea(node);
+        /*LogicalNode lnode = proc.getLogicalTree().findArea(node);
         if (lnode != null)
         {
             TreePath select = new TreePath(lnode.getPath());
             logicalTree.setSelectionPath(select);
             //logicalTree.expandPath(select);
             logicalTree.scrollPathToVisible(new TreePath(lnode.getPath()));
-        }
+        }*/
     }
     
-    public void displayEvaluatedDataInLogicalTree(EvalData data)
+    private void displayAreaInfo(Area area)
     {
-        logicalTree.clearSelection();
-        Vector<LogicalNode> nodes = data.getMatchingNodes();
-        for (LogicalNode node : nodes)
-        {
-            TreePath sel = new TreePath(node.getPath());
-            logicalTree.addSelectionPath(sel);
-        }
-    }
-    
-    private void displayAreaInfo(AreaNode area)
-    {
-        Vector<String> cols = infoTableData("Property", "Value");
+        /*Vector<String> cols = infoTableData("Property", "Value");
         
         Vector<Vector <String>> vals = new Vector<Vector <String>>();
         vals.add(infoTableData("Layout", area.getLayoutType().toString()));
@@ -580,7 +491,7 @@ public class BlockBrowser
         DefaultTableModel tab = new DefaultTableModel(vals, cols);
         infoTable.setModel(tab);
         DefaultTableModel ftab = new DefaultTableModel(fvals, cols);
-        featureTable.setModel(ftab);
+        featureTable.setModel(ftab);*/
     }
     
     private String borderString(Area a)
@@ -616,7 +527,7 @@ public class BlockBrowser
         {
             for (Map.Entry<Tag, Double> entry : map.entrySet())
             {
-                if (entry.getValue() > Config.TAG_PROBABILITY_THRESHOLD)
+                if (entry.getValue() > TAG_PROBABILITY_THRESHOLD)
                     ret += entry.getKey() + " (" + String.format("%1.2f", entry.getValue()) + ") "; 
             }
         }
@@ -631,9 +542,9 @@ public class BlockBrowser
         return cols;
     }
     
-    private void displayProbabilityTable(AreaNode area)
+    private void displayProbabilityTable(Area area)
     {
-        List<Tag> tags = proc.getTagger().getAllTags();
+        /*List<Tag> tags = proc.getTagger().getAllTags();
         Vector<String> cols = new Vector<String>();
         cols.add("Source");
         for (Tag tag : tags)
@@ -659,7 +570,7 @@ public class BlockBrowser
         if (proc.getTagPredictor() != null)
             vals.add(getProbTableLine("total", tags, proc.getTagPredictor().getTagProbabilities(area)));
                 
-        probTable.setModel(new DefaultTableModel(vals, cols));
+        probTable.setModel(new DefaultTableModel(vals, cols));*/
     }
     
     private Vector<String> getProbTableLine(String title, List<Tag> tags, Map<Tag, Double> data)
@@ -676,49 +587,9 @@ public class BlockBrowser
         return ret;
     }
     
-    /** Displays the extraction result table */
-    private void displayExtractionResult(Map<String, LogicalNode> map)
+    private void showArea(Area anode)
     {
-        Vector<String> cols = infoTableData("Property", "Value");
-        Vector<Vector <String>> vals = new Vector<Vector <String>>();
-        if (map != null)
-        {
-            for (String prop : map.keySet())
-                vals.add(infoTableData(prop, map.get(prop).toString()));
-        }
-        DefaultTableModel tab = new DefaultTableModel(vals, cols);
-        extractionTable.setModel(tab);
-    }
-    
-    /** Displays all separators from the selected area */
-    private void showSeparators()
-    {
-        ListModel ml = sepList.getModel();
-        for (int i = 0; i < ml.getSize(); i++)
-        {
-            Separator sep = (Separator) ml.getElementAt(i);
-            sep.drawExtent((BrowserCanvas) contentCanvas);
-        }
-        contentCanvas.repaint();
-    }
-    
-    private void showSeparatorAt(int x, int y)
-    {
-        ListModel ml = sepList.getModel();
-        for (int i = 0; i < ml.getSize(); i++)
-        {
-            Separator sep = (Separator) ml.getElementAt(i);
-            if (sep.contains(x, y))
-            {
-                sepList.setSelectedValue(sep, true);
-            }
-        }
-        //contentCanvas.repaint();
-    }
-    
-    private void showArea(AreaNode anode)
-    {
-        Area sel = anode.getArea();
+        /*Area sel = anode.getArea();
         sel.drawExtent((BrowserCanvas) contentCanvas);
         //anode.drawGrid((BrowserCanvas) contentCanvas);
         contentCanvas.repaint();
@@ -740,66 +611,49 @@ public class BlockBrowser
         //debug joining
         AreaNode p = anode.getParentArea();
         if (p != null)
-            p.debugAreas(anode);
+            p.debugAreas(anode);*/
     }
 
-    private void showNode(LogicalNode lnode)
-    {
-    	boolean first = true;
-    	for (AreaNode node : lnode.getAreaNodes())
-    	{
-    		if (first)
-    			showArea(node);
-    		else
-    		{
-    	        Area sel = node.getArea();
-    	        sel.drawExtent((BrowserCanvas) contentCanvas);
-    		}
-    		first = false;
-    	}
-        contentCanvas.repaint();
-    }
-    
     @SuppressWarnings("unchecked")
-    public void showAreas(AreaNode node, String name)
+    public void showAreas(Area node, String name)
     {
-        Enumeration<AreaNode> en = node.postorderEnumeration();
+        /*Enumeration<AreaNode> en = node.postorderEnumeration();
         while (en.hasMoreElements())
         {
             AreaNode child = en.nextElement();
             if (child.getArea() != null && (name == null || child.getArea().toString().contains(name)))
                 child.getArea().drawExtent((BrowserCanvas) contentCanvas);
         }
-        contentCanvas.repaint();
+        contentCanvas.repaint();*/
     }
     
     @SuppressWarnings("unchecked")
-    public void colorizeTags(AreaNode node)
+    public void colorizeTags(Area node)
     {
-        Enumeration<AreaNode> en = node.postorderEnumeration();
+        /*Enumeration<AreaNode> en = node.postorderEnumeration();
         while (en.hasMoreElements())
         {
             AreaNode child = en.nextElement();
             if (child.getArea() != null)
                 child.getArea().colorizeByTags((BrowserCanvas) contentCanvas, child.getTags());
         }
-        contentCanvas.repaint();
+        contentCanvas.repaint();*/
     }
     
     @SuppressWarnings("unchecked")
-    public void colorizeClasses(AreaNode node)
+    public void colorizeClasses(Area node)
     {
-        Enumeration<AreaNode> en = node.postorderEnumeration();
+        /*Enumeration<Area> en = node.postorderEnumeration();
         while (en.hasMoreElements())
         {
-            AreaNode child = en.nextElement();
+            Area child = en.nextElement();
             if (child.getArea() != null && child.getDepth() <= 5) //only mark almost leaf areas
             {
                 String cname = proc.getVisualClassifier().classifyArea(child);
                 child.getArea().colorizeByClass((BrowserCanvas) contentCanvas, cname);
             }
         }
-        contentCanvas.repaint();
+        contentCanvas.repaint();*/
     }
     
     public BrowserCanvas getBrowserCanvas()
@@ -1095,21 +949,19 @@ public class BlockBrowser
         if (boxTree == null)
         {
             boxTree = new JTree();
-            boxTree.addTreeSelectionListener(new javax.swing.event.TreeSelectionListener()
+            /*boxTree.addTreeSelectionListener(new javax.swing.event.TreeSelectionListener()
             {
                 public void valueChanged(javax.swing.event.TreeSelectionEvent e)
                 {
-                    BoxNode node = (BoxNode) boxTree.getLastSelectedPathComponent();
-                    if (node != null && node.getBox() != null)
+                    Box node = (Box) boxTree.getLastSelectedPathComponent();
+                    if (node != null)
                     {
-                        System.out.println("Bg:"+node.getEfficientBackground());
-                        System.out.println("Fg:"+node.getEfficientColor());
 	                    node.drawExtent((BrowserCanvas) contentCanvas);
                         contentCanvas.repaint();
                         boxTree.scrollPathToVisible(new TreePath(node.getPath()));
                     }
                 }
-            });
+            });*/
         }
         return boxTree;
     }
@@ -1128,7 +980,7 @@ public class BlockBrowser
             contentScroll.getVerticalScrollBar().setUnitIncrement(10);
             contentScroll.addComponentListener(new java.awt.event.ComponentAdapter()
             {
-                public void componentResized(java.awt.event.ComponentEvent e)
+                /*public void componentResized(java.awt.event.ComponentEvent e)
                 {
                     if (contentCanvas != null && contentCanvas instanceof BrowserCanvas)
                     {
@@ -1137,7 +989,7 @@ public class BlockBrowser
                         BoxTree btree = new BoxTree(((BrowserCanvas) contentCanvas).getViewport());
                         boxTree.setModel(new DefaultTreeModel(btree.getRoot()));
                     }
-                }
+                }*/
             });
         }
         return contentScroll;
@@ -1273,12 +1125,12 @@ public class BlockBrowser
 				{
                     if (logsync)
                     {
-	                    DefaultMutableTreeNode node = (DefaultMutableTreeNode) areaTree.getLastSelectedPathComponent();
-	                    if (node != null && node instanceof AreaNode)
+	                    Area node = (Area) areaTree.getLastSelectedPathComponent();
+	                    if (node != null)
 	                    {
-	                        showArea((AreaNode) node);
+	                        showArea(node);
                         	areasync = false;
-                        	showAreaInLogicalTree((AreaNode) node);
+                        	showAreaInLogicalTree(node);
                         	areasync = true;
 	                    }
                     }
@@ -1329,7 +1181,7 @@ public class BlockBrowser
 	 */
 	private JList getSepList()
 	{
-		if (sepList == null)
+		/*if (sepList == null)
 		{
 			sepList = new JList();
 			sepList.addListSelectionListener(new javax.swing.event.ListSelectionListener()
@@ -1345,7 +1197,8 @@ public class BlockBrowser
 				}
 			});
 		}
-		return sepList;
+		return sepList;*/
+	    return new JList();
 	}
 
 	/**
@@ -1451,13 +1304,13 @@ public class BlockBrowser
         {
             showSepButton = new JButton();
             showSepButton.setText("Separators");
-            showSepButton.addActionListener(new java.awt.event.ActionListener()
+            /*showSepButton.addActionListener(new java.awt.event.ActionListener()
             {
                 public void actionPerformed(java.awt.event.ActionEvent e)
                 {
                     showSeparators();
                 }
-            });
+            });*/
         }
         return showSepButton;
     }
@@ -1478,16 +1331,16 @@ public class BlockBrowser
             {
 				public void actionPerformed(java.awt.event.ActionEvent e)
                 {
-                    BoxNode node = (BoxNode) boxTree.getLastSelectedPathComponent();
+                    Box node = (Box) boxTree.getLastSelectedPathComponent();
                     if (node != null /*&& node.getBox() != null*/)
                     {
-                        Enumeration<?> en = node.postorderEnumeration();
+                        /*Enumeration<?> en = node.postorderEnumeration();
                         while (en.hasMoreElements())
                         {
                             BoxNode child = (BoxNode) en.nextElement();
                             if (child.getBox() != null)
                                 child.drawExtent((BrowserCanvas) contentCanvas);
-                        }
+                        }*/
                         contentCanvas.repaint();
                     }
                 }
@@ -1512,10 +1365,10 @@ public class BlockBrowser
             {
 				public void actionPerformed(java.awt.event.ActionEvent e)
                 {
-                    DefaultMutableTreeNode node = (DefaultMutableTreeNode) areaTree.getLastSelectedPathComponent();
-                    if (node != null && node instanceof AreaNode)
+                    Area node = (Area) areaTree.getLastSelectedPathComponent();
+                    if (node != null)
                     {
-                        showAreas((AreaNode) node, null);
+                        showAreas(node, null);
                     }
                 }
             });
@@ -1588,7 +1441,7 @@ public class BlockBrowser
 			saveButton = new JButton();
 			saveButton.setText("Save Visual");
 			saveButton.setEnabled(false);
-			saveButton.addActionListener(new java.awt.event.ActionListener()
+			/*saveButton.addActionListener(new java.awt.event.ActionListener()
 			{
 				public void actionPerformed(java.awt.event.ActionEvent e)
 				{
@@ -1619,7 +1472,7 @@ public class BlockBrowser
 	            	    }
 					}
 				}
-			});
+			});*/
 		}
 		return saveButton;
 	}
@@ -1635,7 +1488,7 @@ public class BlockBrowser
         {
             gridButton = new JButton();
             gridButton.setText("Show grid");
-            gridButton.addActionListener(new java.awt.event.ActionListener()
+            /*gridButton.addActionListener(new java.awt.event.ActionListener()
             {
                 public void actionPerformed(java.awt.event.ActionEvent e)
                 {
@@ -1646,7 +1499,7 @@ public class BlockBrowser
                         contentCanvas.repaint();
                     }
                 }
-            });
+            });*/
         }
         return gridButton;
     }
@@ -1698,7 +1551,7 @@ public class BlockBrowser
         if (logicalTree == null)
         {
             logicalTree = new JTree();
-            logicalTree.addTreeSelectionListener(new javax.swing.event.TreeSelectionListener()
+            /*logicalTree.addTreeSelectionListener(new javax.swing.event.TreeSelectionListener()
                     {
                         public void valueChanged(javax.swing.event.TreeSelectionEvent e)
                         {
@@ -1714,7 +1567,7 @@ public class BlockBrowser
 	                            }
                         	}
                         }
-                    });
+                    });*/
         }
         return logicalTree;
     }
@@ -1842,7 +1695,7 @@ public class BlockBrowser
         if (tagsButton == null)
         {
             tagsButton = new JButton("Tags");
-            tagsButton.addActionListener(new ActionListener()
+            /*tagsButton.addActionListener(new ActionListener()
             {
                 public void actionPerformed(ActionEvent arg0)
                 {
@@ -1852,7 +1705,7 @@ public class BlockBrowser
                         colorizeTags((AreaNode) node);
                     }
                 }
-            });
+            });*/
         }
         return tagsButton;
     }
@@ -1862,7 +1715,7 @@ public class BlockBrowser
         if (classesButton == null)
         {
             classesButton = new JButton("Classes");
-            classesButton.addActionListener(new ActionListener()
+            /*classesButton.addActionListener(new ActionListener()
             {
                 public void actionPerformed(ActionEvent e)
                 {
@@ -1872,7 +1725,7 @@ public class BlockBrowser
                         colorizeClasses((AreaNode) node);
                     }
                 }
-            });
+            });*/
         }
         return classesButton;
     }
@@ -1889,7 +1742,7 @@ public class BlockBrowser
             showArtAreaButton = new JButton();
             showArtAreaButton.setText("Art. areas");
             showArtAreaButton.setToolTipText("Show artificial areas marked with <area>");       
-            showArtAreaButton.addActionListener(new java.awt.event.ActionListener()
+            /*showArtAreaButton.addActionListener(new java.awt.event.ActionListener()
             {
                 public void actionPerformed(java.awt.event.ActionEvent e)
                 {
@@ -1899,7 +1752,7 @@ public class BlockBrowser
                         showAreas((AreaNode) node, "<area");
                     }
                 }
-            });
+            });*/
         }
         return showArtAreaButton;
     }
@@ -1916,7 +1769,7 @@ public class BlockBrowser
           showColumnsButton = new JButton();
           showColumnsButton.setText("Columns");
           showColumnsButton.setToolTipText("Show columns marked with <column>");
-          showColumnsButton.addActionListener(new java.awt.event.ActionListener()
+          /*showColumnsButton.addActionListener(new java.awt.event.ActionListener()
           {
               public void actionPerformed(java.awt.event.ActionEvent e)
               {
@@ -1926,7 +1779,7 @@ public class BlockBrowser
                       showAreas((AreaNode) node, "<column>");
                   }
               }
-          });
+          });*/
         }
         return showColumnsButton;
     }
@@ -1973,7 +1826,7 @@ public class BlockBrowser
             saveLogicalButton.setText("Save Logical");
             saveLogicalButton.setEnabled(false);
             saveLogicalButton.setToolTipText("Save logical tree to a file");
-            saveLogicalButton.addActionListener(new java.awt.event.ActionListener()
+            /*saveLogicalButton.addActionListener(new java.awt.event.ActionListener()
             {
                 public void actionPerformed(java.awt.event.ActionEvent e)
                 {
@@ -2004,7 +1857,7 @@ public class BlockBrowser
                         }
                     }
                 }
-            });
+            });*/
         }
         return saveLogicalButton;
     }
@@ -2015,7 +1868,7 @@ public class BlockBrowser
         {
             saveRDFButton = new JButton("Save RDF");
             saveRDFButton.setEnabled(false);
-            saveRDFButton.addActionListener(new ActionListener()
+            /*saveRDFButton.addActionListener(new ActionListener()
             {
                 public void actionPerformed(ActionEvent arg0)
                 {
@@ -2046,7 +1899,7 @@ public class BlockBrowser
                         }
                     }
                 }
-            });
+            });*/
         }
         return saveRDFButton;
     }
@@ -2161,7 +2014,7 @@ public class BlockBrowser
                     Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
                     try {
                         Double d = Double.parseDouble(value.toString().replace(',', '.'));
-                        if (d <= Config.TAG_PROBABILITY_THRESHOLD)
+                        if (d <= TAG_PROBABILITY_THRESHOLD)
                             c.setForeground(new java.awt.Color(180, 180, 180));
                         else
                             c.setForeground(Color.BLACK);
@@ -2201,7 +2054,7 @@ public class BlockBrowser
         {
             evaluationButton = new JButton("Evaluation");
             evaluationButton.setEnabled(false);
-            evaluationButton.addActionListener(new ActionListener() 
+            /*evaluationButton.addActionListener(new ActionListener() 
             {
                 public void actionPerformed(ActionEvent arg0) 
                 {
@@ -2209,7 +2062,7 @@ public class BlockBrowser
                     if (proc.getEvalData() != null)
                         ((EvalWindow) getEvalWindow()).setEvaluationData(proc.getEvalData());
                 }
-            });
+            });*/
         }
         return evaluationButton;
     }
@@ -2220,7 +2073,7 @@ public class BlockBrowser
         {
             treeCompButton = new JButton("TreeComp");
             treeCompButton.setEnabled(false);
-            treeCompButton.addActionListener(new ActionListener() 
+            /*treeCompButton.addActionListener(new ActionListener() 
             {
                 public void actionPerformed(ActionEvent arg0) 
                 {
@@ -2228,7 +2081,7 @@ public class BlockBrowser
                     if (proc.getEvalData() != null)
                         ((TreeCompWindow) getTreeCompWindow()).setEvaluationData(proc.getEvalData());
                 }
-            });
+            });*/
         }
         return treeCompButton;
     }
@@ -2237,9 +2090,9 @@ public class BlockBrowser
     {
         if (treeCompWindow == null) 
         {
-            SearchTree stree = ProgrammeSearchTree.create();
+            /*SearchTree stree = ProgrammeSearchTree.create();
             treeCompWindow = new TreeCompWindow(stree, proc.getLogicalTree().getRoot(), proc.getTagPredictor());
-            treeCompWindow.setSize(900, 600);
+            treeCompWindow.setSize(900, 600);*/
         }
         treeCompWindow.setVisible(true);
         return treeCompWindow;
@@ -2249,8 +2102,8 @@ public class BlockBrowser
     {
         if (evalWindow == null) 
         {
-            evalWindow = new EvalWindow(this);
-            evalWindow.setSize(1200, 400);
+            /*evalWindow = new EvalWindow(this);
+            evalWindow.setSize(1200, 400);*/
         }
         evalWindow.setVisible(true);
         return evalWindow;

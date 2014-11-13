@@ -6,13 +6,17 @@
 package org.fit.layout.tools;
 
 import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics2D;
+import java.awt.geom.Rectangle2D;
 import java.util.Iterator;
 import java.util.Set;
 
 import org.fit.layout.api.OutputDisplay;
 import org.fit.layout.model.Area;
 import org.fit.layout.model.Box;
+import org.fit.layout.model.Page;
 import org.fit.layout.model.Rectangular;
 import org.fit.layout.model.Tag;
 
@@ -38,6 +42,67 @@ public class OutputDisplayImpl implements OutputDisplay
         return g;
     }
 
+    @Override
+    public void drawPage(Page page)
+    {
+        recursivelyDrawBoxes(page.getRoot());
+    }
+
+    private void recursivelyDrawBoxes(Box root)
+    {
+        drawBox(root);
+        for (int i = 0; i < root.getChildCount(); i++)
+            recursivelyDrawBoxes(root.getChildBox(i));
+    }
+    
+    @Override
+    public void drawBox(Box box)
+    {
+        Box.Type type = box.getType();
+        
+        if (type == Box.Type.TEXT_CONTENT)
+        {
+            g.setColor(box.getColor());
+            
+            //setup the font
+            Font font = new Font("Serif", Font.PLAIN, 12);
+            String fmlspec = box.getFontFamily();
+            float fontsize = box.getFontSize();
+            int fs = Font.PLAIN;
+            if (box.getFontWeight() > 0.5f)
+                fs = Font.BOLD;
+            if (box.getFontStyle() > 0.5f)
+                fs = fs | Font.ITALIC;
+            
+            //TODO underline and overline
+            font = new Font(fmlspec, fs, (int) fontsize);
+            g.setFont(font);
+            
+            String text = box.getText();
+            FontMetrics fm = g.getFontMetrics();
+            Rectangle2D rect = fm.getStringBounds(text, g);
+            g.drawString(text, box.getX1() + (int) rect.getX(), box.getY1() - (int) rect.getY());
+        }
+        else if (type == Box.Type.REPLACED_CONTENT)
+        {
+            g.setColor(box.getColor());
+            Rectangular r = box.getBounds();
+            g.drawRect(r.getX1(), r.getY1(), r.getWidth() - 1, r.getHeight() - 1);
+        }
+        else //element boxes
+        {
+            Color bg = box.getBackgroundColor();
+            if (bg != null)
+            {
+                g.setColor(bg);
+                Rectangular r = box.getBounds();
+                g.fillRect(r.getX1(), r.getY1(), r.getWidth() - 1, r.getHeight() - 1);
+            }
+            //TODO borders
+        }
+
+    }
+    
     //=================================================================================
 
     @Override
@@ -118,7 +183,7 @@ public class OutputDisplayImpl implements OutputDisplay
             Color ret = new Color(100 + (r % 150), 100 + (g % 150), 100 + (b % 150), 128);              
             //System.out.println(cname + " => " + ret.toString());               
             return ret;                                                          
-    } 
+    }
     
     
 }
