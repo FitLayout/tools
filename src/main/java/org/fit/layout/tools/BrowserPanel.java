@@ -5,11 +5,13 @@
  */
 package org.fit.layout.tools;
 
+import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 
 import javax.swing.JPanel;
 
+import org.fit.layout.api.OutputDisplay;
 import org.fit.layout.model.Page;
 
 
@@ -22,18 +24,34 @@ public class BrowserPanel extends JPanel
     private static final long serialVersionUID = 1L;
 
     protected Page page;
+    protected BufferedImage img;
+    protected OutputDisplayImpl disp;
     
     public BrowserPanel(Page page)
     {
         this.page = page;
+        setSize(page.getWidth(), page.getHeight());
+        setPreferredSize(new Dimension(page.getWidth(), page.getHeight()));
+        img = new BufferedImage(page.getWidth(), page.getHeight(), BufferedImage.TYPE_INT_RGB);
+        disp = new OutputDisplayImpl(img.createGraphics());
+        disp.drawPage(page);
     }
 
+    public void redrawPage()
+    {
+        disp.drawPage(page);
+    }
+    
+    public OutputDisplay getOutputDisplay()
+    {
+        return disp;
+    }
+    
     @Override
     protected void paintComponent(Graphics g)
     {
         super.paintComponent(g);
-        OutputDisplayImpl disp = new OutputDisplayImpl((Graphics2D) g);
-        disp.drawPage(page);
+        g.drawImage(img, 0, 0, null);
     }
 
 }

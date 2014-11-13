@@ -4,47 +4,26 @@
 package org.fit.layout.tools;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Method;
 import java.net.URL;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Vector;
 
-import org.fit.cssbox.css.CSSNorm;
-import org.fit.cssbox.css.DOMAnalyzer;
-import org.fit.cssbox.io.DOMSource;
-import org.fit.cssbox.io.DefaultDOMSource;
-import org.fit.cssbox.io.DefaultDocumentSource;
-import org.fit.cssbox.io.DocumentSource;
 import org.fit.cssbox.layout.BrowserCanvas;
 import org.fit.cssbox.layout.BrowserConfig;
-import org.fit.cssbox.pdf.PdfBrowserCanvas;
 import org.fit.layout.model.Area;
 import org.fit.layout.model.Box;
 import org.fit.layout.model.Page;
 import org.fit.layout.model.Tag;
 import org.fit.segm.grouping.AreaTree;
-import org.apache.pdfbox.exceptions.CryptographyException;
-import org.apache.pdfbox.exceptions.InvalidPasswordException;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
 
-import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.tree.*;
 import javax.swing.JSplitPane;
 import javax.swing.JToolBar;
 
 import java.awt.GridBagConstraints;
 
 import javax.swing.JButton;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -60,6 +39,7 @@ import javax.swing.JTree;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.GridBagLayout;
 
@@ -74,6 +54,7 @@ import java.awt.FlowLayout;
 
 import javax.swing.JTextArea;
 import javax.swing.JTable;
+import javax.swing.tree.TreePath;
 
 import java.awt.Insets;
 import java.awt.Font;
@@ -315,12 +296,6 @@ public class BlockBrowser
             });
             contentScroll.setViewportView(contentCanvas);
             
-            proc = new Processor() {
-                protected void treesCompleted()
-                {
-                    refresh();
-                }
-            };
             proc.segmentPage(page);
 
             dispFinished = true;
@@ -346,7 +321,7 @@ public class BlockBrowser
     /** This is called when the browser canvas is clicked */
     private void canvasClick(int x, int y)
     {
-        /*if (lookupButton.isSelected())
+        if (lookupButton.isSelected())
         {
             Area node = proc.getAreaTree().getAreaAt(x, y);
             if (node != null)
@@ -356,7 +331,7 @@ public class BlockBrowser
             }
             //lookupButton.setSelected(false);
         }
-        if (boxLookupButton.isSelected())
+        /*if (boxLookupButton.isSelected())
         {
             BoxNode node = proc.getBoxTree().getBoxAt(x, y);
             if (node != null)
@@ -397,10 +372,18 @@ public class BlockBrowser
     
     private void showAreaInTree(Area node)
     {
-        /*TreePath select = new TreePath(node.getPath());
+        //find the path to root
+        int len = 0;
+        for (Area a = node; a != null; a = a.getParentArea())
+            len++;
+        Area[] path = new Area[len];
+        for (Area a = node; a != null; a = a.getParentArea())
+            path[--len] = a;
+        
+        TreePath select = new TreePath(path);
         areaTree.setSelectionPath(select);
         //areaTree.expandPath(select);
-        areaTree.scrollPathToVisible(new TreePath(node.getPath()));*/
+        areaTree.scrollPathToVisible(new TreePath(path));
     }
     
     private void showAreaInLogicalTree(Area node)
@@ -587,8 +570,12 @@ public class BlockBrowser
         return ret;
     }
     
-    private void showArea(Area anode)
+    private void showArea(Area area)
     {
+        ((BrowserPanel) contentCanvas).getOutputDisplay().drawExtent(area);
+        contentCanvas.repaint();
+        
+        
         /*Area sel = anode.getArea();
         sel.drawExtent((BrowserCanvas) contentCanvas);
         //anode.drawGrid((BrowserCanvas) contentCanvas);
@@ -949,19 +936,21 @@ public class BlockBrowser
         if (boxTree == null)
         {
             boxTree = new JTree();
-            /*boxTree.addTreeSelectionListener(new javax.swing.event.TreeSelectionListener()
+            boxTree.addTreeSelectionListener(new javax.swing.event.TreeSelectionListener()
             {
                 public void valueChanged(javax.swing.event.TreeSelectionEvent e)
                 {
                     Box node = (Box) boxTree.getLastSelectedPathComponent();
                     if (node != null)
                     {
-	                    node.drawExtent((BrowserCanvas) contentCanvas);
+	                    //node.drawExtent((BrowserCanvas) contentCanvas);
+                        System.out.println("Node:" + node);
+                        ((BrowserPanel) contentCanvas).getOutputDisplay().drawExtent(node);
                         contentCanvas.repaint();
-                        boxTree.scrollPathToVisible(new TreePath(node.getPath()));
+                        //boxTree.scrollPathToVisible(new TreePath(node.getPath()));
                     }
                 }
-            });*/
+            });
         }
         return boxTree;
     }
@@ -1067,7 +1056,7 @@ public class BlockBrowser
             {
                 public void actionPerformed(java.awt.event.ActionEvent e)
                 {
-                    ((BrowserCanvas) contentCanvas).redrawBoxes();
+                    ((BrowserPanel) contentCanvas).redrawPage();
                     contentCanvas.repaint();
                 }
             });

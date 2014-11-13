@@ -54,7 +54,7 @@ public class Processor
         atree = new AreaTree(page);
         atree.findBasicAreas();
         
-        
+        treesCompleted();
     }
     
     //====================================================================================
