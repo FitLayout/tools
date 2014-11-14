@@ -10,11 +10,14 @@ import java.awt.Dimension;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Vector;
 
 import org.fit.layout.classify.TreeTagger;
 import org.fit.layout.cssbox.CSSBoxTreeBuilder;
 import org.fit.layout.model.Page;
 import org.fit.segm.grouping.AreaTree;
+import org.fit.segm.grouping.op.AreaTreeOperator;
+import org.fit.segm.grouping.op.FindLineOperator;
 import org.xml.sax.SAXException;
 
 
@@ -53,6 +56,23 @@ public class Processor
         //area tree
         atree = new AreaTree(page);
         atree.findBasicAreas();
+        
+        //apply the area tree operations
+        Vector<AreaTreeOperator> operations = new Vector<AreaTreeOperator>();
+        operations.add(new FindLineOperator(false, 1.5f));
+        //operations.add(new HomogeneousLeafOperator());
+        ////operations.add(new FindColumnsOperator());
+        //operations.add(new SuperAreaOperator(1)); //TODO misto pass limit by se hodilo nejake omezeni granularity na zaklade vlastnosti oblasti
+        ////operations.add(new CollapseAreasOperator());
+        //operations.add(new ReorderOperator());
+        
+        System.out.println("OPERATORS");
+        for (AreaTreeOperator op : operations)
+        {
+            System.out.println(op.toString());
+            op.apply(atree);
+        }
+        System.out.println("DONE");
         
         treesCompleted();
     }
