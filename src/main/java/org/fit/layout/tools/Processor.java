@@ -18,6 +18,7 @@ import org.fit.layout.model.Page;
 import org.fit.segm.grouping.AreaTree;
 import org.fit.segm.grouping.op.AreaTreeOperator;
 import org.fit.segm.grouping.op.FindLineOperator;
+import org.fit.segm.grouping.op.HomogeneousLeafOperator;
 import org.xml.sax.SAXException;
 
 
@@ -60,7 +61,7 @@ public class Processor
         //apply the area tree operations
         Vector<AreaTreeOperator> operations = new Vector<AreaTreeOperator>();
         operations.add(new FindLineOperator(false, 1.5f));
-        //operations.add(new HomogeneousLeafOperator());
+        operations.add(new HomogeneousLeafOperator());
         ////operations.add(new FindColumnsOperator());
         //operations.add(new SuperAreaOperator(1)); //TODO misto pass limit by se hodilo nejake omezeni granularity na zaklade vlastnosti oblasti
         ////operations.add(new CollapseAreasOperator());
