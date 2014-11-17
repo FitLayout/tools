@@ -37,6 +37,7 @@ public class OutputDisplayImpl implements OutputDisplay
         this.g = g;
     }
 
+    @Override
     public Graphics2D getGraphics()
     {
         return g;
@@ -162,12 +163,6 @@ public class OutputDisplayImpl implements OutputDisplay
             g.fillRect(bounds.getX1(), (int) y, bounds.getWidth(), (int) (step+0.5));
             g.setColor(c);
         }
-    }
-
-    @Override
-    public void drawLayout(Area area)
-    {
-        //TODO the area should provide an implementation of this (it depends on how the areas are internally organized)
     }
 
     protected Color stringColor(String cname)                                 

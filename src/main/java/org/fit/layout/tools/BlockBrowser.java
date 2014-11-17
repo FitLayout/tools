@@ -1477,18 +1477,18 @@ public class BlockBrowser
         {
             gridButton = new JButton();
             gridButton.setText("Show grid");
-            /*gridButton.addActionListener(new java.awt.event.ActionListener()
+            gridButton.addActionListener(new java.awt.event.ActionListener()
             {
                 public void actionPerformed(java.awt.event.ActionEvent e)
                 {
-                    DefaultMutableTreeNode node = (DefaultMutableTreeNode) areaTree.getLastSelectedPathComponent();
-                    if (node != null && node instanceof AreaNode && contentCanvas instanceof BrowserCanvas)
+                    Area node = (Area) areaTree.getLastSelectedPathComponent();
+                    if (node != null && contentCanvas instanceof BrowserPanel)
                     {
-                        ((AreaNode) node).drawGrid((BrowserCanvas) contentCanvas);
+                        node.getTopology().drawLayout(((BrowserPanel) contentCanvas).getOutputDisplay());
                         contentCanvas.repaint();
                     }
                 }
-            });*/
+            });
         }
         return gridButton;
     }
