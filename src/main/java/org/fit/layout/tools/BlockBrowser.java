@@ -54,6 +54,7 @@ import java.awt.FlowLayout;
 
 import javax.swing.JTextArea;
 import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.TreePath;
 
 import java.awt.Insets;
@@ -400,53 +401,49 @@ public class BlockBrowser
     
     private void displayAreaInfo(Area area)
     {
-        /*Vector<String> cols = infoTableData("Property", "Value");
+        Vector<String> cols = infoTableData("Property", "Value");
         
         Vector<Vector <String>> vals = new Vector<Vector <String>>();
-        vals.add(infoTableData("Layout", area.getLayoutType().toString()));
-        vals.add(infoTableData("GP", area.getGridPosition().toString()));
-        vals.add(infoTableData("Tags", tagString(area.getAllTags())));
-        if (proc.getVisualClassifier() != null)
-            vals.add(infoTableData("V. class", proc.getVisualClassifier().classifyArea(area)));
-        vals.add(infoTableData("Style probs", tagProbabilityString(proc.getMsa() != null ? proc.getMsa().classifyNode(area) : null)));
-        vals.add(infoTableData("Total probs", tagProbabilityString(proc.getTagPredictor() != null ? proc.getTagPredictor().getTagProbabilities(area) : null)));
-        vals.add(infoTableData("Importance", String.valueOf(area.getImportance())));
-        vals.add(infoTableData("Separated", (area.explicitelySeparated()) ? "true" : "false"));
-        vals.add(infoTableData("Atomic", (area.isAtomic()) ? "true" : "false"));
-        vals.add(infoTableData("Indent scale", (area.getGrid() != null) ? (area.getGrid().getMinIndent() + " - " + area.getGrid().getMaxIndent()) : "-"));
-        vals.add(infoTableData("Indent value", String.valueOf(proc.getFeatures().getIndentation(area))));
-        vals.add(infoTableData("Centered", (area.isCentered()) ? "true" : "false"));
-        vals.add(infoTableData("Coherent", (area.isCoherent()) ? "true" : "false"));
-        vals.add(infoTableData("Parent perc.", String.valueOf(area.getParentPercentage())));
+        //vals.add(infoTableData("Layout", area.getLayoutType().toString()));
+        vals.add(infoTableData("GP", area.getTopology().getPosition().toString()));
+        vals.add(infoTableData("Tags", tagString(area.getTags())));
+        //if (proc.getVisualClassifier() != null)
+        //    vals.add(infoTableData("V. class", proc.getVisualClassifier().classifyArea(area)));
+        //vals.add(infoTableData("Style probs", tagProbabilityString(proc.getMsa() != null ? proc.getMsa().classifyNode(area) : null)));
+        //vals.add(infoTableData("Total probs", tagProbabilityString(proc.getTagPredictor() != null ? proc.getTagPredictor().getTagProbabilities(area) : null)));
+        //vals.add(infoTableData("Importance", String.valueOf(area.getImportance())));
+        //vals.add(infoTableData("Separated", (area.isSeparated()) ? "true" : "false"));
+        //vals.add(infoTableData("Atomic", (area.isAtomic()) ? "true" : "false"));
+        vals.add(infoTableData("Indent scale", area.getTopology().getMinIndent() + " - " + area.getTopology().getMaxIndent()));
+        //vals.add(infoTableData("Indent value", String.valueOf(proc.getFeatures().getIndentation(area))));
+        //vals.add(infoTableData("Centered", (area.isCentered()) ? "true" : "false"));
+        //vals.add(infoTableData("Coherent", (area.isCoherent()) ? "true" : "false"));
+        //vals.add(infoTableData("Parent perc.", String.valueOf(area.getParentPercentage())));
         
-        Area a = area.getArea();
-        if (a != null)
-        {
-            vals.add(infoTableData("Name", a.getName()));
-            vals.add(infoTableData("Bounds", a.getBounds().toString()));
-            vals.add(infoTableData("Content", (a.getContentBounds() == null) ? "" : a.getContentBounds().toString()));
-            vals.add(infoTableData("Level", String.valueOf(a.getLevel())));
-            vals.add(infoTableData("Borders", borderString(a)));
-            vals.add(infoTableData("Bg separated", (a.isBackgroundSeparated()) ? "true" : "false"));
-            vals.add(infoTableData("Is hor. sep.", (a.isHorizontalSeparator()) ? "true" : "false"));
-            vals.add(infoTableData("Is vert. sep.", (a.isVerticalSeparator()) ? "true" : "false"));
-            vals.add(infoTableData("Avg. fsize", String.valueOf(a.getAverageFontSize())));
-            vals.add(infoTableData("Avg. fweight", String.valueOf(a.getAverageFontWeight())));
-            vals.add(infoTableData("Avg. fstyle", String.valueOf(a.getAverageFontStyle())));
-            vals.add(infoTableData("Decl. fsize", String.valueOf(a.getDeclaredFontSize())));
-            vals.add(infoTableData("Luminosity", String.valueOf(a.getAverageColorLuminosity())));
-            //vals.add(infoTableData("Start color", colorString(a.getBoxes().firstElement().getStartColor())));
-            vals.add(infoTableData("Bg color", colorString(a.getBackgroundColor())));
-        }
+        //vals.add(infoTableData("Name", area.getName()));
+        vals.add(infoTableData("Bounds", area.getBounds().toString()));
+        //vals.add(infoTableData("Content", (a.getContentBounds() == null) ? "" : a.getContentBounds().toString()));
+        //vals.add(infoTableData("Level", String.valueOf(a.getLevel())));
+        vals.add(infoTableData("Borders", borderString(area)));
+        vals.add(infoTableData("Bg separated", (area.isBackgroundSeparated()) ? "true" : "false"));
+        //vals.add(infoTableData("Is hor. sep.", (area.isHorizontalSeparator()) ? "true" : "false"));
+        //vals.add(infoTableData("Is vert. sep.", (area.isVerticalSeparator()) ? "true" : "false"));
+        vals.add(infoTableData("Avg. fsize", String.valueOf(area.getFontSize())));
+        vals.add(infoTableData("Avg. fweight", String.valueOf(area.getFontWeight())));
+        vals.add(infoTableData("Avg. fstyle", String.valueOf(area.getFontStyle())));
+        //vals.add(infoTableData("Decl. fsize", String.valueOf(area.getDeclaredFontSize())));
+        //vals.add(infoTableData("Luminosity", String.valueOf(area.getColorLuminosity())));
+        //vals.add(infoTableData("Start color", colorString(a.getBoxes().firstElement().getStartColor())));
+        vals.add(infoTableData("Bg color", colorString(area.getBackgroundColor())));
         
-        vals.add(infoTableData("Fg color", colorString(area.getFirstNestedBox().getBox().getVisualContext().getColor())));
+        //vals.add(infoTableData("Fg color", colorString(area.getBoxes().firstElement().getColor())));
         
-        markednessText.setText(String.format("%.2f", proc.getFeatures().getMarkedness(area)));
+        //markednessText.setText(String.format("%.2f", proc.getFeatures().getMarkedness(area)));
 
         //classification result
         displayProbabilityTable(area);
         
-        Vector<Vector <String>> fvals = new Vector<Vector <String>>();
+        /*Vector<Vector <String>> fvals = new Vector<Vector <String>>();
         FeatureVector f = proc.getFeatures().getFeatureVector(area);
         if (f != null)
         {
@@ -469,11 +466,11 @@ public class BlockBrowser
                     }
                 } catch (Exception e) {}
             }
-        }
+        }*/
         
         DefaultTableModel tab = new DefaultTableModel(vals, cols);
         infoTable.setModel(tab);
-        DefaultTableModel ftab = new DefaultTableModel(fvals, cols);
+        /*DefaultTableModel ftab = new DefaultTableModel(fvals, cols);
         featureTable.setModel(ftab);*/
     }
     
@@ -495,11 +492,11 @@ public class BlockBrowser
             return String.format("#%02x%02x%02x", color.getRed(), color.getGreen(), color.getBlue());
     }
     
-    private String tagString(Set<Tag> tags)
+    private String tagString(Map<Tag, Float> tags)
     {
         String ret = "";
-        for (Tag tag : tags)
-            ret += tag + " ";
+        for (Map.Entry<Tag, Float> entry : tags.entrySet())
+            ret += entry.getKey() + " ";
         return ret;
     }
     
@@ -576,16 +573,11 @@ public class BlockBrowser
         contentCanvas.repaint();
         
         
-        /*Area sel = anode.getArea();
-        sel.drawExtent((BrowserCanvas) contentCanvas);
-        //anode.drawGrid((BrowserCanvas) contentCanvas);
-        contentCanvas.repaint();
-        
         //show the info table
-        displayAreaInfo(anode);
+        displayAreaInfo(area);
         
         //show the separator list
-        SeparatorSet sset = Config.createSeparators(anode);
+        /*SeparatorSet sset = Config.createSeparators(anode);
         DefaultListModel ml = new DefaultListModel();
         for (Separator sep : sset.getHorizontal())
             ml.addElement(sep);
