@@ -12,7 +12,12 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Vector;
 
+import org.fit.layout.classify.Tagger;
 import org.fit.layout.classify.TreeTagger;
+import org.fit.layout.classify.taggers.DateTagger;
+import org.fit.layout.classify.taggers.PersonsTagger;
+import org.fit.layout.classify.taggers.TimeTagger;
+import org.fit.layout.classify.taggers.TitleTagger;
 import org.fit.layout.cssbox.CSSBoxTreeBuilder;
 import org.fit.layout.model.Page;
 import org.fit.segm.grouping.AreaTree;
@@ -74,8 +79,21 @@ public class Processor
             System.out.println(op.toString());
             op.apply(atree);
         }
-        System.out.println("DONE");
         
+        //tagging
+        Tagger tTime = new TimeTagger();
+        Tagger tDate = new DateTagger();
+        Tagger tPersons = new PersonsTagger(1);
+        Tagger tTitle = new TitleTagger();
+        
+        tagger = new TreeTagger(atree.getRoot());
+        tagger.addTagger(tTime);
+        tagger.addTagger(tDate);
+        tagger.addTagger(tPersons);
+        tagger.addTagger(tTitle);
+        tagger.tagTree();
+       
+        System.out.println("DONE");
         treesCompleted();
     }
     
