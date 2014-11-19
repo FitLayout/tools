@@ -332,14 +332,14 @@ public class BlockBrowser
             }
             //lookupButton.setSelected(false);
         }
-        /*if (boxLookupButton.isSelected())
+        if (boxLookupButton.isSelected())
         {
-            BoxNode node = proc.getBoxTree().getBoxAt(x, y);
+            Box node = proc.getPage().getBoxAt(x, y);
             if (node != null)
                 showBoxInTree(node);
             //boxLookupButton.setSelected(false);
         }
-        if (sepLookupButton.isSelected())
+        /*if (sepLookupButton.isSelected())
         {
             showSeparatorAt(x, y);
         }
@@ -366,9 +366,18 @@ public class BlockBrowser
     
     private void showBoxInTree(Box node)
     {
-        /*TreePath select = new TreePath(node.getPath());
+        //find the path to root
+        int len = 0;
+        for (Box b = node; b != null; b = b.getParentBox())
+            len++;
+        Box[] path = new Box[len];
+        for (Box b = node; b != null; b = b.getParentBox())
+            path[--len] = b;
+        
+        TreePath select = new TreePath(path);
         boxTree.setSelectionPath(select);
-        boxTree.expandPath(select);*/
+        //boxTree.expandPath(select);
+        boxTree.scrollPathToVisible(new TreePath(path));
     }
     
     private void showAreaInTree(Area node)
