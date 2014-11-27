@@ -4,6 +4,7 @@
 package org.fit.layout.tools;
 
 import java.io.File;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +13,7 @@ import java.util.Vector;
 
 import org.fit.cssbox.layout.BrowserCanvas;
 import org.fit.cssbox.layout.BrowserConfig;
+import org.fit.layout.classify.FeatureVector;
 import org.fit.layout.model.Area;
 import org.fit.layout.model.Box;
 import org.fit.layout.model.Page;
@@ -447,12 +449,12 @@ public class BlockBrowser
         
         //vals.add(infoTableData("Fg color", colorString(area.getBoxes().firstElement().getColor())));
         
-        //markednessText.setText(String.format("%.2f", proc.getFeatures().getMarkedness(area)));
+        markednessText.setText(String.format("%.2f", proc.getFeatures().getMarkedness(area)));
 
         //classification result
         displayProbabilityTable(area);
         
-        /*Vector<Vector <String>> fvals = new Vector<Vector <String>>();
+        Vector<Vector <String>> fvals = new Vector<Vector <String>>();
         FeatureVector f = proc.getFeatures().getFeatureVector(area);
         if (f != null)
         {
@@ -475,12 +477,12 @@ public class BlockBrowser
                     }
                 } catch (Exception e) {}
             }
-        }*/
+        }
         
         DefaultTableModel tab = new DefaultTableModel(vals, cols);
         infoTable.setModel(tab);
-        /*DefaultTableModel ftab = new DefaultTableModel(fvals, cols);
-        featureTable.setModel(ftab);*/
+        DefaultTableModel ftab = new DefaultTableModel(fvals, cols);
+        featureTable.setModel(ftab);
     }
     
     private String borderString(Area a)

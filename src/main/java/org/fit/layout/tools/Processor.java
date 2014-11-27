@@ -12,6 +12,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Vector;
 
+import org.fit.layout.classify.FeatureAnalyzer;
 import org.fit.layout.classify.Tagger;
 import org.fit.layout.classify.TreeTagger;
 import org.fit.layout.classify.taggers.DateTagger;
@@ -36,6 +37,7 @@ public class Processor
 {
     private Page page;
     private AreaTree atree;
+    private FeatureAnalyzer features;
     private TreeTagger tagger;
 
 
@@ -80,6 +82,11 @@ public class Processor
             op.apply(atree);
         }
         
+        //visual features
+        features = new FeatureAnalyzer(atree.getRoot());
+        //if (weights != null)
+        //    features.setWeights(weights);
+        
         //tagging
         Tagger tTime = new TimeTagger();
         Tagger tDate = new DateTagger();
@@ -119,5 +126,9 @@ public class Processor
         return atree;
     }
 
+    public FeatureAnalyzer getFeatures()
+    {
+        return features;
+    }
 
 }
