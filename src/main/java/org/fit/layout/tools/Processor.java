@@ -15,6 +15,7 @@ import java.util.Vector;
 import org.fit.layout.classify.FeatureAnalyzer;
 import org.fit.layout.classify.Tagger;
 import org.fit.layout.classify.TreeTagger;
+import org.fit.layout.classify.VisualClassifier;
 import org.fit.layout.classify.taggers.DateTagger;
 import org.fit.layout.classify.taggers.PersonsTagger;
 import org.fit.layout.classify.taggers.TimeTagger;
@@ -39,6 +40,7 @@ public class Processor
     private AreaTree atree;
     private FeatureAnalyzer features;
     private TreeTagger tagger;
+    private VisualClassifier vcls;
 
 
     public Processor()
@@ -100,6 +102,11 @@ public class Processor
         tagger.addTagger(tTitle);
         tagger.tagTree();
        
+        //visual classification
+        vcls = new VisualClassifier("train_mix.arff", 1);
+        //vcls = new VisualClassifier("train_reuters2.arff", 1);
+        vcls.classifyTree(atree.getRoot(), features);
+        
         System.out.println("DONE");
         treesCompleted();
     }
@@ -131,4 +138,8 @@ public class Processor
         return features;
     }
 
+    public VisualClassifier getVisualClassifier()
+    {
+        return vcls;
+    }
 }

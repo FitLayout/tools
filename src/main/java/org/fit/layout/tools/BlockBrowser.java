@@ -418,8 +418,8 @@ public class BlockBrowser
         //vals.add(infoTableData("Layout", area.getLayoutType().toString()));
         vals.add(infoTableData("GP", area.getTopology().getPosition().toString()));
         vals.add(infoTableData("Tags", tagString(area.getTags())));
-        //if (proc.getVisualClassifier() != null)
-        //    vals.add(infoTableData("V. class", proc.getVisualClassifier().classifyArea(area)));
+        if (proc.getVisualClassifier() != null)
+            vals.add(infoTableData("V. class", proc.getVisualClassifier().classifyArea(area)));
         //vals.add(infoTableData("Style probs", tagProbabilityString(proc.getMsa() != null ? proc.getMsa().classifyNode(area) : null)));
         //vals.add(infoTableData("Total probs", tagProbabilityString(proc.getTagPredictor() != null ? proc.getTagPredictor().getTagProbabilities(area) : null)));
         //vals.add(infoTableData("Importance", String.valueOf(area.getImportance())));
@@ -617,33 +617,34 @@ public class BlockBrowser
         contentCanvas.repaint();*/
     }
     
-    @SuppressWarnings("unchecked")
     public void colorizeTags(Area node)
     {
-        /*Enumeration<AreaNode> en = node.postorderEnumeration();
-        while (en.hasMoreElements())
-        {
-            AreaNode child = en.nextElement();
-            if (child.getArea() != null)
-                child.getArea().colorizeByTags((BrowserCanvas) contentCanvas, child.getTags());
-        }
-        contentCanvas.repaint();*/
+        recursiveColorizeTags(node);
+        contentCanvas.repaint();
     }
     
-    @SuppressWarnings("unchecked")
+    public void recursiveColorizeTags(Area node)
+    {
+        ((BrowserPanel) contentCanvas).getOutputDisplay().colorizeByTags(node, node.getTags().keySet());
+        for (Area child : node.getChildAreas())
+            recursiveColorizeTags(child);
+    }
+    
     public void colorizeClasses(Area node)
     {
-        /*Enumeration<Area> en = node.postorderEnumeration();
-        while (en.hasMoreElements())
+        recursiveColorizeClasses(node);
+        contentCanvas.repaint();
+    }
+    
+    public void recursiveColorizeClasses(Area node)
+    {
+        if (node.getDepth() <= 5)  //only mark almost leaf areas
         {
-            Area child = en.nextElement();
-            if (child.getArea() != null && child.getDepth() <= 5) //only mark almost leaf areas
-            {
-                String cname = proc.getVisualClassifier().classifyArea(child);
-                child.getArea().colorizeByClass((BrowserCanvas) contentCanvas, cname);
-            }
+            String cname = proc.getVisualClassifier().classifyArea(node);
+            ((BrowserPanel) contentCanvas).getOutputDisplay().colorizeByClass(node, cname);
         }
-        contentCanvas.repaint();*/
+        for (Area child : node.getChildAreas())
+            recursiveColorizeClasses(child);
     }
     
     public BrowserCanvas getBrowserCanvas()
@@ -1687,17 +1688,17 @@ public class BlockBrowser
         if (tagsButton == null)
         {
             tagsButton = new JButton("Tags");
-            /*tagsButton.addActionListener(new ActionListener()
+            tagsButton.addActionListener(new ActionListener()
             {
                 public void actionPerformed(ActionEvent arg0)
                 {
-                    DefaultMutableTreeNode node = (DefaultMutableTreeNode) areaTree.getLastSelectedPathComponent();
-                    if (node != null && node instanceof AreaNode)
+                    Area node = (Area) areaTree.getLastSelectedPathComponent();
+                    if (node != null)
                     {
-                        colorizeTags((AreaNode) node);
+                        colorizeTags(node);
                     }
                 }
-            });*/
+            });
         }
         return tagsButton;
     }
@@ -1707,17 +1708,17 @@ public class BlockBrowser
         if (classesButton == null)
         {
             classesButton = new JButton("Classes");
-            /*classesButton.addActionListener(new ActionListener()
+            classesButton.addActionListener(new ActionListener()
             {
                 public void actionPerformed(ActionEvent e)
                 {
-                    DefaultMutableTreeNode node = (DefaultMutableTreeNode) areaTree.getLastSelectedPathComponent();
-                    if (node != null && node instanceof AreaNode)
+                    Area node = (Area) areaTree.getLastSelectedPathComponent();
+                    if (node != null)
                     {
-                        colorizeClasses((AreaNode) node);
+                        colorizeClasses(node);
                     }
                 }
-            });*/
+            });
         }
         return classesButton;
     }
