@@ -11,8 +11,15 @@
 	<name>LayoutTools</name>
 	
 	<build>
-		<sourceDirectory>src</sourceDirectory>
-		
+		<sourceDirectory>src/main/java</sourceDirectory>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<excludes>
+					<exclude>**/*.java</exclude>
+				</excludes>
+			</resource>
+		</resources>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
