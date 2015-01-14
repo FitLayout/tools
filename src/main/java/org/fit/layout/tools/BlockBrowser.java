@@ -15,10 +15,10 @@ import org.fit.cssbox.layout.BrowserCanvas;
 import org.fit.cssbox.layout.BrowserConfig;
 import org.fit.layout.classify.FeatureVector;
 import org.fit.layout.model.Area;
+import org.fit.layout.model.AreaTree;
 import org.fit.layout.model.Box;
 import org.fit.layout.model.Page;
 import org.fit.layout.model.Tag;
-import org.fit.segm.grouping.AreaTree;
 
 import javax.swing.JSplitPane;
 import javax.swing.JToolBar;

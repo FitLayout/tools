@@ -12,6 +12,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Vector;
 
+import org.fit.layout.api.AreaTreeOperator;
 import org.fit.layout.classify.FeatureAnalyzer;
 import org.fit.layout.classify.Tagger;
 import org.fit.layout.classify.TreeTagger;
@@ -21,9 +22,9 @@ import org.fit.layout.classify.taggers.PersonsTagger;
 import org.fit.layout.classify.taggers.TimeTagger;
 import org.fit.layout.classify.taggers.TitleTagger;
 import org.fit.layout.cssbox.CSSBoxTreeBuilder;
+import org.fit.layout.model.AreaTree;
 import org.fit.layout.model.Page;
-import org.fit.segm.grouping.AreaTree;
-import org.fit.segm.grouping.op.AreaTreeOperator;
+import org.fit.segm.grouping.SegmentationAreaTree;
 import org.fit.segm.grouping.op.FindLineOperator;
 import org.fit.segm.grouping.op.HomogeneousLeafOperator;
 import org.fit.segm.grouping.op.SuperAreaOperator;
@@ -37,7 +38,7 @@ import org.xml.sax.SAXException;
 public class Processor
 {
     private Page page;
-    private AreaTree atree;
+    private SegmentationAreaTree atree;
     private FeatureAnalyzer features;
     private TreeTagger tagger;
     private VisualClassifier vcls;
@@ -65,7 +66,7 @@ public class Processor
     public void segmentPage(Page page)
     {
         //area tree
-        atree = new AreaTree(page);
+        atree = new SegmentationAreaTree(page);
         atree.findBasicAreas();
         
         //apply the area tree operations
