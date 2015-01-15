@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.ServiceLoader;
 
 import org.fit.layout.api.AreaTreeOperator;
+import org.fit.layout.api.AreaTreeProvider;
 
 /**
  * 
@@ -20,21 +21,34 @@ import org.fit.layout.api.AreaTreeOperator;
  */
 public class ScriptableProcessor
 {
+    private Map<String, AreaTreeProvider> providers;
     private Map<String, AreaTreeOperator> operators;
     
     public ScriptableProcessor()
     {
+        findAreaTreeProviders();
         findAreaTreeOperators();
     }
 
-    protected void findAreaTreeOperators()
+    private void findAreaTreeProviders()
+    {
+        ServiceLoader<AreaTreeProvider> loader = ServiceLoader.load(AreaTreeProvider.class);
+        Iterator<AreaTreeProvider> it = loader.iterator();
+        providers = new HashMap<String, AreaTreeProvider>();
+        while (it.hasNext())
+        {
+            AreaTreeProvider op = it.next();
+            providers.put(op.getId(), op);
+        }
+    }
+    
+    private void findAreaTreeOperators()
     {
         ServiceLoader<AreaTreeOperator> loader = ServiceLoader.load(AreaTreeOperator.class);
         Iterator<AreaTreeOperator> it = loader.iterator();
         operators = new HashMap<String, AreaTreeOperator>();
         while (it.hasNext())
         {
-            //System.out.println(it.next().getName());
             AreaTreeOperator op = it.next();
             operators.put(op.getId(), op);
         }
@@ -43,6 +57,11 @@ public class ScriptableProcessor
     public List<String> getOperatorIds()
     {
         return new ArrayList<String>(operators.keySet());
+    }
+    
+    public List<String> getProviderIds()
+    {
+        return new ArrayList<String>(providers.keySet());
     }
     
 }

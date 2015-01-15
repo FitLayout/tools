@@ -7,10 +7,12 @@ package org.fit.layout.process;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.List;
 
 import javax.script.Bindings;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
+import javax.script.ScriptEngineFactory;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
@@ -34,11 +36,33 @@ public class Test
             return false;
     }
     
+    public static void printInfo()
+    {
+        ScriptEngineManager mgr = new ScriptEngineManager();
+        List<ScriptEngineFactory> factories = mgr.getEngineFactories();
+        for (ScriptEngineFactory factory : factories)
+        {
+            System.out.println("ScriptEngineFactory Info");
+            String engName = factory.getEngineName();
+            String engVersion = factory.getEngineVersion();
+            String langName = factory.getLanguageName();
+            String langVersion = factory.getLanguageVersion();
+            System.out.printf("\tScript Engine: %s (%s)\n", engName, engVersion);
+            List<String> engNames = factory.getNames();
+            for (String name : engNames)
+            {
+                System.out.printf("\tEngine Alias: %s\n", name);
+            }
+            System.out.printf("\tLanguage: %s (%s)\n", langName, langVersion);
+        }
+    }
+    
     /**
      * @param args
      */
     public static void main(String[] args)
     {
+        //printInfo();
         try
         {
             // create a script engine manager
