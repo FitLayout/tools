@@ -5,6 +5,9 @@
  */
 package org.fit.layout.process;
 
+import java.awt.Dimension;
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -14,6 +17,10 @@ import java.util.ServiceLoader;
 
 import org.fit.layout.api.AreaTreeOperator;
 import org.fit.layout.api.AreaTreeProvider;
+import org.fit.layout.cssbox.CSSBoxTreeBuilder;
+import org.fit.layout.model.AreaTree;
+import org.fit.layout.model.Page;
+import org.xml.sax.SAXException;
 
 /**
  * 
@@ -23,6 +30,10 @@ public class ScriptableProcessor
 {
     private Map<String, AreaTreeProvider> providers;
     private Map<String, AreaTreeOperator> operators;
+
+    private Page page;
+    private AreaTree atree;
+    
     
     public ScriptableProcessor()
     {
@@ -30,6 +41,17 @@ public class ScriptableProcessor
         findAreaTreeOperators();
     }
 
+    public Page renderPage(String urlstring, Dimension dim) throws MalformedURLException, IOException, SAXException
+    {
+        CSSBoxTreeBuilder build = new CSSBoxTreeBuilder(dim);
+        build.parse(urlstring);
+        page = build.getPage();
+        return page;
+    }
+
+    //======================================================================================================
+    // scripting initialization
+    
     private void findAreaTreeProviders()
     {
         ServiceLoader<AreaTreeProvider> loader = ServiceLoader.load(AreaTreeProvider.class);
@@ -54,6 +76,9 @@ public class ScriptableProcessor
         }
     }
     
+    //======================================================================================================
+    // scripting interface
+    
     public List<String> getOperatorIds()
     {
         return new ArrayList<String>(operators.keySet());
@@ -64,4 +89,40 @@ public class ScriptableProcessor
         return new ArrayList<String>(providers.keySet());
     }
     
+    public AreaTree initAreaTree(String providerName)
+    {
+        AreaTreeProvider provider = providers.get(providerName);
+        if (provider != null)
+        {
+            atree = provider.createAreaTree(page);
+            return atree;
+        }
+        else
+            return null;
+    }
+    
+    public void apply(String operatorName, Map<String, Object> params)
+    {
+        System.out.println("Apply: " + operatorName + " : " + params);
+        System.out.println(params.keySet());
+        Object o1 = params.get("useConsistentStyle");
+        Object o2 = params.get("maxLineEmSpace");
+        System.out.println(params.get("useConsistentStyle"));
+        System.out.println(params.get("useConsistentStyle"));
+    }
+    
+    //======================================================================================================
+    // Block browser interface
+    
+    public Page getPage()
+    {
+        return page;
+    }
+
+
+    public AreaTree getAreaTree()
+    {
+        return atree;
+    }
+
 }
