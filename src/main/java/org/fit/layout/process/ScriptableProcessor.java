@@ -7,6 +7,8 @@ package org.fit.layout.process;
 
 import java.awt.Dimension;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,6 +16,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
+
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 
 import org.fit.layout.api.AreaTreeOperator;
 import org.fit.layout.api.AreaTreeProvider;
@@ -33,6 +39,8 @@ public class ScriptableProcessor
 
     private Page page;
     private AreaTree atree;
+    
+    private ScriptEngine engine;
     
     
     public ScriptableProcessor()
@@ -109,6 +117,18 @@ public class ScriptableProcessor
         Object o2 = params.get("maxLineEmSpace");
         System.out.println(params.get("useConsistentStyle"));
         System.out.println(params.get("useConsistentStyle"));
+        
+        AreaTreeOperator op = operators.get(operatorName);
+        if (op != null)
+        {
+            for (Map.Entry<String, Object> entry : params.entrySet())
+            {
+                op.setParam(entry.getKey(), entry.getValue());
+            }
+        }
+        else
+            System.err.println("Unknown operator " + operatorName);
+        
     }
     
     //======================================================================================================
@@ -125,4 +145,31 @@ public class ScriptableProcessor
         return atree;
     }
 
+    //======================================================================================================
+    // Script invocation
+
+    public boolean execInternal(String scriptName) throws ScriptException
+    {
+        InputStream is = ClassLoader.getSystemResourceAsStream(scriptName);
+        if (is != null)
+        {
+            getEngine().eval(new InputStreamReader(is));
+            return true;
+        }
+        else
+            return false;
+    }
+
+    protected ScriptEngine getEngine()
+    {
+        if (engine == null)
+        {
+            ScriptEngineManager factory = new ScriptEngineManager();
+            engine = factory.getEngineByName("JavaScript");
+            ScriptableProcessor proc = new ScriptableProcessor();
+            engine.put("proc", proc);
+        }
+        return engine;
+    }
+    
 }
