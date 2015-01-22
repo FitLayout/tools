@@ -72,7 +72,7 @@ public class BlockBrowser
 {
     public static BlockBrowser browser;
 
-    public static final double TAG_PROBABILITY_THRESHOLD = 0.5; 
+    public static final float TAG_PROBABILITY_THRESHOLD = 0.3f; 
     
     private BrowserConfig config;
     private Processor proc;
@@ -417,7 +417,7 @@ public class BlockBrowser
         Vector<Vector <String>> vals = new Vector<Vector <String>>();
         //vals.add(infoTableData("Layout", area.getLayoutType().toString()));
         vals.add(infoTableData("GP", area.getTopology().getPosition().toString()));
-        vals.add(infoTableData("Tags", tagString(area.getTags())));
+        vals.add(infoTableData("Tags", tagProbabilityString(area.getTags())));
         if (proc.getVisualClassifier() != null)
             vals.add(infoTableData("V. class", proc.getVisualClassifier().classifyArea(area)));
         //vals.add(infoTableData("Style probs", tagProbabilityString(proc.getMsa() != null ? proc.getMsa().classifyNode(area) : null)));
@@ -511,12 +511,12 @@ public class BlockBrowser
         return ret;
     }
     
-    private String tagProbabilityString(Map<Tag, Double> map)
+    private String tagProbabilityString(Map<Tag, Float> map)
     {
         String ret = "";
         if (map != null)
         {
-            for (Map.Entry<Tag, Double> entry : map.entrySet())
+            for (Map.Entry<Tag, Float> entry : map.entrySet())
             {
                 if (entry.getValue() > TAG_PROBABILITY_THRESHOLD)
                     ret += entry.getKey() + " (" + String.format("%1.2f", entry.getValue()) + ") "; 

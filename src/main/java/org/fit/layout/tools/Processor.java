@@ -14,13 +14,8 @@ import java.util.Vector;
 
 import org.fit.layout.api.AreaTreeOperator;
 import org.fit.layout.classify.FeatureAnalyzer;
-import org.fit.layout.classify.Tagger;
-import org.fit.layout.classify.TreeTagger;
 import org.fit.layout.classify.VisualClassifier;
-import org.fit.layout.classify.taggers.DateTagger;
-import org.fit.layout.classify.taggers.PersonsTagger;
-import org.fit.layout.classify.taggers.TimeTagger;
-import org.fit.layout.classify.taggers.TitleTagger;
+import org.fit.layout.classify.op.TagEntitiesOperator;
 import org.fit.layout.cssbox.CSSBoxTreeBuilder;
 import org.fit.layout.model.AreaTree;
 import org.fit.layout.model.Page;
@@ -40,7 +35,6 @@ public class Processor
     private Page page;
     private SegmentationAreaTree atree;
     private FeatureAnalyzer features;
-    private TreeTagger tagger;
     private VisualClassifier vcls;
 
 
@@ -91,17 +85,8 @@ public class Processor
         //    features.setWeights(weights);
         
         //tagging
-        Tagger tTime = new TimeTagger();
-        Tagger tDate = new DateTagger();
-        Tagger tPersons = new PersonsTagger(1);
-        Tagger tTitle = new TitleTagger();
-        
-        tagger = new TreeTagger(atree.getRoot());
-        tagger.addTagger(tTime);
-        tagger.addTagger(tDate);
-        tagger.addTagger(tPersons);
-        tagger.addTagger(tTitle);
-        tagger.tagTree();
+        AreaTreeOperator tagop = new TagEntitiesOperator();
+        tagop.apply(atree);
        
         //visual classification
         vcls = new VisualClassifier("train_mix.arff", 1);
