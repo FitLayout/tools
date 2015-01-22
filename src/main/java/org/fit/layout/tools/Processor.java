@@ -16,6 +16,7 @@ import org.fit.layout.api.AreaTreeOperator;
 import org.fit.layout.classify.FeatureAnalyzer;
 import org.fit.layout.classify.VisualClassifier;
 import org.fit.layout.classify.op.TagEntitiesOperator;
+import org.fit.layout.classify.op.VisualClassificationOperator;
 import org.fit.layout.cssbox.CSSBoxTreeBuilder;
 import org.fit.layout.model.AreaTree;
 import org.fit.layout.model.Page;
@@ -79,19 +80,24 @@ public class Processor
             op.apply(atree);
         }
         
-        //visual features
-        features = new FeatureAnalyzer(atree.getRoot());
-        //if (weights != null)
-        //    features.setWeights(weights);
-        
         //tagging
         AreaTreeOperator tagop = new TagEntitiesOperator();
         tagop.apply(atree);
        
+        /*//visual features
+        features = new FeatureAnalyzer(atree.getRoot());
+        //if (weights != null)
+        //    features.setWeights(weights);
+        
         //visual classification
         vcls = new VisualClassifier("train_mix.arff", 1);
         //vcls = new VisualClassifier("train_reuters2.arff", 1);
-        vcls.classifyTree(atree.getRoot(), features);
+        vcls.classifyTree(atree.getRoot(), features);*/
+        
+        VisualClassificationOperator vcop = new VisualClassificationOperator("train_mix.arff", 1);
+        vcop.apply(atree);
+        features = vcop.getFeatures();
+        vcls = vcop.getVisualClassifier();
         
         System.out.println("DONE");
         treesCompleted();
