@@ -17,6 +17,7 @@ import java.util.Vector;
 import org.fit.cssbox.layout.BrowserCanvas;
 import org.fit.cssbox.layout.BrowserConfig;
 import org.fit.layout.api.AreaTreeProvider;
+import org.fit.layout.api.OutputDisplay;
 import org.fit.layout.classify.FeatureVector;
 import org.fit.layout.gui.Browser;
 import org.fit.layout.gui.BrowserPlugin;
@@ -256,6 +257,27 @@ public class BlockBrowser implements Browser
         constraints.gridx = 0;
         
         objectInfoPanel.add(component, constraints);
+    }
+
+    @Override
+    public OutputDisplay getOutputDisplay()
+    {
+        return ((BrowserPanel) contentCanvas).getOutputDisplay();
+    }
+
+    @Override
+    public void updateDisplay()
+    {
+        contentCanvas.repaint();
+    }
+
+    @Override
+    public Area getSelectedArea()
+    {
+        if (areaTree == null)
+            return null;
+        else                   
+            return (Area) areaTree.getLastSelectedPathComponent();
     }
 
     //=============================================================================================================
