@@ -104,6 +104,7 @@ public class BlockBrowser implements Browser
     private boolean logsync = true;
 
     private JFrame mainWindow = null;  //  @jve:decl-index=0:visual-constraint="-239,28"
+    private JPanel container = null;
     private JPanel mainPanel = null;
     private JPanel urlPanel = null;
     private JPanel contentPanel = null;
@@ -210,11 +211,6 @@ public class BlockBrowser implements Browser
         this.charset = charset;
     }
 
-    public JPanel getToolBar()
-    {
-        return toolPanel;
-    }
-    
     /**
      * Print a text string on the console.
      */
@@ -239,7 +235,7 @@ public class BlockBrowser implements Browser
     @Override
     public void addToolBar(JToolBar toolbar)
     {
-        mainPanel.add(toolbar, BorderLayout.PAGE_START);
+        toolPanel.add(toolbar);
     }
 
     @Override
@@ -716,7 +712,7 @@ public class BlockBrowser implements Browser
             mainWindow.setVisible(true);
             mainWindow.setBounds(new Rectangle(0, 0, 1489, 256));
             mainWindow.setMinimumSize(new Dimension(1200, 256));
-            mainWindow.setContentPane(getMainPanel());
+            mainWindow.setContentPane(getContainer());
             mainWindow.addWindowListener(new java.awt.event.WindowAdapter()
             {
                 public void windowClosing(java.awt.event.WindowEvent e)
@@ -729,11 +725,18 @@ public class BlockBrowser implements Browser
         return mainWindow;
     }
 
-    /**
-     * This method initializes jContentPane	
-     * 	
-     * @return javax.swing.JPanel	
-     */
+    private JPanel getContainer()
+    {
+        if (container == null)
+        {
+            container = new JPanel();
+            container.setLayout(new BorderLayout());
+            container.add(getToolPanel(), BorderLayout.NORTH);
+            container.add(getMainPanel(), BorderLayout.CENTER);
+        }
+        return container;
+    }
+    
     private JPanel getMainPanel()
     {
         if (mainPanel == null)
@@ -761,7 +764,7 @@ public class BlockBrowser implements Browser
             gridBagConstraints.gridy = 1;
             mainPanel = new JPanel();
             mainPanel.setLayout(new GridBagLayout());
-            mainPanel.add(getToolPanel(), gridBagConstraints2);
+            //mainPanel.add(getToolPanel(), gridBagConstraints2);
             mainPanel.add(getUrlPanel(), gridBagConstraints);
             mainPanel.add(getMainSplitter(), gridBagConstraints11);
             mainPanel.add(getStatusPanel(), gridBagConstraints3);
@@ -1447,11 +1450,12 @@ public class BlockBrowser implements Browser
             FlowLayout flowLayout = new FlowLayout();
             flowLayout.setAlignment(java.awt.FlowLayout.LEFT);
             toolPanel = new JPanel();
-            toolPanel.setLayout(flowLayout);
-            toolPanel.add(getShowToolBar(), null);
-            toolPanel.add(getLookupToolBar(), null);
-            toolPanel.add(getFileToolBar(), null);
-            toolPanel.add(getTreeCompToolBar(), null);
+            //toolPanel.setLayout(new WrappingLayout(WrappingLayout.LEFT, 1, 1));
+            toolPanel.setLayout(new ToolbarLayout());
+            toolPanel.add(getShowToolBar());
+            toolPanel.add(getLookupToolBar());
+            toolPanel.add(getFileToolBar());
+            toolPanel.add(getTreeCompToolBar());
         }
         return toolPanel;
     }
