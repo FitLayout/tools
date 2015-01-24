@@ -6,14 +6,20 @@ package org.fit.layout.tools;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.Vector;
 
 import org.fit.cssbox.layout.BrowserCanvas;
 import org.fit.cssbox.layout.BrowserConfig;
+import org.fit.layout.api.AreaTreeProvider;
 import org.fit.layout.classify.FeatureVector;
+import org.fit.layout.gui.Browser;
+import org.fit.layout.gui.BrowserPlugin;
 import org.fit.layout.model.Area;
 import org.fit.layout.model.AreaTree;
 import org.fit.layout.model.Box;
@@ -26,6 +32,7 @@ import javax.swing.JToolBar;
 import java.awt.GridBagConstraints;
 
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -38,6 +45,7 @@ import java.awt.GridLayout;
 
 import javax.swing.JTree;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -68,7 +76,7 @@ import java.awt.event.ActionEvent;
  * @author burgetr
  *
  */
-public class BlockBrowser
+public class BlockBrowser implements Browser
 {
     public static BlockBrowser browser;
 
@@ -226,6 +234,34 @@ public class BlockBrowser
         //logicalTree.setModel(new DefaultTreeModel(proc.getLogicalTree().getRoot()));
     }
     
+    //=============================================================================================================
+    
+    @Override
+    public void addToolBar(JToolBar toolbar)
+    {
+        mainPanel.add(toolbar, BorderLayout.PAGE_START);
+    }
+
+    @Override
+    public void addStructurePanel(String title, JComponent component)
+    {
+        sidebarPane.addTab(title, component);
+    }
+
+    @Override
+    public void addInfoPanel(JComponent component, double weighty)
+    {
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.insets = new Insets(0, 0, 5, 0);
+        constraints.fill = GridBagConstraints.BOTH;
+        constraints.gridy = GridBagConstraints.RELATIVE;
+        constraints.weightx = 1.0;
+        constraints.weighty = weighty;
+        constraints.gridx = 0;
+        
+        objectInfoPanel.add(component, constraints);
+    }
+
     //=============================================================================================================
     
     public void displayURL(String urlstring)
@@ -650,6 +686,18 @@ public class BlockBrowser
     public BrowserCanvas getBrowserCanvas()
     {
         return (BrowserCanvas) contentCanvas;
+    }
+    
+    private void initPlugins()
+    {
+        ServiceLoader<BrowserPlugin> loader = ServiceLoader.load(BrowserPlugin.class);
+        Iterator<BrowserPlugin> it = loader.iterator();
+        while (it.hasNext())
+        {
+            BrowserPlugin plugin = it.next();
+            System.out.println("Init plugin: " + plugin.getClass().getName());
+            plugin.init(this);
+        }
     }
     
     //===========================================================================
@@ -1403,7 +1451,7 @@ public class BlockBrowser
             toolPanel.add(getShowToolBar(), null);
             toolPanel.add(getLookupToolBar(), null);
             toolPanel.add(getFileToolBar(), null);
-            toolPanel.add(getTreeCompToolBar());
+            toolPanel.add(getTreeCompToolBar(), null);
         }
         return toolPanel;
     }
@@ -2114,6 +2162,7 @@ public class BlockBrowser
         //main.setMinimumSize(new Dimension(1200, 600));
         //main.setSize(1500,600);
         main.setSize(1600,1000);
+        browser.initPlugins();
         main.setVisible(true);
         
         try {
