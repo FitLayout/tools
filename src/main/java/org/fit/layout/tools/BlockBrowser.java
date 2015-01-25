@@ -6,17 +6,14 @@ package org.fit.layout.tools;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
-import java.util.Set;
 import java.util.Vector;
 
 import org.fit.cssbox.layout.BrowserCanvas;
 import org.fit.cssbox.layout.BrowserConfig;
-import org.fit.layout.api.AreaTreeProvider;
 import org.fit.layout.api.OutputDisplay;
 import org.fit.layout.classify.FeatureVector;
 import org.fit.layout.gui.Browser;
@@ -86,7 +83,6 @@ public class BlockBrowser implements Browser
     private BrowserConfig config;
     private Processor proc;
     private Page page;
-    private AreaTree atree;
     /*private BoxTree btree;
     private LogicalTree ltree;
     private FeatureAnalyzer features;
@@ -156,7 +152,6 @@ public class BlockBrowser implements Browser
     private JTable featureTable = null;
     private JButton saveLogicalButton = null;
     private JTextField markednessText;
-    private JButton tagsButton;
     private JPanel pathsPanel;
     private JScrollPane pathListScroll;
     private JScrollPane extractionScroll;
@@ -171,7 +166,6 @@ public class BlockBrowser implements Browser
     private JTable probTable;
     private JButton evaluationButton;
     private JButton saveRDFButton;
-    private JButton classesButton;
 
     public BlockBrowser()
     {
@@ -671,36 +665,6 @@ public class BlockBrowser implements Browser
         contentCanvas.repaint();*/
     }
     
-    public void colorizeTags(Area node)
-    {
-        recursiveColorizeTags(node);
-        contentCanvas.repaint();
-    }
-    
-    public void recursiveColorizeTags(Area node)
-    {
-        ((BrowserPanel) contentCanvas).getOutputDisplay().colorizeByTags(node, node.getTags().keySet());
-        for (Area child : node.getChildAreas())
-            recursiveColorizeTags(child);
-    }
-    
-    public void colorizeClasses(Area node)
-    {
-        recursiveColorizeClasses(node);
-        contentCanvas.repaint();
-    }
-    
-    public void recursiveColorizeClasses(Area node)
-    {
-        if (node.getDepth() <= 5)  //only mark almost leaf areas
-        {
-            String cname = proc.getVisualClassifier().classifyArea(node);
-            ((BrowserPanel) contentCanvas).getOutputDisplay().colorizeByClass(node, cname);
-        }
-        for (Area child : node.getChildAreas())
-            recursiveColorizeClasses(child);
-    }
-    
     public BrowserCanvas getBrowserCanvas()
     {
         return (BrowserCanvas) contentCanvas;
@@ -1110,8 +1074,6 @@ public class BlockBrowser implements Browser
             showToolBar.add(getShowColumnsButton());
             showToolBar.add(getShowSepButton());
             showToolBar.add(getGridButton());
-            showToolBar.add(getTagsButton());
-            showToolBar.add(getClassesButton());
         }
         return showToolBar;
     }
@@ -1754,47 +1716,6 @@ public class BlockBrowser implements Browser
             infoTable = new JTable();
         }
         return infoTable;
-    }
-
-    
-    private JButton getTagsButton()
-    {
-        if (tagsButton == null)
-        {
-            tagsButton = new JButton("Tags");
-            tagsButton.addActionListener(new ActionListener()
-            {
-                public void actionPerformed(ActionEvent arg0)
-                {
-                    Area node = (Area) areaTree.getLastSelectedPathComponent();
-                    if (node != null)
-                    {
-                        colorizeTags(node);
-                    }
-                }
-            });
-        }
-        return tagsButton;
-    }
-    
-    private JButton getClassesButton()
-    {
-        if (classesButton == null)
-        {
-            classesButton = new JButton("Classes");
-            classesButton.addActionListener(new ActionListener()
-            {
-                public void actionPerformed(ActionEvent e)
-                {
-                    Area node = (Area) areaTree.getLastSelectedPathComponent();
-                    if (node != null)
-                    {
-                        colorizeClasses(node);
-                    }
-                }
-            });
-        }
-        return classesButton;
     }
     
     /**
