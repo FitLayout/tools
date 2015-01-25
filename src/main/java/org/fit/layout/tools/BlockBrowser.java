@@ -7,6 +7,7 @@ import java.io.File;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
@@ -16,6 +17,7 @@ import org.fit.cssbox.layout.BrowserCanvas;
 import org.fit.cssbox.layout.BrowserConfig;
 import org.fit.layout.api.OutputDisplay;
 import org.fit.layout.classify.FeatureVector;
+import org.fit.layout.gui.AreaSelectionListener;
 import org.fit.layout.gui.Browser;
 import org.fit.layout.gui.BrowserPlugin;
 import org.fit.layout.model.Area;
@@ -99,6 +101,7 @@ public class BlockBrowser implements Browser
     private boolean dispFinished = false;
     private boolean areasync = true;
     private boolean logsync = true;
+    private List<AreaSelectionListener> areaListeners;
 
     private JFrame mainWindow = null;  //  @jve:decl-index=0:visual-constraint="-239,28"
     private JPanel container = null;
@@ -170,6 +173,7 @@ public class BlockBrowser implements Browser
     public BlockBrowser()
     {
         config = new BrowserConfig();
+        areaListeners = new LinkedList<AreaSelectionListener>();
         saveDir = new File("/home/burgetr/local/rdf");
     }
     
@@ -272,6 +276,12 @@ public class BlockBrowser implements Browser
             return null;
         else                   
             return (Area) areaTree.getLastSelectedPathComponent();
+    }
+
+    @Override
+    public void addAreaSelectionListener(AreaSelectionListener listener)
+    {
+        areaListeners.add(listener);
     }
 
     //=============================================================================================================
@@ -631,9 +641,12 @@ public class BlockBrowser implements Browser
         ((BrowserPanel) contentCanvas).getOutputDisplay().drawExtent(area);
         contentCanvas.repaint();
         
-        
         //show the info table
         displayAreaInfo(area);
+
+        //notify area listeners
+        for (AreaSelectionListener listener : areaListeners)
+            listener.areaSelected(area);
         
         //show the separator list
         /*SeparatorSet sset = Config.createSeparators(anode);
