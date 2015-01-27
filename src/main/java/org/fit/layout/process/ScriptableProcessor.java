@@ -26,6 +26,7 @@ import javax.script.ScriptException;
 
 import org.fit.layout.api.AreaTreeOperator;
 import org.fit.layout.api.AreaTreeProvider;
+import org.fit.layout.api.BoxTreeProvider;
 import org.fit.layout.cssbox.CSSBoxTreeBuilder;
 import org.fit.layout.model.AreaTree;
 import org.fit.layout.model.Page;
@@ -37,7 +38,8 @@ import org.xml.sax.SAXException;
  */
 public class ScriptableProcessor
 {
-    private Map<String, AreaTreeProvider> providers;
+    private Map<String, BoxTreeProvider> boxProviders;
+    private Map<String, AreaTreeProvider> areaProviders;
     private Map<String, AreaTreeOperator> operators;
 
     private Page page;
@@ -48,6 +50,7 @@ public class ScriptableProcessor
     
     public ScriptableProcessor()
     {
+        findBoxTreeProviders();
         findAreaTreeProviders();
         findAreaTreeOperators();
     }
@@ -63,15 +66,27 @@ public class ScriptableProcessor
     //======================================================================================================
     // scripting initialization
     
+    private void findBoxTreeProviders()
+    {
+        ServiceLoader<BoxTreeProvider> loader = ServiceLoader.load(BoxTreeProvider.class);
+        Iterator<BoxTreeProvider> it = loader.iterator();
+        boxProviders = new HashMap<String, BoxTreeProvider>();
+        while (it.hasNext())
+        {
+            BoxTreeProvider op = it.next();
+            boxProviders.put(op.getId(), op);
+        }
+    }
+    
     private void findAreaTreeProviders()
     {
         ServiceLoader<AreaTreeProvider> loader = ServiceLoader.load(AreaTreeProvider.class);
         Iterator<AreaTreeProvider> it = loader.iterator();
-        providers = new HashMap<String, AreaTreeProvider>();
+        areaProviders = new HashMap<String, AreaTreeProvider>();
         while (it.hasNext())
         {
             AreaTreeProvider op = it.next();
-            providers.put(op.getId(), op);
+            areaProviders.put(op.getId(), op);
         }
     }
     
@@ -95,14 +110,35 @@ public class ScriptableProcessor
         return new ArrayList<String>(operators.keySet());
     }
     
-    public List<String> getProviderIds()
+    public List<String> getBoxProviderIds()
     {
-        return new ArrayList<String>(providers.keySet());
+        return new ArrayList<String>(boxProviders.keySet());
+    }
+    
+    public List<String> getAreaProviderIds()
+    {
+        return new ArrayList<String>(areaProviders.keySet());
+    }
+
+    public Page renderPage(String providerName, Map<String, Object> params)
+    {
+        BoxTreeProvider provider = boxProviders.get(providerName);
+        if (provider != null)
+        {
+            for (Map.Entry<String, Object> entry : params.entrySet())
+            {
+                provider.setParam(entry.getKey(), entry.getValue());
+            }
+            page = provider.getPage();
+            return page;
+        }
+        else
+            return null;
     }
     
     public AreaTree initAreaTree(String providerName)
     {
-        AreaTreeProvider provider = providers.get(providerName);
+        AreaTreeProvider provider = areaProviders.get(providerName);
         if (provider != null)
         {
             atree = provider.createAreaTree(page);
