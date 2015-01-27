@@ -9,6 +9,8 @@ import java.awt.Dimension;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.Writer;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 
+import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
@@ -148,6 +151,31 @@ public class ScriptableProcessor
     //======================================================================================================
     // Script invocation
 
+    protected ScriptEngine getEngine()
+    {
+        if (engine == null)
+        {
+            ScriptEngineManager factory = new ScriptEngineManager();
+            engine = factory.getEngineByName("JavaScript");
+            ScriptableProcessor proc = new ScriptableProcessor();
+            engine.put("proc", proc);
+        }
+        return engine;
+    }
+    
+    public void setIO(Reader in, Writer out, Writer err)
+    {
+        ScriptContext ctx = getEngine().getContext();
+        ctx.setReader(in);
+        ctx.setWriter(out);
+        ctx.setErrorWriter(err);
+    }
+    
+    public void put(String var, Object obj)
+    {
+        getEngine().put(var, obj);
+    }
+    
     public boolean execInternal(String scriptName) throws ScriptException
     {
         InputStream is = ClassLoader.getSystemResourceAsStream(scriptName);
@@ -160,16 +188,10 @@ public class ScriptableProcessor
             return false;
     }
 
-    protected ScriptEngine getEngine()
+    public boolean execCommand(String command) throws ScriptException
     {
-        if (engine == null)
-        {
-            ScriptEngineManager factory = new ScriptEngineManager();
-            engine = factory.getEngineByName("JavaScript");
-            ScriptableProcessor proc = new ScriptableProcessor();
-            engine.put("proc", proc);
-        }
-        return engine;
+        getEngine().eval(command);
+        return true;
     }
     
 }
