@@ -39,6 +39,7 @@ public class Console
         proc.setIO(rin, wout, werr);
         while (true)
         {
+            proc.flushIO();
             out.println();
             out.print(prompt());
             String cmd = rin.readLine();
