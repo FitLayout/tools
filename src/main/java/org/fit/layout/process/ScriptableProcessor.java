@@ -6,9 +6,11 @@
 package org.fit.layout.process;
 
 import java.awt.Dimension;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.net.MalformedURLException;
@@ -42,6 +44,10 @@ public class ScriptableProcessor
     private Map<String, AreaTreeProvider> areaProviders;
     private Map<String, AreaTreeOperator> operators;
 
+    private BufferedReader rin;
+    private PrintWriter wout;
+    private PrintWriter werr;
+    
     private Page page;
     private AreaTree atree;
     
@@ -133,7 +139,10 @@ public class ScriptableProcessor
             return page;
         }
         else
+        {
+            werr.println("Unknown box tree provider: " + providerName);
             return null;
+        }
     }
     
     public AreaTree initAreaTree(String providerName)
@@ -145,7 +154,10 @@ public class ScriptableProcessor
             return atree;
         }
         else
+        {
+            werr.println("Unknown area tree provider: " + providerName);
             return null;
+        }
     }
     
     public void apply(String operatorName, Map<String, Object> params)
@@ -166,7 +178,7 @@ public class ScriptableProcessor
             }
         }
         else
-            System.err.println("Unknown operator " + operatorName);
+            werr.println("Unknown operator " + operatorName);
         
     }
     
@@ -201,10 +213,14 @@ public class ScriptableProcessor
     
     public void setIO(Reader in, Writer out, Writer err)
     {
+        rin = new BufferedReader(in);
+        wout = new PrintWriter(out);
+        werr = new PrintWriter(err);
+        
         ScriptContext ctx = getEngine().getContext();
-        ctx.setReader(in);
-        ctx.setWriter(out);
-        ctx.setErrorWriter(err);
+        ctx.setReader(rin);
+        ctx.setWriter(wout);
+        ctx.setErrorWriter(werr);
     }
     
     public void put(String var, Object obj)
@@ -221,7 +237,10 @@ public class ScriptableProcessor
             return true;
         }
         else
+        {
+            werr.println("Couldn't access internal script " + scriptName);
             return false;
+        }
     }
 
     public boolean execCommand(String command) throws ScriptException
