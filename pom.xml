@@ -49,6 +49,11 @@
 			<artifactId>layout-classify</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>jline</groupId>
+			<artifactId>jline</artifactId>
+			<version>2.12</version>
+		</dependency>		
 	</dependencies>
 
 </project>
