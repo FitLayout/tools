@@ -49,6 +49,11 @@
 			<artifactId>layout-classify</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>org.fit.layout.storage</groupId>
+		  	<artifactId>LayoutStorage</artifactId>
+		  	<version>0.0.1-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 
 </project>
