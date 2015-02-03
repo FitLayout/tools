@@ -235,6 +235,7 @@ public class BlockBrowser implements Browser
     public void addToolBar(JToolBar toolbar)
     {
         toolPanel.add(toolbar);
+        toolPanel.updateUI();
     }
 
     @Override
@@ -283,6 +284,69 @@ public class BlockBrowser implements Browser
     {
         areaListeners.add(listener);
     }
+    
+    @Override
+	public void setPage(Page page) {
+    	
+    	this.page = page;
+    	contentCanvas = createContentCanvas();
+        
+        contentCanvas.addMouseListener(new MouseListener() {
+            public void mouseClicked(MouseEvent e)
+            {
+                System.out.println("Click: " + e.getX() + ":" + e.getY());
+                canvasClick(e.getX(), e.getY());
+            }
+            public void mousePressed(MouseEvent e) { }
+            public void mouseReleased(MouseEvent e) { }
+            public void mouseEntered(MouseEvent e) { }
+            public void mouseExited(MouseEvent e) 
+            {
+                statusText.setText("");
+            }
+        });
+        contentCanvas.addMouseMotionListener(new MouseMotionListener() {
+            public void mouseDragged(MouseEvent e) { }
+            public void mouseMoved(MouseEvent e) 
+            { 
+                String s = "Absolute: " + e.getX() + ":" + e.getY();
+                Area node = (Area) areaTree.getLastSelectedPathComponent();
+                if (node != null)
+                {
+                    Area area = (Area) node;
+                    int rx = e.getX() - area.getX1();
+                    int ry = e.getY() - area.getY1();
+                    s += "  Relative: " + rx + ":" + ry;
+                    /*if (area.getBounds().contains(e.getX(), e.getY()))
+                    {
+                        AreaGrid grid = area.getGrid();
+                        if (grid != null)
+                        {
+                            int gx = grid.findCellX(e.getX());
+                            int gy = grid.findCellY(e.getY());
+                            s += "  Grid: " + gx + ":" + gy;
+                        }
+                    }*/
+                }
+                statusText.setText(s);
+            }
+        });
+        contentScroll.setViewportView(contentCanvas);
+        
+        proc.segmentPage(page);
+
+        dispFinished = true;
+        saveButton.setEnabled(true);
+        saveLogicalButton.setEnabled(true);
+        saveRDFButton.setEnabled(true);
+        treeCompButton.setEnabled(true);
+	}
+
+	@Override
+	public Page getPage() {
+		return page;
+	}
+    
 
     //=============================================================================================================
     
@@ -313,57 +377,7 @@ public class BlockBrowser implements Browser
                 }
             };
             page = proc.renderPage(urlstring, contentScroll.getSize());
-            contentCanvas = createContentCanvas();
-            
-            contentCanvas.addMouseListener(new MouseListener() {
-                public void mouseClicked(MouseEvent e)
-                {
-                    System.out.println("Click: " + e.getX() + ":" + e.getY());
-                    canvasClick(e.getX(), e.getY());
-                }
-                public void mousePressed(MouseEvent e) { }
-                public void mouseReleased(MouseEvent e) { }
-                public void mouseEntered(MouseEvent e) { }
-                public void mouseExited(MouseEvent e) 
-                {
-                    statusText.setText("");
-                }
-            });
-            contentCanvas.addMouseMotionListener(new MouseMotionListener() {
-                public void mouseDragged(MouseEvent e) { }
-                public void mouseMoved(MouseEvent e) 
-                { 
-                    String s = "Absolute: " + e.getX() + ":" + e.getY();
-                    Area node = (Area) areaTree.getLastSelectedPathComponent();
-                    if (node != null)
-                    {
-                        Area area = (Area) node;
-                        int rx = e.getX() - area.getX1();
-                        int ry = e.getY() - area.getY1();
-                        s += "  Relative: " + rx + ":" + ry;
-                        /*if (area.getBounds().contains(e.getX(), e.getY()))
-                        {
-                            AreaGrid grid = area.getGrid();
-                            if (grid != null)
-                            {
-                                int gx = grid.findCellX(e.getX());
-                                int gy = grid.findCellY(e.getY());
-                                s += "  Grid: " + gx + ":" + gy;
-                            }
-                        }*/
-                    }
-                    statusText.setText(s);
-                }
-            });
-            contentScroll.setViewportView(contentCanvas);
-            
-            proc.segmentPage(page);
-
-            dispFinished = true;
-            saveButton.setEnabled(true);
-            saveLogicalButton.setEnabled(true);
-            saveRDFButton.setEnabled(true);
-            treeCompButton.setEnabled(true);
+            setPage(page);
             
         } catch (Exception e) {
             System.err.println("*** Error: "+e.getMessage());
@@ -2185,5 +2199,9 @@ public class BlockBrowser implements Browser
         }
         
     }
+
+	
+
+	
 
 }
