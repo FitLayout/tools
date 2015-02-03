@@ -97,7 +97,6 @@ public class BlockBrowser implements Browser
     private Vector<EvalData> evalData;*/
     private File saveDir = null;
     private URL currentUrl = null;
-    private String charset = "utf-8";
     private boolean dispFinished = false;
     private boolean areasync = true;
     private boolean logsync = true;
@@ -143,7 +142,6 @@ public class BlockBrowser implements Browser
     private JPanel jPanel = null;
     private JScrollPane logicalTreeScroll = null;
     private JTree logicalTree = null;
-    private JTextArea consoleText = null;
     private JButton refreshButton = null;
     private JSplitPane infoSplitter = null;
     private JPanel objectInfoPanel = null;
@@ -158,7 +156,6 @@ public class BlockBrowser implements Browser
     private JPanel pathsPanel;
     private JScrollPane pathListScroll;
     private JScrollPane extractionScroll;
-    private JList pathList;
     private JTable extractionTable;
     private JToolBar treeCompToolBar;
     private JButton treeCompButton;
@@ -198,25 +195,6 @@ public class BlockBrowser implements Browser
     public boolean getLoadImages()
     {
         return config.getLoadImages();
-    }
-    
-    public String getCharset()
-    {
-        return charset;
-    }
-
-    public void setCharset(String charset)
-    {
-        this.charset = charset;
-    }
-
-    /**
-     * Print a text string on the console.
-     */
-    public void consolePrint(String s)
-    {
-        consoleText.setCaretPosition(consoleText.getText().length());
-        consoleText.insert(s, consoleText.getCaretPosition());
     }
     
     /**
@@ -286,7 +264,8 @@ public class BlockBrowser implements Browser
     }
     
     @Override
-	public void setPage(Page page) {
+	public void setPage(Page page) 
+    {
     	
     	this.page = page;
     	contentCanvas = createContentCanvas();
@@ -343,7 +322,8 @@ public class BlockBrowser implements Browser
 	}
 
 	@Override
-	public Page getPage() {
+	public Page getPage() 
+	{
 		return page;
 	}
     
@@ -1965,7 +1945,6 @@ public class BlockBrowser implements Browser
         if (pathListScroll == null)
         {
             pathListScroll = new JScrollPane();
-            pathListScroll.setViewportView(getPathList());
         }
         return pathListScroll;
     }
@@ -1978,31 +1957,6 @@ public class BlockBrowser implements Browser
             extractionScroll.setViewportView(getExtractionTable());
         }
         return extractionScroll;
-    }
-
-    private JList getPathList()
-    {
-        if (pathList == null)
-        {
-            pathList = new JList();
-            /*pathList.addListSelectionListener(new ListSelectionListener() 
-            {
-                public void valueChanged(ListSelectionEvent arg0) 
-                {
-                    TaggedNodePath path = (TaggedNodePath) pathList.getSelectedValue();
-                    if (path != null)
-                    {
-                        for (LogicalNode node : path)
-                            node.getFirstAreaNode().getArea().drawExtent((BrowserCanvas) contentCanvas);
-                        contentCanvas.repaint();
-                        Map<String, LogicalNode> match = pex.getMatchingNodes(path);
-                        displayExtractionResult(match);
-                    }
-                    
-                }
-            });*/
-        }
-        return pathList;
     }
 
     private JScrollPane getProbabilityScroll()
