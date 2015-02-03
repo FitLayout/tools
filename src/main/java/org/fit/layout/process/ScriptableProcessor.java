@@ -169,16 +169,20 @@ public class ScriptableProcessor
         System.out.println(params.keySet());
         Object o1 = params.get("useConsistentStyle");
         Object o2 = params.get("maxLineEmSpace");
-        System.out.println(params.get("useConsistentStyle"));
-        System.out.println(params.get("useConsistentStyle"));
-        
+
         AreaTreeOperator op = operators.get(operatorName);
         if (op != null)
         {
-            for (Map.Entry<String, Object> entry : params.entrySet())
+            if (atree != null)
             {
-                op.setParam(entry.getKey(), entry.getValue());
+                for (Map.Entry<String, Object> entry : params.entrySet())
+                {
+                    op.setParam(entry.getKey(), entry.getValue());
+                }
+                op.apply(atree);
             }
+            else
+                werr.println("Couldn't apply " + operatorName + ": no area tree");
         }
         else
             werr.println("Unknown operator " + operatorName);
