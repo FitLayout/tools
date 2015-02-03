@@ -1,0 +1,55 @@
+<configuration>
+
+	<appender name="cssbox" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%-4relative %-5level %-25logger{1} - %msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<logger name="org.fit.cssbox" additivity="false">
+		<level value="error" />
+		<appender-ref ref="cssbox" />
+	</logger>
+
+	<appender name="jstyleparser" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%-4relative %-5level %logger{35} - %msg%n</pattern>
+		</encoder>
+	</appender>
+	
+	<logger name="test" additivity="false">
+		<level value="warn" />
+		<appender-ref ref="jstyleparser" />
+	</logger>
+
+	<logger name="cz.vutbr.web" additivity="false">
+		<level value="error" />
+		<appender-ref ref="jstyleparser" />
+	</logger>
+
+	<logger name="cz.vutbr.web.csskit" additivity="false">
+		<level value="error" />
+		<appender-ref ref="jstyleparser" />
+	</logger>
+
+	<logger name="cz.vutbr.web.csskit.antlr" additivity="false">
+		<level value="error" />
+		<appender-ref ref="jstyleparser" />
+	</logger>
+
+	<logger name="cz.vutbr.web.domassign" additivity="false">
+		<level value="error" />
+		<appender-ref ref="jstyleparser" />
+	</logger>
+
+	<logger name="cz.vutbr.web.domassign.DeclarationTransformer" additivity="false">
+		<level value="error" />
+		<appender-ref ref="jstyleparser" />
+	</logger>
+
+
+	<root>
+		<appender-ref ref="cssbox" />
+	</root>
+
+</configuration>

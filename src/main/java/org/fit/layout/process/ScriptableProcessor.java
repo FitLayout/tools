@@ -32,6 +32,8 @@ import org.fit.layout.api.BoxTreeProvider;
 import org.fit.layout.cssbox.CSSBoxTreeBuilder;
 import org.fit.layout.model.AreaTree;
 import org.fit.layout.model.Page;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 /**
@@ -40,6 +42,8 @@ import org.xml.sax.SAXException;
  */
 public class ScriptableProcessor
 {
+    private static Logger log = LoggerFactory.getLogger(ScriptableProcessor.class);
+
     private Map<String, BoxTreeProvider> boxProviders;
     private Map<String, AreaTreeProvider> areaProviders;
     private Map<String, AreaTreeOperator> operators;
@@ -143,7 +147,7 @@ public class ScriptableProcessor
         }
         else
         {
-            werr.println("Unknown box tree provider: " + providerName);
+            log.error("Unknown box tree provider: " + providerName);
             return null;
         }
     }
@@ -158,7 +162,7 @@ public class ScriptableProcessor
         }
         else
         {
-            werr.println("Unknown area tree provider: " + providerName);
+            log.error("Unknown area tree provider: " + providerName);
             return null;
         }
     }
@@ -182,10 +186,10 @@ public class ScriptableProcessor
                 op.apply(atree);
             }
             else
-                werr.println("Couldn't apply " + operatorName + ": no area tree");
+                log.error("Couldn't apply " + operatorName + ": no area tree");
         }
         else
-            werr.println("Unknown operator " + operatorName);
+            log.error("Unknown operator " + operatorName);
         
     }
     
@@ -250,7 +254,7 @@ public class ScriptableProcessor
         }
         else
         {
-            werr.println("Couldn't access internal script " + scriptName);
+            log.error("Couldn't access internal script " + scriptName);
             return false;
         }
     }

@@ -18,6 +18,8 @@ import javax.script.ScriptException;
 import jline.console.ConsoleReader;
 
 import org.fit.layout.process.ScriptableProcessor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -25,6 +27,8 @@ import org.fit.layout.process.ScriptableProcessor;
  */
 public class Console
 {
+    private static Logger log = LoggerFactory.getLogger(Console.class);
+    
     private ScriptableProcessor proc;
     
     public Console()
@@ -54,7 +58,7 @@ public class Console
             {
                 proc.execCommand(cmd);
             } catch (ScriptException e) {
-                out.println("Error: " + e.getMessage());
+                log.error(e.getMessage());
             }
         }
         out.println();
