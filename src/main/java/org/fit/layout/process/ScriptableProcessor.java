@@ -56,6 +56,9 @@ public class ScriptableProcessor
     
     public ScriptableProcessor()
     {
+        rin = new BufferedReader(new InputStreamReader(System.in));
+        wout = new PrintWriter(System.out);
+        werr = new PrintWriter(System.err);
         findBoxTreeProviders();
         findAreaTreeProviders();
         findAreaTreeOperators();
@@ -205,8 +208,7 @@ public class ScriptableProcessor
         {
             ScriptEngineManager factory = new ScriptEngineManager();
             engine = factory.getEngineByName("JavaScript");
-            ScriptableProcessor proc = new ScriptableProcessor();
-            engine.put("proc", proc);
+            engine.put("proc", this);
         }
         return engine;
     }
@@ -221,6 +223,12 @@ public class ScriptableProcessor
         ctx.setReader(rin);
         ctx.setWriter(wout);
         ctx.setErrorWriter(werr);
+    }
+    
+    public void flushIO()
+    {
+        wout.flush();
+        werr.flush();
     }
     
     public void put(String var, Object obj)

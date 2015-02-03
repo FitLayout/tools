@@ -15,6 +15,8 @@ import java.io.Writer;
 
 import javax.script.ScriptException;
 
+import jline.console.ConsoleReader;
+
 import org.fit.layout.process.ScriptableProcessor;
 
 /**
@@ -37,11 +39,15 @@ public class Console
         Writer wout = new OutputStreamWriter(out);
         Writer werr = new OutputStreamWriter(err);
         proc.setIO(rin, wout, werr);
+        
+        ConsoleReader reader = new ConsoleReader(in, out);
+        reader.setPrompt(prompt());
+        
         while (true)
         {
+            proc.flushIO();
             out.println();
-            out.print(prompt());
-            String cmd = rin.readLine();
+            String cmd = reader.readLine();
             if (cmd == null)
                 break;
             try
