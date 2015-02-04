@@ -235,6 +235,12 @@ public class BlockBrowser implements Browser
     }
 
     @Override
+    public void addToolPanel(String title, JComponent component)
+    {
+        toolTabs.addTab(title, component);
+    }
+
+    @Override
     public void addStructurePanel(String title, JComponent component)
     {
         sidebarPane.addTab(title, component);
