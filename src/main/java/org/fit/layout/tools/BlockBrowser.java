@@ -1965,6 +1965,183 @@ public class BlockBrowser implements Browser
         return extractionTable;
     }
     
+
+    private JTabbedPane getToolTabs()
+    {
+        if (toolTabs == null)
+        {
+            toolTabs = new JTabbedPane(JTabbedPane.TOP);
+            toolTabs.addTab("Sources", null, getSourcesTab(), null);
+        }
+        return toolTabs;
+    }
+
+    private JPanel getSourcesTab()
+    {
+        if (sourcesTab == null)
+        {
+            sourcesTab = new JPanel();
+            GridBagLayout gbl_sourcesTab = new GridBagLayout();
+            gbl_sourcesTab.columnWeights = new double[] { 0.0 };
+            gbl_sourcesTab.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0 };
+            sourcesTab.setLayout(gbl_sourcesTab);
+            GridBagConstraints gbc_rendererChoicePanel = new GridBagConstraints();
+            gbc_rendererChoicePanel.weightx = 1.0;
+            gbc_rendererChoicePanel.anchor = GridBagConstraints.EAST;
+            gbc_rendererChoicePanel.fill = GridBagConstraints.BOTH;
+            gbc_rendererChoicePanel.insets = new Insets(0, 0, 5, 0);
+            gbc_rendererChoicePanel.gridx = 0;
+            gbc_rendererChoicePanel.gridy = 0;
+            sourcesTab.add(getRendererChoicePanel(), gbc_rendererChoicePanel);
+            GridBagConstraints gbc_rendererParamsPanel = new GridBagConstraints();
+            gbc_rendererParamsPanel.weightx = 1.0;
+            gbc_rendererParamsPanel.fill = GridBagConstraints.BOTH;
+            gbc_rendererParamsPanel.insets = new Insets(0, 0, 5, 0);
+            gbc_rendererParamsPanel.gridx = 0;
+            gbc_rendererParamsPanel.gridy = 1;
+            sourcesTab.add(getRendererParamsPanel(), gbc_rendererParamsPanel);
+            GridBagConstraints gbc_segmChoicePanel = new GridBagConstraints();
+            gbc_segmChoicePanel.weightx = 1.0;
+            gbc_segmChoicePanel.anchor = GridBagConstraints.EAST;
+            gbc_segmChoicePanel.fill = GridBagConstraints.BOTH;
+            gbc_segmChoicePanel.insets = new Insets(0, 0, 5, 0);
+            gbc_segmChoicePanel.gridx = 0;
+            gbc_segmChoicePanel.gridy = 2;
+            sourcesTab.add(getSegmChoicePanel(), gbc_segmChoicePanel);
+            GridBagConstraints gbc_segmParamsPanel = new GridBagConstraints();
+            gbc_segmParamsPanel.weightx = 1.0;
+            gbc_segmParamsPanel.fill = GridBagConstraints.BOTH;
+            gbc_segmParamsPanel.gridx = 0;
+            gbc_segmParamsPanel.gridy = 3;
+            sourcesTab.add(getSegmParamsPanel(), gbc_segmParamsPanel);
+
+            BoxTreeProvider p = (BoxTreeProvider) rendererCombo
+                    .getSelectedItem();
+            if (p != null) ((ParamsPanel) rendererParamsPanel).setOperation(p);
+            AreaTreeProvider ap = (AreaTreeProvider) segmentatorCombo
+                    .getSelectedItem();
+            if (ap != null) ((ParamsPanel) segmParamsPanel).setOperation(ap);
+
+        }
+        return sourcesTab;
+    }
+
+    private JLabel getRendererLabel()
+    {
+        if (rendererLabel == null)
+        {
+            rendererLabel = new JLabel("Renderer");
+        }
+        return rendererLabel;
+    }
+
+    private JComboBox<BoxTreeProvider> getRendererCombo()
+    {
+        if (rendererCombo == null)
+        {
+            rendererCombo = new JComboBox<BoxTreeProvider>();
+            rendererCombo.addActionListener(new ActionListener()
+            {
+                public void actionPerformed(ActionEvent e)
+                {
+                    BoxTreeProvider p = (BoxTreeProvider) rendererCombo.getSelectedItem();
+                    if (p != null)
+                        ((ParamsPanel) rendererParamsPanel).setOperation(p);
+                }
+            });
+            Vector<BoxTreeProvider> providers = new Vector<BoxTreeProvider>(proc.getBoxProviders().values());
+            DefaultComboBoxModel<BoxTreeProvider> model = new DefaultComboBoxModel<BoxTreeProvider>(providers);
+            rendererCombo.setModel(model);
+        }
+        return rendererCombo;
+    }
+
+    private JPanel getRendererChoicePanel()
+    {
+        if (rendererChoicePanel == null)
+        {
+            rendererChoicePanel = new JPanel();
+            FlowLayout flowLayout = (FlowLayout) rendererChoicePanel.getLayout();
+            flowLayout.setAlignment(FlowLayout.LEFT);
+            rendererChoicePanel.add(getRendererLabel());
+            rendererChoicePanel.add(getRendererCombo());
+            rendererChoicePanel.add(getOkButton());
+        }
+        return rendererChoicePanel;
+    }
+
+    private JPanel getRendererParamsPanel()
+    {
+        if (rendererParamsPanel == null)
+        {
+            rendererParamsPanel = new ParamsPanel();
+        }
+        return rendererParamsPanel;
+    }
+
+    private JPanel getSegmChoicePanel()
+    {
+        if (segmChoicePanel == null)
+        {
+            segmChoicePanel = new JPanel();
+            FlowLayout flowLayout = (FlowLayout) segmChoicePanel.getLayout();
+            flowLayout.setAlignment(FlowLayout.LEFT);
+            segmChoicePanel.add(getLblSegmentator());
+            segmChoicePanel.add(getSegmentatorCombo());
+            segmChoicePanel.add(getSegmAutorunCheckbox());
+        }
+        return segmChoicePanel;
+    }
+
+    private JPanel getSegmParamsPanel()
+    {
+        if (segmParamsPanel == null)
+        {
+            segmParamsPanel = new ParamsPanel();
+        }
+        return segmParamsPanel;
+    }
+
+    private JLabel getLblSegmentator()
+    {
+        if (lblSegmentator == null)
+        {
+            lblSegmentator = new JLabel("Segmentator");
+        }
+        return lblSegmentator;
+    }
+
+    private JComboBox<AreaTreeProvider> getSegmentatorCombo()
+    {
+        if (segmentatorCombo == null)
+        {
+            segmentatorCombo = new JComboBox<AreaTreeProvider>();
+            segmentatorCombo.addActionListener(new ActionListener()
+            {
+                public void actionPerformed(ActionEvent e)
+                {
+                    AreaTreeProvider ap = (AreaTreeProvider) segmentatorCombo.getSelectedItem();
+                    if (ap != null)
+                        ((ParamsPanel) segmParamsPanel).setOperation(ap);
+                }
+            });
+            Vector<AreaTreeProvider> providers = new Vector<AreaTreeProvider>(
+                    proc.getAreaProviders().values());
+            DefaultComboBoxModel<AreaTreeProvider> model = new DefaultComboBoxModel<AreaTreeProvider>(providers);
+            segmentatorCombo.setModel(model);
+        }
+        return segmentatorCombo;
+    }
+
+    private JCheckBox getSegmAutorunCheckbox()
+    {
+        if (segmAutorunCheckbox == null)
+        {
+            segmAutorunCheckbox = new JCheckBox("Run automatically");
+        }
+        return segmAutorunCheckbox;
+    }
+    
     /**
      * @param args
      */
@@ -2039,143 +2216,5 @@ public class BlockBrowser implements Browser
             e.printStackTrace();
         }
         
-    }
-    private JTabbedPane getToolTabs() {
-        if (toolTabs == null) {
-        	toolTabs = new JTabbedPane(JTabbedPane.TOP);
-        	toolTabs.addTab("Sources", null, getSourcesTab(), null);
-        }
-        return toolTabs;
-    }
-    private JPanel getSourcesTab() {
-        if (sourcesTab == null) {
-        	sourcesTab = new JPanel();
-        	GridBagLayout gbl_sourcesTab = new GridBagLayout();
-        	gbl_sourcesTab.columnWeights = new double[]{0.0};
-        	gbl_sourcesTab.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0};
-        	sourcesTab.setLayout(gbl_sourcesTab);
-        	GridBagConstraints gbc_rendererChoicePanel = new GridBagConstraints();
-        	gbc_rendererChoicePanel.weightx = 1.0;
-        	gbc_rendererChoicePanel.anchor = GridBagConstraints.EAST;
-        	gbc_rendererChoicePanel.fill = GridBagConstraints.BOTH;
-        	gbc_rendererChoicePanel.insets = new Insets(0, 0, 5, 0);
-        	gbc_rendererChoicePanel.gridx = 0;
-        	gbc_rendererChoicePanel.gridy = 0;
-        	sourcesTab.add(getRendererChoicePanel(), gbc_rendererChoicePanel);
-        	GridBagConstraints gbc_rendererParamsPanel = new GridBagConstraints();
-        	gbc_rendererParamsPanel.weightx = 1.0;
-        	gbc_rendererParamsPanel.fill = GridBagConstraints.BOTH;
-        	gbc_rendererParamsPanel.insets = new Insets(0, 0, 5, 0);
-        	gbc_rendererParamsPanel.gridx = 0;
-        	gbc_rendererParamsPanel.gridy = 1;
-        	sourcesTab.add(getRendererParamsPanel(), gbc_rendererParamsPanel);
-        	GridBagConstraints gbc_segmChoicePanel = new GridBagConstraints();
-        	gbc_segmChoicePanel.weightx = 1.0;
-        	gbc_segmChoicePanel.anchor = GridBagConstraints.EAST;
-        	gbc_segmChoicePanel.fill = GridBagConstraints.BOTH;
-        	gbc_segmChoicePanel.insets = new Insets(0, 0, 5, 0);
-        	gbc_segmChoicePanel.gridx = 0;
-        	gbc_segmChoicePanel.gridy = 2;
-        	sourcesTab.add(getSegmChoicePanel(), gbc_segmChoicePanel);
-        	GridBagConstraints gbc_segmParamsPanel = new GridBagConstraints();
-        	gbc_segmParamsPanel.weightx = 1.0;
-        	gbc_segmParamsPanel.fill = GridBagConstraints.BOTH;
-        	gbc_segmParamsPanel.gridx = 0;
-        	gbc_segmParamsPanel.gridy = 3;
-        	sourcesTab.add(getSegmParamsPanel(), gbc_segmParamsPanel);
-        	
-            BoxTreeProvider p = (BoxTreeProvider) rendererCombo.getSelectedItem();
-            if (p != null)
-                ((ParamsPanel) rendererParamsPanel).setOperation(p);
-            AreaTreeProvider ap = (AreaTreeProvider) segmentatorCombo.getSelectedItem();
-            if (ap != null)
-                ((ParamsPanel) segmParamsPanel).setOperation(ap);
-        	
-        }
-        return sourcesTab;
-    }
-    private JLabel getRendererLabel() {
-        if (rendererLabel == null) {
-        	rendererLabel = new JLabel("Renderer");
-        }
-        return rendererLabel;
-    }
-    private JComboBox<BoxTreeProvider> getRendererCombo() {
-        if (rendererCombo == null) {
-        	rendererCombo = new JComboBox<BoxTreeProvider>();
-        	rendererCombo.addActionListener(new ActionListener() {
-        	    public void actionPerformed(ActionEvent e) {
-        	        BoxTreeProvider p = (BoxTreeProvider) rendererCombo.getSelectedItem();
-        	        if (p != null)
-        	            ((ParamsPanel) rendererParamsPanel).setOperation(p);
-        	    }
-        	});
-        	Vector<BoxTreeProvider> providers = new Vector<BoxTreeProvider>(proc.getBoxProviders().values());
-        	DefaultComboBoxModel<BoxTreeProvider> model = new DefaultComboBoxModel<BoxTreeProvider>(providers);
-        	rendererCombo.setModel(model);
-        }
-        return rendererCombo;
-    }
-    private JPanel getRendererChoicePanel() {
-        if (rendererChoicePanel == null) {
-        	rendererChoicePanel = new JPanel();
-        	FlowLayout flowLayout = (FlowLayout) rendererChoicePanel.getLayout();
-        	flowLayout.setAlignment(FlowLayout.LEFT);
-        	rendererChoicePanel.add(getRendererLabel());
-        	rendererChoicePanel.add(getRendererCombo());
-        	rendererChoicePanel.add(getOkButton());
-        }
-        return rendererChoicePanel;
-    }
-    private JPanel getRendererParamsPanel() {
-        if (rendererParamsPanel == null) {
-        	rendererParamsPanel = new ParamsPanel();
-        }
-        return rendererParamsPanel;
-    }
-    private JPanel getSegmChoicePanel() {
-        if (segmChoicePanel == null) {
-        	segmChoicePanel = new JPanel();
-        	FlowLayout flowLayout = (FlowLayout) segmChoicePanel.getLayout();
-        	flowLayout.setAlignment(FlowLayout.LEFT);
-        	segmChoicePanel.add(getLblSegmentator());
-        	segmChoicePanel.add(getSegmentatorCombo());
-        	segmChoicePanel.add(getSegmAutorunCheckbox());
-        }
-        return segmChoicePanel;
-    }
-    private JPanel getSegmParamsPanel() {
-        if (segmParamsPanel == null) {
-        	segmParamsPanel = new ParamsPanel();
-        }
-        return segmParamsPanel;
-    }
-    private JLabel getLblSegmentator() {
-        if (lblSegmentator == null) {
-        	lblSegmentator = new JLabel("Segmentator");
-        }
-        return lblSegmentator;
-    }
-    private JComboBox<AreaTreeProvider> getSegmentatorCombo() {
-        if (segmentatorCombo == null) {
-        	segmentatorCombo = new JComboBox<AreaTreeProvider>();
-        	segmentatorCombo.addActionListener(new ActionListener() {
-        	    public void actionPerformed(ActionEvent e) {
-                    AreaTreeProvider ap = (AreaTreeProvider) segmentatorCombo.getSelectedItem();
-                    if (ap != null)
-                        ((ParamsPanel) segmParamsPanel).setOperation(ap);
-        	    }
-        	});
-            Vector<AreaTreeProvider> providers = new Vector<AreaTreeProvider>(proc.getAreaProviders().values());
-            DefaultComboBoxModel<AreaTreeProvider> model = new DefaultComboBoxModel<AreaTreeProvider>(providers);
-            segmentatorCombo.setModel(model);
-        }
-        return segmentatorCombo;
-    }
-    private JCheckBox getSegmAutorunCheckbox() {
-        if (segmAutorunCheckbox == null) {
-        	segmAutorunCheckbox = new JCheckBox("Run automatically");
-        }
-        return segmAutorunCheckbox;
     }
 }
