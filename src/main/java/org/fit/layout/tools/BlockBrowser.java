@@ -112,13 +112,11 @@ public class BlockBrowser implements Browser
     private JFrame mainWindow = null;  //  @jve:decl-index=0:visual-constraint="-239,28"
     private JPanel container = null;
     private JPanel mainPanel = null;
-    private JPanel urlPanel = null;
     private JPanel contentPanel = null;
     private JPanel structurePanel = null;
     private JPanel statusPanel = null;
     private JTextField statusText = null;
     private JLabel jLabel = null;
-    private JTextField urlText = null;
     private JButton okButton = null;
     private JTabbedPane sidebarPane = null;
     private JPanel boxTreePanel = null;
@@ -198,7 +196,7 @@ public class BlockBrowser implements Browser
     
     public void setLocation(String url)
     {
-        urlText.setText(url);
+        ((ParamsPanel) rendererParamsPanel).setParam("url", url);
         displayURL(url);
     }
     
@@ -332,6 +330,7 @@ public class BlockBrowser implements Browser
         });
         contentScroll.setViewportView(contentCanvas);
         
+        boxTree.setModel(new BoxTreeModel(proc.getPage().getRoot()));
         //proc.segmentPage(page); //TODO jinak
 
         dispFinished = true;
@@ -370,6 +369,11 @@ public class BlockBrowser implements Browser
 
             page = proc.renderPage(urlstring, contentScroll.getSize());
             setPage(page);
+            
+            if (segmAutorunCheckbox.isSelected())
+            {
+                //TODO segmentation here
+            }
             
         } catch (Exception e) {
             System.err.println("*** Error: "+e.getMessage());
@@ -753,7 +757,7 @@ public class BlockBrowser implements Browser
             GridBagConstraints gridBagConstraints11 = new GridBagConstraints();
             gridBagConstraints11.weighty = 1.0;
             gridBagConstraints11.insets = new Insets(0, 0, 5, 0);
-            gridBagConstraints11.gridy = 2;
+            gridBagConstraints11.gridy = 1;
             gridBagConstraints11.fill = java.awt.GridBagConstraints.BOTH;
             gridBagConstraints11.gridx = 0;
             gridBagConstraints11.weightx = 1.0;
@@ -762,14 +766,7 @@ public class BlockBrowser implements Browser
             gridBagConstraints3.weightx = 1.0;
             gridBagConstraints3.fill = java.awt.GridBagConstraints.HORIZONTAL;
             gridBagConstraints3.gridwidth = 1;
-            gridBagConstraints3.gridy = 4;
-            GridBagConstraints gridBagConstraints = new GridBagConstraints();
-            gridBagConstraints.insets = new Insets(0, 0, 5, 0);
-            gridBagConstraints.gridx = 0;
-            gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-            gridBagConstraints.weightx = 1.0;
-            gridBagConstraints.gridwidth = 1;
-            gridBagConstraints.gridy = 1;
+            gridBagConstraints3.gridy = 2;
             mainPanel = new JPanel();
             GridBagLayout gbl_mainPanel = new GridBagLayout();
             mainPanel.setLayout(gbl_mainPanel);
@@ -780,50 +777,10 @@ public class BlockBrowser implements Browser
             gbc_toolTabs.gridx = 0;
             gbc_toolTabs.gridy = 0;
             mainPanel.add(getToolTabs(), gbc_toolTabs);
-            mainPanel.add(getUrlPanel(), gridBagConstraints);
             mainPanel.add(getMainSplitter(), gridBagConstraints11);
             mainPanel.add(getStatusPanel(), gridBagConstraints3);
         }
         return mainPanel;
-    }
-
-    /**
-     * This method initializes jPanel	
-     * 	
-     * @return javax.swing.JPanel	
-     */
-    private JPanel getUrlPanel()
-    {
-        if (urlPanel == null)
-        {
-            GridBagConstraints gridBagConstraints1 = new GridBagConstraints();
-            gridBagConstraints1.fill = java.awt.GridBagConstraints.HORIZONTAL;
-            gridBagConstraints1.gridy = 0;
-            gridBagConstraints1.weightx = 1.0;
-            gridBagConstraints1.gridx = 1;
-            GridBagConstraints gridBagConstraints7 = new GridBagConstraints();
-            gridBagConstraints7.gridx = 3;
-            gridBagConstraints7.insets = new java.awt.Insets(4,0,5,7);
-            gridBagConstraints7.gridy = 1;
-            GridBagConstraints gridBagConstraints6 = new GridBagConstraints();
-            gridBagConstraints6.fill = java.awt.GridBagConstraints.HORIZONTAL;
-            gridBagConstraints6.gridy = 1;
-            gridBagConstraints6.weightx = 1.0;
-            gridBagConstraints6.insets = new java.awt.Insets(0,5,0,5);
-            GridBagConstraints gridBagConstraints5 = new GridBagConstraints();
-            gridBagConstraints5.gridy = 1;
-            gridBagConstraints5.anchor = java.awt.GridBagConstraints.CENTER;
-            gridBagConstraints5.insets = new java.awt.Insets(0,6,0,0);
-            gridBagConstraints5.gridx = 0;
-            jLabel = new JLabel();
-            jLabel.setText("Location :");
-            urlPanel = new JPanel();
-            urlPanel.setLayout(new GridBagLayout());
-            urlPanel.add(jLabel, gridBagConstraints5);
-            urlPanel.add(getUrlText(), gridBagConstraints6);
-            urlPanel.add(getOkButton(), gridBagConstraints7);
-        }
-        return urlPanel;
     }
 
     /**
@@ -902,27 +859,6 @@ public class BlockBrowser implements Browser
     }
 
     /**
-     * This method initializes jTextField	
-     * 	
-     * @return javax.swing.JTextField	
-     */
-    private JTextField getUrlText()
-    {
-        if (urlText == null)
-        {
-            urlText = new JTextField();
-            urlText.addActionListener(new java.awt.event.ActionListener()
-            {
-                public void actionPerformed(java.awt.event.ActionEvent e)
-                {
-                    displayURL(urlText.getText());
-                }
-            });
-        }
-        return urlText;
-    }
-
-    /**
      * This method initializes jButton	
      * 	
      * @return javax.swing.JButton	
@@ -937,7 +873,9 @@ public class BlockBrowser implements Browser
             {
                 public void actionPerformed(java.awt.event.ActionEvent e)
                 {
-                    displayURL(urlText.getText());
+                    Object urlval = ((ParamsPanel) rendererParamsPanel).getParam("url");
+                    if (urlval != null)
+                        displayURL(urlval.toString());
                 }
             });
         }
@@ -2185,6 +2123,7 @@ public class BlockBrowser implements Browser
         	flowLayout.setAlignment(FlowLayout.LEFT);
         	rendererChoicePanel.add(getRendererLabel());
         	rendererChoicePanel.add(getRendererCombo());
+        	rendererChoicePanel.add(getOkButton());
         }
         return rendererChoicePanel;
     }
