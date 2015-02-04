@@ -15,6 +15,8 @@ import java.util.Vector;
 
 import org.fit.cssbox.layout.BrowserCanvas;
 import org.fit.cssbox.layout.BrowserConfig;
+import org.fit.layout.api.AreaTreeProvider;
+import org.fit.layout.api.BoxTreeProvider;
 import org.fit.layout.api.OutputDisplay;
 import org.fit.layout.classify.FeatureVector;
 import org.fit.layout.gui.AreaSelectionListener;
@@ -25,12 +27,14 @@ import org.fit.layout.model.AreaTree;
 import org.fit.layout.model.Box;
 import org.fit.layout.model.Page;
 import org.fit.layout.model.Tag;
+import org.fit.layout.process.ScriptableProcessor;
 
 import javax.swing.JSplitPane;
 import javax.swing.JToolBar;
 
 import java.awt.GridBagConstraints;
 
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -72,6 +76,9 @@ import java.awt.Font;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
+import javax.swing.JComboBox;
+import javax.swing.JCheckBox;
+
 /**
  * @author burgetr
  *
@@ -83,7 +90,7 @@ public class BlockBrowser implements Browser
     public static final float TAG_PROBABILITY_THRESHOLD = 0.3f; 
     
     private BrowserConfig config;
-    private Processor proc;
+    private ScriptableProcessor proc;
     private Page page;
     /*private BoxTree btree;
     private LogicalTree ltree;
@@ -157,21 +164,34 @@ public class BlockBrowser implements Browser
     private JScrollPane pathListScroll;
     private JScrollPane extractionScroll;
     private JTable extractionTable;
-    private JToolBar treeCompToolBar;
-    private JButton treeCompButton;
-    private JFrame evalWindow;
     private JFrame treeCompWindow;
     private JToggleButton sepLookupButton;
     private JScrollPane probabilityScroll;
     private JTable probTable;
-    private JButton evaluationButton;
     private JButton saveRDFButton;
+    private JTabbedPane toolTabs;
+    private JPanel sourcesTab;
+    private JLabel rendererLabel;
+    private JComboBox<BoxTreeProvider> rendererCombo;
+    private JPanel rendererChoicePanel;
+    private JPanel rendererParamsPanel;
+    private JPanel segmChoicePanel;
+    private JPanel segmParamsPanel;
+    private JLabel lblSegmentator;
+    private JComboBox<AreaTreeProvider> segmentatorCombo;
+    private JCheckBox segmAutorunCheckbox;
 
     public BlockBrowser()
     {
         config = new BrowserConfig();
         areaListeners = new LinkedList<AreaSelectionListener>();
         saveDir = new File("/home/burgetr/local/rdf");
+        proc = new ScriptableProcessor() {
+            protected void treesCompleted()
+            {
+                refresh();
+            }
+        };
     }
     
     //===========================================================================
@@ -312,13 +332,12 @@ public class BlockBrowser implements Browser
         });
         contentScroll.setViewportView(contentCanvas);
         
-        proc.segmentPage(page);
+        //proc.segmentPage(page); //TODO jinak
 
         dispFinished = true;
         saveButton.setEnabled(true);
         saveLogicalButton.setEnabled(true);
         saveRDFButton.setEnabled(true);
-        treeCompButton.setEnabled(true);
 	}
 
 	@Override
@@ -336,7 +355,6 @@ public class BlockBrowser implements Browser
         saveButton.setEnabled(false);
         saveLogicalButton.setEnabled(false);
         saveRDFButton.setEnabled(false);
-        treeCompButton.setEnabled(false);
         if (treeCompWindow != null)
         {
             treeCompWindow.setVisible(false);
@@ -350,12 +368,6 @@ public class BlockBrowser implements Browser
                 !urlstring.startsWith("file:"))
                     urlstring = "http://" + urlstring;
 
-            proc = new Processor() {
-                protected void treesCompleted()
-                {
-                    refresh();
-                }
-            };
             page = proc.renderPage(urlstring, contentScroll.getSize());
             setPage(page);
             
@@ -470,8 +482,8 @@ public class BlockBrowser implements Browser
         //vals.add(infoTableData("Layout", area.getLayoutType().toString()));
         vals.add(infoTableData("GP", area.getTopology().getPosition().toString()));
         vals.add(infoTableData("Tags", tagProbabilityString(area.getTags())));
-        if (proc.getVisualClassifier() != null)
-            vals.add(infoTableData("V. class", proc.getVisualClassifier().classifyArea(area)));
+        //if (proc.getVisualClassifier() != null)
+        //    vals.add(infoTableData("V. class", proc.getVisualClassifier().classifyArea(area)));
         //vals.add(infoTableData("Style probs", tagProbabilityString(proc.getMsa() != null ? proc.getMsa().classifyNode(area) : null)));
         //vals.add(infoTableData("Total probs", tagProbabilityString(proc.getTagPredictor() != null ? proc.getTagPredictor().getTagProbabilities(area) : null)));
         //vals.add(infoTableData("Importance", String.valueOf(area.getImportance())));
@@ -501,12 +513,12 @@ public class BlockBrowser implements Browser
         
         //vals.add(infoTableData("Fg color", colorString(area.getBoxes().firstElement().getColor())));
         
-        markednessText.setText(String.format("%.2f", proc.getFeatures().getMarkedness(area)));
+        //markednessText.setText(String.format("%.2f", proc.getFeatures().getMarkedness(area)));
 
         //classification result
         displayProbabilityTable(area);
         
-        Vector<Vector <String>> fvals = new Vector<Vector <String>>();
+        /*Vector<Vector <String>> fvals = new Vector<Vector <String>>();
         FeatureVector f = proc.getFeatures().getFeatureVector(area);
         if (f != null)
         {
@@ -529,12 +541,12 @@ public class BlockBrowser implements Browser
                     }
                 } catch (Exception e) {}
             }
-        }
+        }*/
         
         DefaultTableModel tab = new DefaultTableModel(vals, cols);
         infoTable.setModel(tab);
-        DefaultTableModel ftab = new DefaultTableModel(fvals, cols);
-        featureTable.setModel(ftab);
+        //DefaultTableModel ftab = new DefaultTableModel(fvals, cols);
+        //featureTable.setModel(ftab);
     }
     
     private String borderString(Area a)
@@ -739,8 +751,10 @@ public class BlockBrowser implements Browser
             gridBagConstraints2.anchor = GridBagConstraints.WEST;
             gridBagConstraints2.gridx = -1;
             GridBagConstraints gridBagConstraints11 = new GridBagConstraints();
-            gridBagConstraints11.fill = java.awt.GridBagConstraints.BOTH;
             gridBagConstraints11.weighty = 1.0;
+            gridBagConstraints11.insets = new Insets(0, 0, 5, 0);
+            gridBagConstraints11.gridy = 2;
+            gridBagConstraints11.fill = java.awt.GridBagConstraints.BOTH;
             gridBagConstraints11.gridx = 0;
             gridBagConstraints11.weightx = 1.0;
             GridBagConstraints gridBagConstraints3 = new GridBagConstraints();
@@ -750,14 +764,22 @@ public class BlockBrowser implements Browser
             gridBagConstraints3.gridwidth = 1;
             gridBagConstraints3.gridy = 4;
             GridBagConstraints gridBagConstraints = new GridBagConstraints();
+            gridBagConstraints.insets = new Insets(0, 0, 5, 0);
             gridBagConstraints.gridx = 0;
             gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
             gridBagConstraints.weightx = 1.0;
             gridBagConstraints.gridwidth = 1;
             gridBagConstraints.gridy = 1;
             mainPanel = new JPanel();
-            mainPanel.setLayout(new GridBagLayout());
-            //mainPanel.add(getToolPanel(), gridBagConstraints2);
+            GridBagLayout gbl_mainPanel = new GridBagLayout();
+            mainPanel.setLayout(gbl_mainPanel);
+            GridBagConstraints gbc_toolTabs = new GridBagConstraints();
+            gbc_toolTabs.fill = GridBagConstraints.HORIZONTAL;
+            gbc_toolTabs.weightx = 1.0;
+            gbc_toolTabs.insets = new Insets(0, 0, 5, 0);
+            gbc_toolTabs.gridx = 0;
+            gbc_toolTabs.gridy = 0;
+            mainPanel.add(getToolTabs(), gbc_toolTabs);
             mainPanel.add(getUrlPanel(), gridBagConstraints);
             mainPanel.add(getMainSplitter(), gridBagConstraints11);
             mainPanel.add(getStatusPanel(), gridBagConstraints3);
@@ -1446,7 +1468,6 @@ public class BlockBrowser implements Browser
             toolPanel.add(getShowToolBar());
             toolPanel.add(getLookupToolBar());
             toolPanel.add(getFileToolBar());
-            toolPanel.add(getTreeCompToolBar());
         }
         return toolPanel;
     }
@@ -2006,78 +2027,6 @@ public class BlockBrowser implements Browser
         return extractionTable;
     }
     
-    private JToolBar getTreeCompToolBar() 
-    {
-        if (treeCompToolBar == null) 
-        {
-            treeCompToolBar = new JToolBar();
-            treeCompToolBar.add(getEvaluationButton());
-            treeCompToolBar.add(getTreeCompButton());
-        }
-        return treeCompToolBar;
-    }
-    
-    private JButton getEvaluationButton()
-    {
-        if (evaluationButton == null)
-        {
-            evaluationButton = new JButton("Evaluation");
-            evaluationButton.setEnabled(false);
-            /*evaluationButton.addActionListener(new ActionListener() 
-            {
-                public void actionPerformed(ActionEvent arg0) 
-                {
-                    getEvalWindow().requestFocus();
-                    if (proc.getEvalData() != null)
-                        ((EvalWindow) getEvalWindow()).setEvaluationData(proc.getEvalData());
-                }
-            });*/
-        }
-        return evaluationButton;
-    }
-
-    private JButton getTreeCompButton() 
-    {
-        if (treeCompButton == null) 
-        {
-            treeCompButton = new JButton("TreeComp");
-            treeCompButton.setEnabled(false);
-            /*treeCompButton.addActionListener(new ActionListener() 
-            {
-                public void actionPerformed(ActionEvent arg0) 
-                {
-                    getTreeCompWindow().requestFocus();
-                    if (proc.getEvalData() != null)
-                        ((TreeCompWindow) getTreeCompWindow()).setEvaluationData(proc.getEvalData());
-                }
-            });*/
-        }
-        return treeCompButton;
-    }
-    
-    private JFrame getTreeCompWindow() 
-    {
-        if (treeCompWindow == null) 
-        {
-            /*SearchTree stree = ProgrammeSearchTree.create();
-            treeCompWindow = new TreeCompWindow(stree, proc.getLogicalTree().getRoot(), proc.getTagPredictor());
-            treeCompWindow.setSize(900, 600);*/
-        }
-        treeCompWindow.setVisible(true);
-        return treeCompWindow;
-    }
-    
-    private JFrame getEvalWindow()
-    {
-        if (evalWindow == null) 
-        {
-            /*evalWindow = new EvalWindow(this);
-            evalWindow.setSize(1200, 400);*/
-        }
-        evalWindow.setVisible(true);
-        return evalWindow;
-    }
-    
     /**
      * @param args
      */
@@ -2153,9 +2102,141 @@ public class BlockBrowser implements Browser
         }
         
     }
-
-	
-
-	
-
+    private JTabbedPane getToolTabs() {
+        if (toolTabs == null) {
+        	toolTabs = new JTabbedPane(JTabbedPane.TOP);
+        	toolTabs.addTab("Sources", null, getSourcesTab(), null);
+        }
+        return toolTabs;
+    }
+    private JPanel getSourcesTab() {
+        if (sourcesTab == null) {
+        	sourcesTab = new JPanel();
+        	GridBagLayout gbl_sourcesTab = new GridBagLayout();
+        	gbl_sourcesTab.columnWeights = new double[]{0.0};
+        	gbl_sourcesTab.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0};
+        	sourcesTab.setLayout(gbl_sourcesTab);
+        	GridBagConstraints gbc_rendererChoicePanel = new GridBagConstraints();
+        	gbc_rendererChoicePanel.weightx = 1.0;
+        	gbc_rendererChoicePanel.anchor = GridBagConstraints.EAST;
+        	gbc_rendererChoicePanel.fill = GridBagConstraints.BOTH;
+        	gbc_rendererChoicePanel.insets = new Insets(0, 0, 5, 0);
+        	gbc_rendererChoicePanel.gridx = 0;
+        	gbc_rendererChoicePanel.gridy = 0;
+        	sourcesTab.add(getRendererChoicePanel(), gbc_rendererChoicePanel);
+        	GridBagConstraints gbc_rendererParamsPanel = new GridBagConstraints();
+        	gbc_rendererParamsPanel.weightx = 1.0;
+        	gbc_rendererParamsPanel.fill = GridBagConstraints.BOTH;
+        	gbc_rendererParamsPanel.insets = new Insets(0, 0, 5, 0);
+        	gbc_rendererParamsPanel.gridx = 0;
+        	gbc_rendererParamsPanel.gridy = 1;
+        	sourcesTab.add(getRendererParamsPanel(), gbc_rendererParamsPanel);
+        	GridBagConstraints gbc_segmChoicePanel = new GridBagConstraints();
+        	gbc_segmChoicePanel.weightx = 1.0;
+        	gbc_segmChoicePanel.anchor = GridBagConstraints.EAST;
+        	gbc_segmChoicePanel.fill = GridBagConstraints.BOTH;
+        	gbc_segmChoicePanel.insets = new Insets(0, 0, 5, 0);
+        	gbc_segmChoicePanel.gridx = 0;
+        	gbc_segmChoicePanel.gridy = 2;
+        	sourcesTab.add(getSegmChoicePanel(), gbc_segmChoicePanel);
+        	GridBagConstraints gbc_segmParamsPanel = new GridBagConstraints();
+        	gbc_segmParamsPanel.weightx = 1.0;
+        	gbc_segmParamsPanel.fill = GridBagConstraints.BOTH;
+        	gbc_segmParamsPanel.gridx = 0;
+        	gbc_segmParamsPanel.gridy = 3;
+        	sourcesTab.add(getSegmParamsPanel(), gbc_segmParamsPanel);
+        	
+            BoxTreeProvider p = (BoxTreeProvider) rendererCombo.getSelectedItem();
+            if (p != null)
+                ((ParamsPanel) rendererParamsPanel).setOperation(p);
+            AreaTreeProvider ap = (AreaTreeProvider) segmentatorCombo.getSelectedItem();
+            if (ap != null)
+                ((ParamsPanel) segmParamsPanel).setOperation(ap);
+        	
+        }
+        return sourcesTab;
+    }
+    private JLabel getRendererLabel() {
+        if (rendererLabel == null) {
+        	rendererLabel = new JLabel("Renderer");
+        }
+        return rendererLabel;
+    }
+    private JComboBox<BoxTreeProvider> getRendererCombo() {
+        if (rendererCombo == null) {
+        	rendererCombo = new JComboBox<BoxTreeProvider>();
+        	rendererCombo.addActionListener(new ActionListener() {
+        	    public void actionPerformed(ActionEvent e) {
+        	        BoxTreeProvider p = (BoxTreeProvider) rendererCombo.getSelectedItem();
+        	        if (p != null)
+        	            ((ParamsPanel) rendererParamsPanel).setOperation(p);
+        	    }
+        	});
+        	Vector<BoxTreeProvider> providers = new Vector<BoxTreeProvider>(proc.getBoxProviders().values());
+        	DefaultComboBoxModel<BoxTreeProvider> model = new DefaultComboBoxModel<BoxTreeProvider>(providers);
+        	rendererCombo.setModel(model);
+        }
+        return rendererCombo;
+    }
+    private JPanel getRendererChoicePanel() {
+        if (rendererChoicePanel == null) {
+        	rendererChoicePanel = new JPanel();
+        	FlowLayout flowLayout = (FlowLayout) rendererChoicePanel.getLayout();
+        	flowLayout.setAlignment(FlowLayout.LEFT);
+        	rendererChoicePanel.add(getRendererLabel());
+        	rendererChoicePanel.add(getRendererCombo());
+        }
+        return rendererChoicePanel;
+    }
+    private JPanel getRendererParamsPanel() {
+        if (rendererParamsPanel == null) {
+        	rendererParamsPanel = new ParamsPanel();
+        }
+        return rendererParamsPanel;
+    }
+    private JPanel getSegmChoicePanel() {
+        if (segmChoicePanel == null) {
+        	segmChoicePanel = new JPanel();
+        	FlowLayout flowLayout = (FlowLayout) segmChoicePanel.getLayout();
+        	flowLayout.setAlignment(FlowLayout.LEFT);
+        	segmChoicePanel.add(getLblSegmentator());
+        	segmChoicePanel.add(getSegmentatorCombo());
+        	segmChoicePanel.add(getSegmAutorunCheckbox());
+        }
+        return segmChoicePanel;
+    }
+    private JPanel getSegmParamsPanel() {
+        if (segmParamsPanel == null) {
+        	segmParamsPanel = new ParamsPanel();
+        }
+        return segmParamsPanel;
+    }
+    private JLabel getLblSegmentator() {
+        if (lblSegmentator == null) {
+        	lblSegmentator = new JLabel("Segmentator");
+        }
+        return lblSegmentator;
+    }
+    private JComboBox<AreaTreeProvider> getSegmentatorCombo() {
+        if (segmentatorCombo == null) {
+        	segmentatorCombo = new JComboBox<AreaTreeProvider>();
+        	segmentatorCombo.addActionListener(new ActionListener() {
+        	    public void actionPerformed(ActionEvent e) {
+                    AreaTreeProvider ap = (AreaTreeProvider) segmentatorCombo.getSelectedItem();
+                    if (ap != null)
+                        ((ParamsPanel) segmParamsPanel).setOperation(ap);
+        	    }
+        	});
+            Vector<AreaTreeProvider> providers = new Vector<AreaTreeProvider>(proc.getAreaProviders().values());
+            DefaultComboBoxModel<AreaTreeProvider> model = new DefaultComboBoxModel<AreaTreeProvider>(providers);
+            segmentatorCombo.setModel(model);
+        }
+        return segmentatorCombo;
+    }
+    private JCheckBox getSegmAutorunCheckbox() {
+        if (segmAutorunCheckbox == null) {
+        	segmAutorunCheckbox = new JCheckBox("Run automatically");
+        }
+        return segmAutorunCheckbox;
+    }
 }

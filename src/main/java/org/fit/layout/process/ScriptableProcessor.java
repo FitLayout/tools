@@ -76,6 +76,28 @@ public class ScriptableProcessor
         return page;
     }
 
+    public Map<String, BoxTreeProvider> getBoxProviders()
+    {
+        return boxProviders;
+    }
+
+    public void setBoxProviders(Map<String, BoxTreeProvider> boxProviders)
+    {
+        this.boxProviders = boxProviders;
+    }
+
+    public Map<String, AreaTreeProvider> getAreaProviders()
+    {
+        return areaProviders;
+    }
+
+    //======================================================================================================
+    
+    protected void treesCompleted()
+    {
+        //this is called when the tree creation is finished
+    }
+    
     //======================================================================================================
     // scripting initialization
     
@@ -91,6 +113,21 @@ public class ScriptableProcessor
         }
     }
     
+    public void setAreaProviders(Map<String, AreaTreeProvider> areaProviders)
+    {
+        this.areaProviders = areaProviders;
+    }
+
+    public Map<String, AreaTreeOperator> getOperators()
+    {
+        return operators;
+    }
+
+    public void setOperators(Map<String, AreaTreeOperator> operators)
+    {
+        this.operators = operators;
+    }
+
     private void findAreaTreeProviders()
     {
         ServiceLoader<AreaTreeProvider> loader = ServiceLoader.load(AreaTreeProvider.class);
