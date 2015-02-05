@@ -2174,6 +2174,12 @@ public class BlockBrowser implements Browser
         
     }
 
+	@Override
+	public void addToolPanel(String title, JComponent component) {
+		// TODO Auto-generated method stub
+		
+	}
+
 
 	
 
