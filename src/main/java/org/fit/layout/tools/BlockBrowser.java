@@ -64,6 +64,7 @@ import java.awt.FlowLayout;
 
 import javax.swing.JTextArea;
 import javax.swing.JTable;
+import javax.swing.event.TreeSelectionEvent;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.TreePath;
 
@@ -85,6 +86,9 @@ public class BlockBrowser implements Browser
     private BrowserConfig config;
     private Processor proc;
     private Page page;
+    private AreaTree areaTree;
+    
+    //private AreaTree areaTree;
     /*private BoxTree btree;
     private LogicalTree ltree;
     private FeatureAnalyzer features;
@@ -124,7 +128,7 @@ public class BlockBrowser implements Browser
     private JButton redrawButton = null;
 	private JPanel areaTreePanel = null;
 	private JScrollPane areaTreeScroll = null;
-	private JTree areaTree = null;
+	private JTree areaJTree = null;
 	private JPanel sepListPanel = null;
 	private JScrollPane sepScroll = null;
 	private JList sepList = null;
@@ -203,7 +207,7 @@ public class BlockBrowser implements Browser
     public void refresh()
     {
         boxTree.setModel(new BoxTreeModel(proc.getPage().getRoot()));
-        areaTree.setModel(new AreaTreeModel(proc.getAreaTree().getRoot()));
+        setAreaTree(proc.getAreaTree());
         //logicalTree.setModel(new DefaultTreeModel(proc.getLogicalTree().getRoot()));
     }
     
@@ -251,10 +255,10 @@ public class BlockBrowser implements Browser
     @Override
     public Area getSelectedArea()
     {
-        if (areaTree == null)
+        if (areaJTree == null)
             return null;
         else                   
-            return (Area) areaTree.getLastSelectedPathComponent();
+            return (Area) areaJTree.getLastSelectedPathComponent();
     }
 
     @Override
@@ -266,8 +270,9 @@ public class BlockBrowser implements Browser
     @Override
 	public void setPage(Page page) 
     {
-    	
     	this.page = page;
+    	getJTree_boxTree().setModel(new BoxTreeModel(page.getRoot()));
+    	
     	contentCanvas = createContentCanvas();
         
         contentCanvas.addMouseListener(new MouseListener() {
@@ -289,7 +294,7 @@ public class BlockBrowser implements Browser
             public void mouseMoved(MouseEvent e) 
             { 
                 String s = "Absolute: " + e.getX() + ":" + e.getY();
-                Area node = (Area) areaTree.getLastSelectedPathComponent();
+                Area node = (Area) areaJTree.getLastSelectedPathComponent();
                 if (node != null)
                 {
                     Area area = (Area) node;
@@ -327,6 +332,16 @@ public class BlockBrowser implements Browser
 		return page;
 	}
     
+	@Override
+	public AreaTree getAreaTree() {
+		return areaTree;
+	}
+
+	@Override
+	public void setAreaTree(AreaTree areaTree) {
+		this.areaTree = areaTree;
+		getJTree_areaTree().setModel(new AreaTreeModel(areaTree.getRoot()));
+	}
 
     //=============================================================================================================
     
@@ -378,12 +393,14 @@ public class BlockBrowser implements Browser
     {
         if (lookupButton.isSelected())
         {
+        	
             Area node = proc.getAreaTree().getAreaAt(x, y);
             if (node != null)
             {
                 showAreaInTree(node);
                 showAreaInLogicalTree(node);
             }
+            
             //lookupButton.setSelected(false);
         }
         if (boxLookupButton.isSelected())
@@ -445,9 +462,10 @@ public class BlockBrowser implements Browser
             path[--len] = a;
         
         TreePath select = new TreePath(path);
-        areaTree.setSelectionPath(select);
+		areaJTree.setSelectionPath(null);	//it is necessary for refreshing of one area selection
+        areaJTree.setSelectionPath(select);
         //areaTree.expandPath(select);
-        areaTree.scrollPathToVisible(new TreePath(path));
+        areaJTree.scrollPathToVisible(new TreePath(path));
     }
     
     private void showAreaInLogicalTree(Area node)
@@ -969,7 +987,7 @@ public class BlockBrowser implements Browser
         if (boxTreeScroll == null)
         {
             boxTreeScroll = new JScrollPane();
-            boxTreeScroll.setViewportView(getBoxTree());
+            boxTreeScroll.setViewportView(getJTree_boxTree());
         }
         return boxTreeScroll;
     }
@@ -979,7 +997,7 @@ public class BlockBrowser implements Browser
      * 	
      * @return javax.swing.JTree	
      */
-    private JTree getBoxTree()
+    private JTree getJTree_boxTree()
     {
         if (boxTree == null)
         {
@@ -1139,7 +1157,7 @@ public class BlockBrowser implements Browser
 		if (areaTreeScroll == null)
 		{
 			areaTreeScroll = new JScrollPane();
-			areaTreeScroll.setViewportView(getAreaTree());
+			areaTreeScroll.setViewportView(getJTree_areaTree());
 		}
 		return areaTreeScroll;
 	}
@@ -1149,18 +1167,20 @@ public class BlockBrowser implements Browser
 	 * 	
 	 * @return javax.swing.JTree	
 	 */
-	private JTree getAreaTree()
+	private JTree getJTree_areaTree()
 	{
-		if (areaTree == null)
+		if (areaJTree == null)
 		{
-			areaTree = new JTree();
-			areaTree.addTreeSelectionListener(new javax.swing.event.TreeSelectionListener()
+			areaJTree = new JTree();
+			areaJTree.addTreeSelectionListener(new javax.swing.event.TreeSelectionListener()
 			{
+
 				public void valueChanged(javax.swing.event.TreeSelectionEvent e)
 				{
+					
                     if (logsync)
                     {
-	                    Area node = (Area) areaTree.getLastSelectedPathComponent();
+	                    Area node = (Area) areaJTree.getLastSelectedPathComponent();
 	                    if (node != null)
 	                    {
 	                        showArea(node);
@@ -1172,7 +1192,7 @@ public class BlockBrowser implements Browser
 				}
 			});
 		}
-		return areaTree;
+		return areaJTree;
 	}
 
 	/**
@@ -1400,7 +1420,7 @@ public class BlockBrowser implements Browser
             {
 				public void actionPerformed(java.awt.event.ActionEvent e)
                 {
-                    Area node = (Area) areaTree.getLastSelectedPathComponent();
+                    Area node = (Area) areaJTree.getLastSelectedPathComponent();
                     if (node != null)
                     {
                         showAreas(node, null);
@@ -1528,7 +1548,7 @@ public class BlockBrowser implements Browser
             {
                 public void actionPerformed(java.awt.event.ActionEvent e)
                 {
-                    Area node = (Area) areaTree.getLastSelectedPathComponent();
+                    Area node = (Area) areaJTree.getLastSelectedPathComponent();
                     if (node != null && contentCanvas instanceof BrowserPanel)
                     {
                         node.getTopology().drawLayout(((BrowserPanel) contentCanvas).getOutputDisplay());
@@ -2153,6 +2173,7 @@ public class BlockBrowser implements Browser
         }
         
     }
+
 
 	
 
