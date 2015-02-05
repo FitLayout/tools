@@ -53,6 +53,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.GridBagLayout;
@@ -90,7 +91,7 @@ public class BlockBrowser implements Browser
     public static final float TAG_PROBABILITY_THRESHOLD = 0.3f; 
     
     private BrowserConfig config;
-    private ScriptableProcessor proc;
+    private GUIProcessor proc;
     private Page page;
     /*private BoxTree btree;
     private LogicalTree ltree;
@@ -129,7 +130,7 @@ public class BlockBrowser implements Browser
     private JButton redrawButton = null;
 	private JPanel areaTreePanel = null;
 	private JScrollPane areaTreeScroll = null;
-	private JTree areaTree = null;
+	private JTree areaJTree = null;
 	private JPanel sepListPanel = null;
 	private JScrollPane sepScroll = null;
 	private JList sepList = null;
@@ -179,13 +180,16 @@ public class BlockBrowser implements Browser
     private JComboBox<AreaTreeProvider> segmentatorCombo;
     private JCheckBox segmAutorunCheckbox;
     private JButton segmRunButton;
+    private JButton btnOperators;
+    private JFrame operatorWindow;
+
 
     public BlockBrowser()
     {
         config = new BrowserConfig();
         areaListeners = new LinkedList<AreaSelectionListener>();
         saveDir = new File("/home/burgetr/local/rdf");
-        proc = new ScriptableProcessor() {
+        proc = new GUIProcessor() {
             protected void treesCompleted()
             {
                 refresh();
@@ -222,7 +226,7 @@ public class BlockBrowser implements Browser
     public void refresh()
     {
         boxTree.setModel(new BoxTreeModel(proc.getPage().getRoot()));
-        areaTree.setModel(new AreaTreeModel(proc.getAreaTree().getRoot()));
+        areaJTree.setModel(new AreaTreeModel(proc.getAreaTree().getRoot()));
         //logicalTree.setModel(new DefaultTreeModel(proc.getLogicalTree().getRoot()));
     }
     
@@ -276,10 +280,10 @@ public class BlockBrowser implements Browser
     @Override
     public Area getSelectedArea()
     {
-        if (areaTree == null)
+        if (areaJTree == null)
             return null;
         else                   
-            return (Area) areaTree.getLastSelectedPathComponent();
+            return (Area) areaJTree.getLastSelectedPathComponent();
     }
 
     @Override
@@ -314,7 +318,7 @@ public class BlockBrowser implements Browser
             public void mouseMoved(MouseEvent e) 
             { 
                 String s = "Absolute: " + e.getX() + ":" + e.getY();
-                Area node = (Area) areaTree.getLastSelectedPathComponent();
+                Area node = (Area) areaJTree.getLastSelectedPathComponent();
                 if (node != null)
                 {
                     Area area = (Area) node;
@@ -352,6 +356,19 @@ public class BlockBrowser implements Browser
 		return page;
 	}
     
+    @Override
+    public AreaTree getAreaTree()
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void setAreaTree(AreaTree areaTree)
+    {
+        // TODO Auto-generated method stub
+        
+    }
 
     //=============================================================================================================
     
@@ -476,9 +493,9 @@ public class BlockBrowser implements Browser
             path[--len] = a;
         
         TreePath select = new TreePath(path);
-        areaTree.setSelectionPath(select);
+        areaJTree.setSelectionPath(select);
         //areaTree.expandPath(select);
-        areaTree.scrollPathToVisible(new TreePath(path));
+        areaJTree.scrollPathToVisible(new TreePath(path));
     }
     
     private void showAreaInLogicalTree(Area node)
@@ -1114,7 +1131,7 @@ public class BlockBrowser implements Browser
 		if (areaTreeScroll == null)
 		{
 			areaTreeScroll = new JScrollPane();
-			areaTreeScroll.setViewportView(getAreaTree());
+			areaTreeScroll.setViewportView(getAreaJTree());
 		}
 		return areaTreeScroll;
 	}
@@ -1124,18 +1141,18 @@ public class BlockBrowser implements Browser
 	 * 	
 	 * @return javax.swing.JTree	
 	 */
-	private JTree getAreaTree()
+	private JTree getAreaJTree()
 	{
-		if (areaTree == null)
+		if (areaJTree == null)
 		{
-			areaTree = new JTree();
-			areaTree.addTreeSelectionListener(new javax.swing.event.TreeSelectionListener()
+			areaJTree = new JTree();
+			areaJTree.addTreeSelectionListener(new javax.swing.event.TreeSelectionListener()
 			{
 				public void valueChanged(javax.swing.event.TreeSelectionEvent e)
 				{
                     if (logsync)
                     {
-	                    Area node = (Area) areaTree.getLastSelectedPathComponent();
+	                    Area node = (Area) areaJTree.getLastSelectedPathComponent();
 	                    if (node != null)
 	                    {
 	                        showArea(node);
@@ -1147,7 +1164,7 @@ public class BlockBrowser implements Browser
 				}
 			});
 		}
-		return areaTree;
+		return areaJTree;
 	}
 
 	/**
@@ -1375,7 +1392,7 @@ public class BlockBrowser implements Browser
             {
 				public void actionPerformed(java.awt.event.ActionEvent e)
                 {
-                    Area node = (Area) areaTree.getLastSelectedPathComponent();
+                    Area node = (Area) areaJTree.getLastSelectedPathComponent();
                     if (node != null)
                     {
                         showAreas(node, null);
@@ -1502,7 +1519,7 @@ public class BlockBrowser implements Browser
             {
                 public void actionPerformed(java.awt.event.ActionEvent e)
                 {
-                    Area node = (Area) areaTree.getLastSelectedPathComponent();
+                    Area node = (Area) areaJTree.getLastSelectedPathComponent();
                     if (node != null && contentCanvas instanceof BrowserPanel)
                     {
                         node.getTopology().drawLayout(((BrowserPanel) contentCanvas).getOutputDisplay());
@@ -2105,6 +2122,7 @@ public class BlockBrowser implements Browser
             segmChoicePanel.add(getSegmentatorCombo());
             segmChoicePanel.add(getSegmRunButton());
             segmChoicePanel.add(getSegmAutorunCheckbox());
+            segmChoicePanel.add(getBtnOperators());
         }
         return segmChoicePanel;
     }
@@ -2174,79 +2192,104 @@ public class BlockBrowser implements Browser
         return segmAutorunCheckbox;
     }
     
+    private JButton getBtnOperators()
+    {
+        if (btnOperators == null)
+        {
+            btnOperators = new JButton("Operators...");
+            btnOperators.addActionListener(new ActionListener()
+            {
+                public void actionPerformed(ActionEvent e)
+                {
+                    if (operatorWindow == null)
+                        operatorWindow = new OperatorConfigWindow(proc);
+                    operatorWindow.setVisible(true);
+                }
+            });
+        }
+        return btnOperators;
+    }
+    
     /**
      * @param args
      */
     public static void main(String[] args)
     {
-        browser = new BlockBrowser();
-        browser.setLoadImages(false);
-        JFrame main = browser.getMainWindow();
-        //main.setSize(1000,600);
-        //main.setMinimumSize(new Dimension(1200, 600));
-        //main.setSize(1500,600);
-        main.setSize(1600,1000);
-        browser.initPlugins();
-        main.setVisible(true);
-        
-        try {
-            //String localpath = "file:///home/radek/myprog/workspace/Layout";
-            //String localpath = "file:///home/burgetr/workspace/Layout";
-            //String localpath = "file:/C:\\Documents and Settings\\burgetr\\workspace\\Layout";
-            String localpath = "file://" + System.getProperty("user.home");
-            localpath += "/git/Layout";
-    
-            //URL url = new URL("http://www.idnes.cz/");
-            //URL url = new URL("http://olomouc.idnes.cz/rad-nemeckych-rytiru-pozadal-v-restitucich-i-o-hrady-bouzov-a-sovinec-12b-/olomouc-zpravy.aspx?c=A131113_115042_olomouc-zpravy_mip");
-            //URL url = new URL("http://www.aktualne.cz/");
+        EventQueue.invokeLater(new Runnable()
+        {
+            public void run()
+            {
+                try
+                {
+                    browser = new BlockBrowser();
+                    browser.setLoadImages(false);
+                    JFrame main = browser.getMainWindow();
+                    //main.setSize(1000,600);
+                    //main.setMinimumSize(new Dimension(1200, 600));
+                    //main.setSize(1500,600);
+                    main.setSize(1600,1000);
+                    browser.initPlugins();
+                    main.setVisible(true);
+                    
+                    //String localpath = "file:///home/radek/myprog/workspace/Layout";
+                    //String localpath = "file:///home/burgetr/workspace/Layout";
+                    //String localpath = "file:/C:\\Documents and Settings\\burgetr\\workspace\\Layout";
+                    String localpath = "file://" + System.getProperty("user.home");
+                    localpath += "/git/Layout";
             
-            /* PROGRAMMES */
-            
-            //URL url = new URL("http://faculty.neu.edu.cn/yangxc/DQIS2011/workshop.html");
-            //URL url = new URL("http://dali2011.dia.uniroma3.it/program.html");
-            //URL url = new URL("http://www.searchingspeech.org/SSCS2010/SSCS2010.html");
-            //URL url = new URL("http://sspnet.eu/2010/04/sspw/");
-            //URL url = new URL("http://www.icudl2010.org/icudl_program.htm"); //problemy - prazdne vyrazne oblasti?
-            //URL url = new URL("http://iwssps2010.cs.arizona.edu/program.html");
-            //URL url = new URL("http://www.cssim.org/sites/cssim.org/files/cssim-timetable-full.html");
-            //URL url = new URL("http://liber2009.biu-toulouse.fr/images/stories/documents/conference_programme_toulouse_EN.pdf");
-            //URL url = new URL("http://www.ehealthconference.info/ConferenceProgramme/index.php");
-            //URL url = new URL("http://www.dexa.org/previous/dexa2011/programme703b.html?cid=189");
-            //URL url = new URL("http://www.icdar2011.org/EN/column/column32.shtml");
-            //URL url = new URL("http://aktualne.centrum.cz/ekonomika/business-ve-svete/clanek.phtml?id=749291");
-            //URL url = new URL("http://clair.si.umich.edu/clair/sigmod-pods06/SIGMOD-program.htm");
-            //URL url = new URL("http://edbticdt2011.it.uu.se/workshops_program.html");
-            //URL url = new URL("http://www.znalosti.eu/program-konference");
-            //URL url = new URL(localpath + "/test/simple.html");
-            //URL url = new URL(localpath + "/test/markedness.html");
-            //URL url = new URL(localpath + "/test/programmes/dqis2011.html");
-            //URL url = new URL(localpath + "/test/programmes/SSCS2010.html");
-            //URL url = new URL(localpath + "/test/programmes/icudl2010.html");
-            //URL url = new URL(localpath + "/test/programmes/iwssps2010.html");
-            //URL url = new URL(localpath + "/test/programmes/dali2011.html");
-            //URL url = new URL(localpath + "/test/programmes/RuleML-2010-Programme.pdf");
-            //URL url = new URL(localpath + "/test/programmes/cade23-schedule.pdf");
-            //URL url = new URL(localpath + "/test/programmes/ehealth07.html");
-            //URL url = new URL(localpath + "/test/programmes/znalosti2013.html");
-            //URL url = new URL(localpath + "/test/programmes2/1/aaa-idea.org/program.shtml");            
-            //URL url = new URL(localpath + "/test/programmes2/2/aciids2010.hueuni.edu.vn/index.html");
-            //URL url = new URL(localpath + "/test/programmes3/x37/index.html");
+                    //URL url = new URL("http://www.idnes.cz/");
+                    //URL url = new URL("http://olomouc.idnes.cz/rad-nemeckych-rytiru-pozadal-v-restitucich-i-o-hrady-bouzov-a-sovinec-12b-/olomouc-zpravy.aspx?c=A131113_115042_olomouc-zpravy_mip");
+                    //URL url = new URL("http://www.aktualne.cz/");
+                    
+                    /* PROGRAMMES */
+                    
+                    //URL url = new URL("http://faculty.neu.edu.cn/yangxc/DQIS2011/workshop.html");
+                    //URL url = new URL("http://dali2011.dia.uniroma3.it/program.html");
+                    //URL url = new URL("http://www.searchingspeech.org/SSCS2010/SSCS2010.html");
+                    //URL url = new URL("http://sspnet.eu/2010/04/sspw/");
+                    //URL url = new URL("http://www.icudl2010.org/icudl_program.htm"); //problemy - prazdne vyrazne oblasti?
+                    //URL url = new URL("http://iwssps2010.cs.arizona.edu/program.html");
+                    //URL url = new URL("http://www.cssim.org/sites/cssim.org/files/cssim-timetable-full.html");
+                    //URL url = new URL("http://liber2009.biu-toulouse.fr/images/stories/documents/conference_programme_toulouse_EN.pdf");
+                    //URL url = new URL("http://www.ehealthconference.info/ConferenceProgramme/index.php");
+                    //URL url = new URL("http://www.dexa.org/previous/dexa2011/programme703b.html?cid=189");
+                    //URL url = new URL("http://www.icdar2011.org/EN/column/column32.shtml");
+                    //URL url = new URL("http://aktualne.centrum.cz/ekonomika/business-ve-svete/clanek.phtml?id=749291");
+                    //URL url = new URL("http://clair.si.umich.edu/clair/sigmod-pods06/SIGMOD-program.htm");
+                    //URL url = new URL("http://edbticdt2011.it.uu.se/workshops_program.html");
+                    //URL url = new URL("http://www.znalosti.eu/program-konference");
+                    //URL url = new URL(localpath + "/test/simple.html");
+                    //URL url = new URL(localpath + "/test/markedness.html");
+                    //URL url = new URL(localpath + "/test/programmes/dqis2011.html");
+                    //URL url = new URL(localpath + "/test/programmes/SSCS2010.html");
+                    //URL url = new URL(localpath + "/test/programmes/icudl2010.html");
+                    //URL url = new URL(localpath + "/test/programmes/iwssps2010.html");
+                    //URL url = new URL(localpath + "/test/programmes/dali2011.html");
+                    //URL url = new URL(localpath + "/test/programmes/RuleML-2010-Programme.pdf");
+                    //URL url = new URL(localpath + "/test/programmes/cade23-schedule.pdf");
+                    //URL url = new URL(localpath + "/test/programmes/ehealth07.html");
+                    //URL url = new URL(localpath + "/test/programmes/znalosti2013.html");
+                    //URL url = new URL(localpath + "/test/programmes2/1/aaa-idea.org/program.shtml");            
+                    //URL url = new URL(localpath + "/test/programmes2/2/aciids2010.hueuni.edu.vn/index.html");
+                    //URL url = new URL(localpath + "/test/programmes3/x37/index.html");
 
-            
-            /* MENUS */
+                    
+                    /* MENUS */
 
-            //URL url = new URL("http://menu.olomouc.cz/index.php?act=rmenu&rid=32");
-            //URL url = new URL("http://www.obedvat.cz/cz/obedove-menu/619-pivni-bar-atrium.html");
-            
-            /* NEWS */
-            //URL url = new URL("http://edition.cnn.com/2014/02/24/world/europe/ukraine-protests-up-to-speed/index.html?hpt=hp_t1");
-            URL url = new URL("http://www.reuters.com/article/2014/03/28/us-trading-momentum-analysis-idUSBREA2R09M20140328");
-            
-            browser.setLocation(url.toString());
-            
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+                    //URL url = new URL("http://menu.olomouc.cz/index.php?act=rmenu&rid=32");
+                    //URL url = new URL("http://www.obedvat.cz/cz/obedove-menu/619-pivni-bar-atrium.html");
+                    
+                    /* NEWS */
+                    //URL url = new URL("http://edition.cnn.com/2014/02/24/world/europe/ukraine-protests-up-to-speed/index.html?hpt=hp_t1");
+                    URL url = new URL("http://www.reuters.com/article/2014/03/28/us-trading-momentum-analysis-idUSBREA2R09M20140328");
+                    
+                    browser.setLocation(url.toString());
+                        
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
         
     }
 

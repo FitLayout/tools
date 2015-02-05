@@ -186,13 +186,14 @@ public class ParamsPanel extends JPanel
                         ((JCheckBox) comp).setSelected((Boolean) value);
                     break;
                 case FLOAT:
-                    SpinnerNumberModel model = new SpinnerNumberModel(0.0, Double.MIN_VALUE, Double.MAX_VALUE, 0.1);
+                    SpinnerNumberModel model = new SpinnerNumberModel(0.0, -1000.0, 1000.0, 0.1);
                     comp = new JSpinner(model);
                     if (value != null && (value instanceof Integer || value instanceof Float || value instanceof Double))
                         ((JSpinner) comp).setValue(value);
                     break;
                 case INTEGER:
-                    comp = new JSpinner();
+                    SpinnerNumberModel imodel = new SpinnerNumberModel(0, -1000, 1000, 1);
+                    comp = new JSpinner(imodel);
                     if (value != null && value instanceof Integer)
                         ((JSpinner) comp).setValue(value);
                     break;
