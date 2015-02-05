@@ -79,34 +79,6 @@ public class BaseProcessor
         return page;
     }
     
-    public Page renderPage(String providerName, Map<String, Object> params)
-    {
-        BoxTreeProvider provider = boxProviders.get(providerName);
-        if (provider != null)
-        {
-            return renderPage(provider, params);
-        }
-        else
-        {
-            log.error("Unknown box tree provider: " + providerName);
-            return null;
-        }
-    }
-    
-    public AreaTree initAreaTree(String providerName, Map<String, Object> params)
-    {
-        AreaTreeProvider provider = areaProviders.get(providerName);
-        if (provider != null)
-        {
-            return initAreaTree(provider, params);
-        }
-        else
-        {
-            log.error("Unknown area tree provider: " + providerName);
-            return null;
-        }
-    }
-    
     public AreaTree initAreaTree(AreaTreeProvider provider, Map<String, Object> params)
     {
         for (Map.Entry<String, Object> entry : params.entrySet())
@@ -117,35 +89,23 @@ public class BaseProcessor
         return atree;
     }
     
-    public void apply(String operatorName, Map<String, Object> params)
-    {
-        /*System.out.println("Apply: " + operatorName + " : " + params);
-        System.out.println(params.keySet());
-        Object o1 = params.get("useConsistentStyle");
-        Object o2 = params.get("maxLineEmSpace");*/
-
-        AreaTreeOperator op = operators.get(operatorName);
-        if (op != null)
-        {
-            apply(op, params);
-        }
-        else
-            log.error("Unknown operator " + operatorName);
-        
-    }
-    
     public void apply(AreaTreeOperator op, Map<String, Object> params)
     {
         if (atree != null)
         {
-            for (Map.Entry<String, Object> entry : params.entrySet())
-            {
-                op.setParam(entry.getKey(), entry.getValue());
-            }
+            setOperatorParams(op, params);
             op.apply(atree);
         }
         else
             log.error("Couldn't apply " + op.getId() + ": no area tree");
+    }
+
+    public void setOperatorParams(AreaTreeOperator op, Map<String, Object> params)
+    {
+        for (Map.Entry<String, Object> entry : params.entrySet())
+        {
+            op.setParam(entry.getKey(), entry.getValue());
+        }
     }
     
     //======================================================================================================

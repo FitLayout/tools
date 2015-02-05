@@ -13,12 +13,18 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
+import org.fit.layout.api.AreaTreeOperator;
+import org.fit.layout.api.AreaTreeProvider;
+import org.fit.layout.api.BoxTreeProvider;
+import org.fit.layout.model.AreaTree;
+import org.fit.layout.model.Page;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,6 +65,51 @@ public class ScriptableProcessor extends BaseProcessor
     public List<String> getAreaProviderIds()
     {
         return new ArrayList<String>(getAreaProviders().keySet());
+    }
+    
+    public Page renderPage(String providerName, Map<String, Object> params)
+    {
+        BoxTreeProvider provider = getBoxProviders().get(providerName);
+        if (provider != null)
+        {
+            return renderPage(provider, params);
+        }
+        else
+        {
+            log.error("Unknown box tree provider: " + providerName);
+            return null;
+        }
+    }
+    
+    public AreaTree initAreaTree(String providerName, Map<String, Object> params)
+    {
+        AreaTreeProvider provider = getAreaProviders().get(providerName);
+        if (provider != null)
+        {
+            return initAreaTree(provider, params);
+        }
+        else
+        {
+            log.error("Unknown area tree provider: " + providerName);
+            return null;
+        }
+    }
+    
+    public void apply(String operatorName, Map<String, Object> params)
+    {
+        /*System.out.println("Apply: " + operatorName + " : " + params);
+        System.out.println(params.keySet());
+        Object o1 = params.get("useConsistentStyle");
+        Object o2 = params.get("maxLineEmSpace");*/
+
+        AreaTreeOperator op = getOperators().get(operatorName);
+        if (op != null)
+        {
+            apply(op, params);
+        }
+        else
+            log.error("Unknown operator " + operatorName);
+        
     }
     
     //======================================================================================================
