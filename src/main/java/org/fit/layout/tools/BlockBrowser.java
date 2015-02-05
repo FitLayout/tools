@@ -27,6 +27,7 @@ import org.fit.layout.model.AreaTree;
 import org.fit.layout.model.Box;
 import org.fit.layout.model.Page;
 import org.fit.layout.model.Tag;
+import org.fit.layout.process.GUIProcessor;
 import org.fit.layout.process.ScriptableProcessor;
 
 import javax.swing.JSplitPane;

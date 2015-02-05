@@ -19,7 +19,6 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
-import org.fit.layout.tools.BaseProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

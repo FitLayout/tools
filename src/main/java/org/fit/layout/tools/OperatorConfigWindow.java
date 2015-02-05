@@ -17,6 +17,7 @@ import javax.swing.JScrollPane;
 import javax.swing.border.EmptyBorder;
 
 import org.fit.layout.api.AreaTreeOperator;
+import org.fit.layout.process.GUIProcessor;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
