@@ -178,6 +178,7 @@ public class BlockBrowser implements Browser
     private JLabel lblSegmentator;
     private JComboBox<AreaTreeProvider> segmentatorCombo;
     private JCheckBox segmAutorunCheckbox;
+    private JButton segmRunButton;
 
     public BlockBrowser()
     {
@@ -373,13 +374,21 @@ public class BlockBrowser implements Browser
                 !urlstring.startsWith("file:"))
                     urlstring = "http://" + urlstring;
 
-            page = proc.renderPage(urlstring, contentScroll.getSize());
-            setPage(page);
+            //page = proc.renderPage(urlstring, contentScroll.getSize());
             
-            if (segmAutorunCheckbox.isSelected())
+            int i = rendererCombo.getSelectedIndex();
+            if (i != -1)
             {
-                //TODO segmentation here
+                BoxTreeProvider btp = rendererCombo.getItemAt(i);
+                page = proc.renderPage(btp, ((ParamsPanel) rendererParamsPanel).getParams());
+                setPage(page);
+                
+                if (segmAutorunCheckbox.isSelected())
+                {
+                    //TODO segmentation here
+                }
             }
+            
             
         } catch (Exception e) {
             System.err.println("*** Error: "+e.getMessage());
@@ -2094,6 +2103,7 @@ public class BlockBrowser implements Browser
             flowLayout.setAlignment(FlowLayout.LEFT);
             segmChoicePanel.add(getLblSegmentator());
             segmChoicePanel.add(getSegmentatorCombo());
+            segmChoicePanel.add(getSegmRunButton());
             segmChoicePanel.add(getSegmAutorunCheckbox());
         }
         return segmChoicePanel;
@@ -2139,6 +2149,22 @@ public class BlockBrowser implements Browser
         return segmentatorCombo;
     }
 
+    private JButton getSegmRunButton()
+    {
+        if (segmRunButton == null)
+        {
+            segmRunButton = new JButton("Run");
+            segmRunButton.addActionListener(new ActionListener()
+            {
+                public void actionPerformed(ActionEvent e)
+                {
+                    //TODO run segmentation
+                }
+            });
+        }
+        return segmRunButton;
+    }
+    
     private JCheckBox getSegmAutorunCheckbox()
     {
         if (segmAutorunCheckbox == null)
@@ -2223,4 +2249,5 @@ public class BlockBrowser implements Browser
         }
         
     }
+
 }

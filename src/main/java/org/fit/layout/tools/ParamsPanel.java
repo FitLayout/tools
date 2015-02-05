@@ -123,6 +123,20 @@ public class ParamsPanel extends JPanel
             return null;
     }
     
+    /**
+     * Obtains the current values of all the parametres.
+     * @return a map from parameter name to the value
+     */
+    public Map<String, Object> getParams()
+    {
+        Map<String, Object> ret = new HashMap<String, Object>(fields.size());
+        for (String param : fields.keySet())
+        {
+            ret.put(param, getParam(param));
+        }
+        return ret;
+    }
+    
     //======================================================================================
     
     /**
