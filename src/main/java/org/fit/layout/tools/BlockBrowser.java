@@ -343,7 +343,6 @@ public class BlockBrowser implements Browser
         contentScroll.setViewportView(contentCanvas);
         
         boxTree.setModel(new BoxTreeModel(proc.getPage().getRoot()));
-        //proc.segmentPage(page); //TODO jinak
 
         dispFinished = true;
         saveButton.setEnabled(true);
@@ -360,15 +359,13 @@ public class BlockBrowser implements Browser
     @Override
     public AreaTree getAreaTree()
     {
-        // TODO Auto-generated method stub
-        return null;
+        return proc.getAreaTree();
     }
 
     @Override
     public void setAreaTree(AreaTree areaTree)
     {
-        // TODO Auto-generated method stub
-        
+        proc.setAreaTree(areaTree);
     }
 
     //=============================================================================================================
@@ -403,7 +400,7 @@ public class BlockBrowser implements Browser
                 
                 if (segmAutorunCheckbox.isSelected())
                 {
-                    //TODO segmentation here
+                    segmentPage();
                 }
             }
             
@@ -412,6 +409,15 @@ public class BlockBrowser implements Browser
             System.err.println("*** Error: "+e.getMessage());
             e.printStackTrace();
         }
+    }
+    
+    /**
+     * Segments the page using the chosen provider and parametres.
+     */
+    private void segmentPage()
+    {
+        AreaTreeProvider provider = segmentatorCombo.getItemAt(segmentatorCombo.getSelectedIndex());
+        proc.segmentPage(provider, null); //the parametres should have been set through the GUI
     }
     
     /** Creates the appropriate canvas based on the file type */
@@ -2177,7 +2183,7 @@ public class BlockBrowser implements Browser
             {
                 public void actionPerformed(ActionEvent e)
                 {
-                    //TODO run segmentation
+                    segmentPage();
                 }
             });
         }

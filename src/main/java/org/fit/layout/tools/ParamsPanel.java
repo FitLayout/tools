@@ -12,6 +12,10 @@ import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import org.fit.layout.api.ParametrizedOperation;
 
@@ -21,7 +25,7 @@ import org.fit.layout.api.ParametrizedOperation;
  * 
  * @author burgetr
  */
-public class ParamsPanel extends JPanel
+public class ParamsPanel extends JPanel implements ChangeListener, DocumentListener
 {
     private static final long serialVersionUID = 1L;
     
@@ -29,7 +33,8 @@ public class ParamsPanel extends JPanel
     private Vector<Component> before;
     private Vector<Component> after;
     private Map<String, Component> fields;
-
+    private boolean autosave = true;
+    
     public ParamsPanel()
     {
         super();
@@ -38,6 +43,16 @@ public class ParamsPanel extends JPanel
         after = new Vector<Component>();
         fields = new HashMap<String, Component>();
         setLayout(new FlowLayout(FlowLayout.LEFT));
+    }
+
+    /**
+     * Switches the autosave feature on/off. When autosave is on, the operation parametres
+     * are automatically updated when a value is changed. The default is {@code true}.
+     * @param autosave the autosave value
+     */
+    public void setAutosave(boolean autosave)
+    {
+        this.autosave = autosave;
     }
 
     /**
@@ -137,6 +152,17 @@ public class ParamsPanel extends JPanel
         return ret;
     }
     
+    /**
+     * Saves the current parameter values to the operation.
+     */
+    public void saveParams()
+    {
+        for (String param : fields.keySet())
+        {
+            op.setParam(param, getParam(param));
+        }
+    }
+    
     //======================================================================================
     
     /**
@@ -181,31 +207,63 @@ public class ParamsPanel extends JPanel
             switch (types[i])
             {
                 case BOOLEAN:
-                    comp = new JCheckBox(name);
+                    JCheckBox cb = new JCheckBox(name);
                     if (value != null && value instanceof Boolean)
-                        ((JCheckBox) comp).setSelected((Boolean) value);
+                        cb.setSelected((Boolean) value);
+                    cb.addChangeListener(this);
+                    comp = cb;
                     break;
                 case FLOAT:
                     SpinnerNumberModel model = new SpinnerNumberModel(0.0, -1000.0, 1000.0, 0.1);
-                    comp = new JSpinner(model);
+                    JSpinner js = new JSpinner(model);
                     if (value != null && (value instanceof Integer || value instanceof Float || value instanceof Double))
-                        ((JSpinner) comp).setValue(value);
+                        js.setValue(value);
+                    js.addChangeListener(this);
+                    comp = js;
                     break;
                 case INTEGER:
                     SpinnerNumberModel imodel = new SpinnerNumberModel(0, -1000, 1000, 1);
-                    comp = new JSpinner(imodel);
+                    JSpinner jsi = new JSpinner(imodel);
                     if (value != null && value instanceof Integer)
-                        ((JSpinner) comp).setValue(value);
+                        jsi.setValue(value);
+                    jsi.addChangeListener(this);
+                    comp = jsi;
                     break;
                 case STRING:
-                    comp = new JTextField(64);
+                    JTextField tf = new JTextField(64);
                     if (value != null)
-                        ((JTextField) comp).setText(value.toString());
+                        tf.setText(value.toString());
+                    tf.getDocument().addDocumentListener(this);
+                    comp = tf;
                     break;
             }
             fields.put(name, comp);
             add(comp);
         }
+    }
+
+    @Override
+    public void stateChanged(ChangeEvent e)
+    {
+        if (autosave) saveParams();
+    }
+
+    @Override
+    public void insertUpdate(DocumentEvent e)
+    {
+        if (autosave) saveParams();
+    }
+
+    @Override
+    public void removeUpdate(DocumentEvent e)
+    {
+        if (autosave) saveParams();
+    }
+
+    @Override
+    public void changedUpdate(DocumentEvent e)
+    {
+        if (autosave) saveParams();
     }
     
 }

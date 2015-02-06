@@ -112,6 +112,20 @@ public class ScriptableProcessor extends BaseProcessor
         
     }
     
+    @Override
+    public AreaTree segmentPage()
+    {
+        try
+        {
+            setAreaTree(null);
+            execInternal("default_segm.js");
+        } catch (ScriptException e) {
+            log.error("Couldn't execute default segmentation script: " + e.getMessage());
+        }
+        treesCompleted();
+        return getAreaTree();
+    }
+    
     //======================================================================================================
     // Script invocation
 
@@ -169,5 +183,5 @@ public class ScriptableProcessor extends BaseProcessor
         getEngine().eval(command);
         return true;
     }
-    
+
 }

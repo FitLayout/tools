@@ -13,6 +13,7 @@ import java.util.ServiceLoader;
 import org.fit.layout.api.AreaTreeOperator;
 import org.fit.layout.api.AreaTreeProvider;
 import org.fit.layout.api.BoxTreeProvider;
+import org.fit.layout.api.ParametrizedOperation;
 import org.fit.layout.model.AreaTree;
 import org.fit.layout.model.Page;
 import org.slf4j.Logger;
@@ -23,7 +24,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author burgetr
  */
-public class BaseProcessor
+public abstract class BaseProcessor
 {
     private static Logger log = LoggerFactory.getLogger(BaseProcessor.class);
     
@@ -62,29 +63,40 @@ public class BaseProcessor
         return page;
     }
 
+    public void setPage(Page page)
+    {
+        this.page = page;
+    }
+
     public AreaTree getAreaTree()
     {
         return atree;
     }
 
+    public void setAreaTree(AreaTree atree)
+    {
+        this.atree = atree;
+    }
+
+    /**
+     * Runs the default segmentation process with the default parameter values.
+     * @return The resulting area tree or {@code null} for an unsuccessfull segmentation
+     */
+    public abstract AreaTree segmentPage();
+    
     //======================================================================================================
     
     public Page renderPage(BoxTreeProvider provider, Map<String, Object> params)
     {
-        for (Map.Entry<String, Object> entry : params.entrySet())
-        {
-            provider.setParam(entry.getKey(), entry.getValue());
-        }
+        setServiceParams(provider, params);
         page = provider.getPage();
+        atree = null; //destroy the old area tree if any
         return page;
     }
     
     public AreaTree initAreaTree(AreaTreeProvider provider, Map<String, Object> params)
     {
-        for (Map.Entry<String, Object> entry : params.entrySet())
-        {
-            provider.setParam(entry.getKey(), entry.getValue());
-        }
+        setServiceParams(provider, params);
         atree = provider.createAreaTree(page);
         return atree;
     }
@@ -93,18 +105,21 @@ public class BaseProcessor
     {
         if (atree != null)
         {
-            setOperatorParams(op, params);
+            setServiceParams(op, params);
             op.apply(atree);
         }
         else
             log.error("Couldn't apply " + op.getId() + ": no area tree");
     }
 
-    public void setOperatorParams(AreaTreeOperator op, Map<String, Object> params)
+    public void setServiceParams(ParametrizedOperation op, Map<String, Object> params)
     {
-        for (Map.Entry<String, Object> entry : params.entrySet())
+        if (params != null)
         {
-            op.setParam(entry.getKey(), entry.getValue());
+            for (Map.Entry<String, Object> entry : params.entrySet())
+            {
+                op.setParam(entry.getKey(), entry.getValue());
+            }
         }
     }
     
