@@ -7,6 +7,6 @@ proc.apply('FitLayout.Segm.HomogeneousLeaves', {});
 proc.apply('FitLayout.Segm.SuperAreas', {depthLimit: 2});
 
 proc.apply('FitLayout.Tag.Entities', {});
-proc.apply('FitLayout.Tag.Visual', {trainFile: "train_mix.arff", classInex: 1});
+proc.apply('FitLayout.Tag.Visual', {trainFile: "train_mix.arff", classIndex: 1});
 
 //proc.apply('FitLayout.Tools.XMLOutput', {filename: "/tmp/out.xml"});
