@@ -50,8 +50,8 @@
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>org.fit.layout.storage</groupId>
-			<artifactId>LayoutStorage</artifactId>
+			<groupId>cz.vutbr.fit.layout</groupId>
+			<artifactId>layout-storage</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
