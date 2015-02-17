@@ -131,6 +131,15 @@ public class OutputDisplayImpl implements OutputDisplay
     }
 
     @Override
+    public void drawRectangle(Rectangular rect, Color color)
+    {
+        Color c = g.getColor();
+        g.setColor(color);
+        g.drawRect(rect.getX1(), rect.getY1(), rect.getWidth() - 1, rect.getHeight() - 1);
+        g.setColor(c);
+    }
+    
+    @Override
     public void colorizeByTags(Area area, Set<Tag> s)
     {
         if (!s.isEmpty())
@@ -179,6 +188,5 @@ public class OutputDisplayImpl implements OutputDisplay
             //System.out.println(cname + " => " + ret.toString());               
             return ret;                                                          
     }
-    
     
 }
