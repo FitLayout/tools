@@ -118,7 +118,6 @@ public class BlockBrowser implements Browser
     private JPanel structurePanel = null;
     private JPanel statusPanel = null;
     private JTextField statusText = null;
-    private JLabel jLabel = null;
     private JButton okButton = null;
     private JTabbedPane sidebarPane = null;
     private JPanel boxTreePanel = null;
@@ -141,7 +140,6 @@ public class BlockBrowser implements Browser
     private JPanel toolPanel = null;
     private JToolBar fileToolBar = null;
     private JButton saveButton = null;
-    private JButton gridButton = null;
     private JPanel jPanel = null;
     private JScrollPane logicalTreeScroll = null;
     private JTree logicalTree = null;
@@ -1057,7 +1055,6 @@ public class BlockBrowser implements Browser
             showToolBar.add(getShowAreaButton());
             showToolBar.add(getShowArtAreaButton());
             showToolBar.add(getShowColumnsButton());
-            showToolBar.add(getGridButton());
         }
         return showToolBar;
     }
@@ -1406,33 +1403,6 @@ public class BlockBrowser implements Browser
 		}
 		return saveButton;
 	}
-
-	/**
-     * This method initializes gridButton	
-     * 	
-     * @return javax.swing.JButton	
-     */
-    private JButton getGridButton()
-    {
-        if (gridButton == null)
-        {
-            gridButton = new JButton();
-            gridButton.setText("Show grid");
-            gridButton.addActionListener(new java.awt.event.ActionListener()
-            {
-                public void actionPerformed(java.awt.event.ActionEvent e)
-                {
-                    Area node = (Area) areaJTree.getLastSelectedPathComponent();
-                    if (node != null && contentCanvas instanceof BrowserPanel)
-                    {
-                        node.getTopology().drawLayout(((BrowserPanel) contentCanvas).getOutputDisplay());
-                        contentCanvas.repaint();
-                    }
-                }
-            });
-        }
-        return gridButton;
-    }
 
     /**
      * This method initializes jPanel	
