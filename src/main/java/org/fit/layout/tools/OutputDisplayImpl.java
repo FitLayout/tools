@@ -135,7 +135,7 @@ public class OutputDisplayImpl implements OutputDisplay
     {
         Color c = g.getColor();
         g.setColor(color);
-        g.drawRect(rect.getX1(), rect.getY1(), rect.getWidth() - 1, rect.getHeight() - 1);
+        g.fillRect(rect.getX1(), rect.getY1(), rect.getWidth(), rect.getHeight());
         g.setColor(c);
     }
     
