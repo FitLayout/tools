@@ -132,13 +132,9 @@ public class BlockBrowser implements Browser
 	private JPanel areaTreePanel = null;
 	private JScrollPane areaTreeScroll = null;
 	private JTree areaJTree = null;
-	private JPanel sepListPanel = null;
-	private JScrollPane sepScroll = null;
-	private JList sepList = null;
     private JToggleButton lookupButton = null;
     private JToggleButton extractButton = null;
     private JToggleButton boxLookupButton = null;
-    private JButton showSepButton = null;
     private JButton showBoxButton = null;
     private JButton showAreaButton = null;
     private JToolBar lookupToolBar = null;
@@ -696,22 +692,6 @@ public class BlockBrowser implements Browser
         //notify area listeners
         for (AreaSelectionListener listener : areaListeners)
             listener.areaSelected(area);
-        
-        //show the separator list
-        /*SeparatorSet sset = Config.createSeparators(anode);
-        DefaultListModel ml = new DefaultListModel();
-        for (Separator sep : sset.getHorizontal())
-            ml.addElement(sep);
-        for (Separator sep : sset.getVertical())
-            ml.addElement(sep);
-        for (Separator sep : sset.getBoxsep())
-            ml.addElement(sep);
-        sepList.setModel(ml);
-        
-        //debug joining
-        AreaNode p = anode.getParentArea();
-        if (p != null)
-            p.debugAreas(anode);*/
     }
 
     @SuppressWarnings("unchecked")
@@ -934,7 +914,6 @@ public class BlockBrowser implements Browser
             sidebarPane.addTab("Area tree", null, getJPanel(), null);
             sidebarPane.addTab("Logical tree", null, getJPanel4(), null);
             sidebarPane.addTab("Box tree", null, getBoxTreePanel(), null);
-            sidebarPane.addTab("Separators", null, getJPanel2(), null);
             sidebarPane.addTab("Paths", null, getPathsPanel(), null);
         }
         return sidebarPane;
@@ -1078,7 +1057,6 @@ public class BlockBrowser implements Browser
             showToolBar.add(getShowAreaButton());
             showToolBar.add(getShowArtAreaButton());
             showToolBar.add(getShowColumnsButton());
-            showToolBar.add(getShowSepButton());
             showToolBar.add(getGridButton());
         }
         return showToolBar;
@@ -1174,66 +1152,6 @@ public class BlockBrowser implements Browser
 		return areaJTree;
 	}
 
-	/**
-	 * This method initializes jPanel	
-	 * 	
-	 * @return javax.swing.JPanel	
-	 */
-	private JPanel getJPanel2()
-	{
-		if (sepListPanel == null)
-		{
-			GridLayout gridLayout3 = new GridLayout();
-			gridLayout3.setRows(1);
-			gridLayout3.setColumns(1);
-			sepListPanel = new JPanel();
-			sepListPanel.setLayout(gridLayout3);
-			sepListPanel.add(getJScrollPane2(), null);
-		}
-		return sepListPanel;
-	}
-
-	/**
-	 * This method initializes jScrollPane	
-	 * 	
-	 * @return javax.swing.JScrollPane	
-	 */
-	private JScrollPane getJScrollPane2()
-	{
-		if (sepScroll == null)
-		{
-			sepScroll = new JScrollPane();
-			sepScroll.setViewportView(getSepList());
-		}
-		return sepScroll;
-	}
-
-	/**
-	 * This method initializes sepList	
-	 * 	
-	 * @return javax.swing.JList	
-	 */
-	private JList getSepList()
-	{
-		/*if (sepList == null)
-		{
-			sepList = new JList();
-			sepList.addListSelectionListener(new javax.swing.event.ListSelectionListener()
-			{
-				public void valueChanged(javax.swing.event.ListSelectionEvent e)
-				{
-                    Separator sep = (Separator) sepList.getSelectedValue();
-                    if (sep != null)
-                    {
-	                    sep.drawExtent((BrowserCanvas) contentCanvas);
-	                    contentCanvas.repaint();
-                    }
-				}
-			});
-		}
-		return sepList;*/
-	    return new JList();
-	}
 
 	/**
      * This method initializes lookupButton	
@@ -1325,28 +1243,6 @@ public class BlockBrowser implements Browser
             boxLookupButton.setToolTipText("Find boxes");
         }
         return boxLookupButton;
-    }
-
-    /**
-     * This method initializes showSepButton	
-     * 	
-     * @return javax.swing.JButton	
-     */
-    private JButton getShowSepButton()
-    {
-        if (showSepButton == null)
-        {
-            showSepButton = new JButton();
-            showSepButton.setText("Separators");
-            /*showSepButton.addActionListener(new java.awt.event.ActionListener()
-            {
-                public void actionPerformed(java.awt.event.ActionEvent e)
-                {
-                    showSeparators();
-                }
-            });*/
-        }
-        return showSepButton;
     }
 
     /**
