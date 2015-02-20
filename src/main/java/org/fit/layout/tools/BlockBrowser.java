@@ -6,11 +6,14 @@ package org.fit.layout.tools;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
+import java.util.Set;
 import java.util.Vector;
 
 import org.fit.cssbox.layout.BrowserCanvas;
@@ -22,6 +25,7 @@ import org.fit.layout.classify.FeatureVector;
 import org.fit.layout.gui.AreaSelectionListener;
 import org.fit.layout.gui.Browser;
 import org.fit.layout.gui.BrowserPlugin;
+import org.fit.layout.impl.DefaultTag;
 import org.fit.layout.model.Area;
 import org.fit.layout.model.AreaTree;
 import org.fit.layout.model.Box;
@@ -70,6 +74,7 @@ import java.awt.FlowLayout;
 
 import javax.swing.JTextArea;
 import javax.swing.JTable;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.TreePath;
 
@@ -109,6 +114,9 @@ public class BlockBrowser implements Browser
     private boolean dispFinished = false;
     private boolean areasync = true;
     private boolean logsync = true;
+    private Set<String> tagTypes; //all known tag types in the area tree
+    private Set<String> tagNames; //all known area names in the area tree
+    
     private List<AreaSelectionListener> areaListeners;
 
     private JFrame mainWindow = null;  //  @jve:decl-index=0:visual-constraint="-239,28"
@@ -360,6 +368,7 @@ public class BlockBrowser implements Browser
     public void setAreaTree(AreaTree areaTree)
     {
         proc.setAreaTree(areaTree);
+        updateTagLists(areaTree);
     }
 
     //=============================================================================================================
@@ -412,6 +421,7 @@ public class BlockBrowser implements Browser
     {
         AreaTreeProvider provider = segmentatorCombo.getItemAt(segmentatorCombo.getSelectedIndex());
         proc.segmentPage(provider, null); //the parametres should have been set through the GUI
+        setAreaTree(proc.getAreaTree());
     }
     
     /** Creates the appropriate canvas based on the file type */
@@ -636,45 +646,37 @@ public class BlockBrowser implements Browser
     
     private void displayProbabilityTable(Area area)
     {
-        /*List<Tag> tags = proc.getTagger().getAllTags();
-        Vector<String> cols = new Vector<String>();
-        cols.add("Source");
-        for (Tag tag : tags)
-            cols.add(tag.toString());
-        
-        Vector<Vector <String>> vals = new Vector<Vector <String>>();
-        //tags
-        Vector<String> tprob = new Vector<String>();
-        tprob.add("Tag");
-        for (Tag tag : tags)
-        {
-            double p = 0.0;
-            if (area.hasTag(tag))
-                p = tag.getSource().getRelevance();
-            tprob.add(String.format("%1.2f", p));
-        }
-        vals.add(tprob);
-        //classifiers
-        if (proc.getMsa() != null)
-            vals.add(getProbTableLine("m.class", tags, proc.getMsa().classifyNode(area)));
-        if (proc.getEsa() != null)
-            vals.add(getProbTableLine("extr", tags, proc.getEsa().classifyNode(area)));
-        if (proc.getTagPredictor() != null)
-            vals.add(getProbTableLine("total", tags, proc.getTagPredictor().getTagProbabilities(area)));
-                
-        probTable.setModel(new DefaultTableModel(vals, cols));*/
+        Vector<String> cols = new Vector<String>(tagNames);
+        Collections.sort(cols);
+        cols.insertElementAt("Type", 0);
+        Vector<String> types = new Vector<String>(tagTypes);
+        Collections.sort(types);
+
+        Vector<Vector <String>> lines = new Vector<Vector <String>>(types.size());
+        for (String type : types)
+            lines.add(getProbTableLine(type, cols, area.getTags()));
+        probTable.setModel(new DefaultTableModel(lines, cols));
     }
     
-    private Vector<String> getProbTableLine(String title, List<Tag> tags, Map<Tag, Double> data)
+    private Vector<String> getProbTableLine(String type, List<String> names, Map<Tag, Float> data)
     {
         Vector<String> ret = new Vector<String>();
-        ret.add(title);
-        for (Tag tag : tags)
+        boolean first = true;
+        for (String name : names)
         {
-            if (data.containsKey(tag))
-                ret.add(String.format("%1.2f", data.get(tag)));
+            if (first)
+            {
+                ret.add(type);
+                first = false;
+            }
             else
-                ret.add("");
+            {
+                Tag search = new DefaultTag(type, name);
+                if (data.containsKey(search))
+                    ret.add(String.format("%1.2f", data.get(search)));
+                else
+                    ret.add("");
+            }
         }
         return ret;
     }
@@ -704,6 +706,26 @@ public class BlockBrowser implements Browser
         }
         contentCanvas.repaint();*/
     }
+    
+    private void updateTagLists(AreaTree tree)
+    {
+        tagNames = new HashSet<String>();
+        tagTypes = new HashSet<String>();
+        recursiveUpdateTagLists(tree.getRoot());
+    }
+    
+    private void recursiveUpdateTagLists(Area root)
+    {
+        for (Tag tag : root.getTags().keySet())
+        {
+            tagNames.add(tag.getValue());
+            tagTypes.add(tag.getType());
+        }
+        for (int i = 0; i < root.getChildCount(); i++)
+            recursiveUpdateTagLists(root.getChildArea(i));
+    }
+    
+    //===========================================================================
     
     public BrowserCanvas getBrowserCanvas()
     {
@@ -2124,7 +2146,7 @@ public class BlockBrowser implements Browser
                     //URL url = new URL("http://iwssps2010.cs.arizona.edu/program.html");
                     //URL url = new URL("http://www.cssim.org/sites/cssim.org/files/cssim-timetable-full.html");
                     //URL url = new URL("http://liber2009.biu-toulouse.fr/images/stories/documents/conference_programme_toulouse_EN.pdf");
-                    //URL url = new URL("http://www.ehealthconference.info/ConferenceProgramme/index.php");
+                    //URL url = new URL("http://www.ehealthconference.info/conferenceprogramme/index.php");
                     //URL url = new URL("http://www.dexa.org/previous/dexa2011/programme703b.html?cid=189");
                     //URL url = new URL("http://www.icdar2011.org/EN/column/column32.shtml");
                     //URL url = new URL("http://aktualne.centrum.cz/ekonomika/business-ve-svete/clanek.phtml?id=749291");
