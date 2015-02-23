@@ -53,7 +53,7 @@ public class OperatorConfigWindow extends JFrame
         setContentPane(contentPane);
         GridBagLayout gbl_contentPane = new GridBagLayout();
         gbl_contentPane.columnWeights = new double[]{1.0, 0.0, 1.0};
-        gbl_contentPane.rowWeights = new double[]{0.0, 1.0, 1.0};
+        gbl_contentPane.rowWeights = new double[]{0.0, 1.0, 1.0, 0.0};
         contentPane.setLayout(gbl_contentPane);
         
         JLabel lblUsed = new JLabel("Used");
@@ -199,12 +199,25 @@ public class OperatorConfigWindow extends JFrame
         
         paramsPanel = new ParamsPanel();
         GridBagConstraints gbc_paramsPanel = new GridBagConstraints();
+        gbc_paramsPanel.insets = new Insets(0, 0, 5, 0);
         gbc_paramsPanel.gridwidth = 3;
-        gbc_paramsPanel.insets = new Insets(0, 0, 0, 5);
         gbc_paramsPanel.fill = GridBagConstraints.BOTH;
         gbc_paramsPanel.gridx = 0;
         gbc_paramsPanel.gridy = 2;
         contentPane.add(paramsPanel, gbc_paramsPanel);
+        
+        JButton btnClose = new JButton("Close");
+        btnClose.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent arg0) {
+                setVisible(false);
+            }
+        });
+        GridBagConstraints gbc_btnClose = new GridBagConstraints();
+        gbc_btnClose.insets = new Insets(0, 0, 0, 5);
+        gbc_btnClose.anchor = GridBagConstraints.EAST;
+        gbc_btnClose.gridx = 2;
+        gbc_btnClose.gridy = 3;
+        contentPane.add(btnClose, gbc_btnClose);
     }
 
     private void updateLists()
