@@ -4,7 +4,6 @@
 package org.fit.layout.tools;
 
 import java.io.File;
-import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.Collections;
 import java.util.HashSet;
@@ -21,7 +20,6 @@ import org.fit.cssbox.layout.BrowserConfig;
 import org.fit.layout.api.AreaTreeProvider;
 import org.fit.layout.api.BoxTreeProvider;
 import org.fit.layout.api.OutputDisplay;
-import org.fit.layout.classify.FeatureVector;
 import org.fit.layout.gui.AreaSelectionListener;
 import org.fit.layout.gui.Browser;
 import org.fit.layout.gui.BrowserPlugin;
@@ -32,7 +30,6 @@ import org.fit.layout.model.Box;
 import org.fit.layout.model.Page;
 import org.fit.layout.model.Tag;
 import org.fit.layout.process.GUIProcessor;
-import org.fit.layout.process.ScriptableProcessor;
 
 import javax.swing.JSplitPane;
 import javax.swing.JToolBar;
