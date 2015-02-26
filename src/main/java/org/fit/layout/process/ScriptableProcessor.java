@@ -44,6 +44,7 @@ public class ScriptableProcessor extends BaseProcessor
     
     public ScriptableProcessor()
     {
+        super();
         rin = new BufferedReader(new InputStreamReader(System.in));
         wout = new PrintWriter(System.out);
         werr = new PrintWriter(System.err);

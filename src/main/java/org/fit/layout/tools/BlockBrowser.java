@@ -368,6 +368,11 @@ public class BlockBrowser implements Browser
         updateTagLists(areaTree);
     }
 
+    public GUIProcessor getProcessor()
+    {
+        return proc;
+    }
+    
     //=============================================================================================================
     
     public void displayURL(String urlstring)

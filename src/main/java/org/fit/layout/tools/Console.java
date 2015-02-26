@@ -34,10 +34,11 @@ public class Console
     public Console()
     {
         proc = new ScriptableProcessor();
-        proc.put("system", this);
+        proc.put("console", this);
+        init();
     }
     
-    protected void interactiveSession(InputStream in, PrintStream out, PrintStream err) throws IOException
+    public void interactiveSession(InputStream in, PrintStream out, PrintStream err) throws IOException
     {
         BufferedReader rin = new BufferedReader(new InputStreamReader(in));
         Writer wout = new OutputStreamWriter(out);
@@ -46,6 +47,13 @@ public class Console
         
         ConsoleReader reader = new ConsoleReader(in, out);
         reader.setPrompt(prompt());
+        
+        try
+        {
+            initSession();
+        } catch (ScriptException e) {
+            log.error(e.getMessage());
+        }
         
         while (true)
         {
@@ -67,6 +75,29 @@ public class Console
     protected String prompt()
     {
         return "FitLayout> ";
+    }
+    
+    protected ScriptableProcessor getProcessor()
+    {
+        return proc;
+    }
+    
+    /**
+     * This is called when the console is created. Usable for adding custom object to the script engine.
+     */
+    protected void init()
+    {
+        //nothing just now
+    }
+    
+    /**
+     * This function is called at the beginning of the interactive session. Usable for executing
+     * various init scripts.  
+     * @throws ScriptException
+     */
+    protected void initSession() throws ScriptException
+    {
+        proc.execInternal("init.js");
     }
     
     public void exit()
