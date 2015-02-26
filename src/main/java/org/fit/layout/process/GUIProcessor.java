@@ -12,6 +12,7 @@ import javax.script.ScriptException;
 
 import org.fit.layout.api.AreaTreeOperator;
 import org.fit.layout.api.AreaTreeProvider;
+import org.fit.layout.api.ServiceManager;
 import org.fit.layout.model.AreaTree;
 import org.fit.layout.model.Page;
 import org.slf4j.Logger;
@@ -108,7 +109,7 @@ public class GUIProcessor extends ScriptableProcessor
             AreaTreeOperator op = getOperators().get(operatorName);
             if (op != null)
             {
-                setServiceParams(op, params);
+                ServiceManager.setServiceParams(op, params);
                 selectedOperators.add(op);
             }
         }
