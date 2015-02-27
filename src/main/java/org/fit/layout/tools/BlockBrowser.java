@@ -56,11 +56,9 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
-import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.GridBagLayout;
 
-import javax.swing.JList;
 import javax.swing.JToggleButton;
 
 import java.awt.event.KeyEvent;
@@ -69,9 +67,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.FlowLayout;
 
-import javax.swing.JTextArea;
 import javax.swing.JTable;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.TreePath;
 
@@ -155,8 +151,6 @@ public class BlockBrowser implements Browser
     private JTable infoTable = null;
     private JButton showArtAreaButton = null;
     private JButton showColumnsButton = null;
-    private JScrollPane featureScroll = null;
-    private JTable featureTable = null;
     private JButton saveLogicalButton = null;
     private JTextField markednessText;
     private JPanel pathsPanel;
@@ -1545,23 +1539,16 @@ public class BlockBrowser implements Browser
     {
         if (objectInfoPanel == null)
         {
-            GridBagConstraints gridBagConstraints9 = new GridBagConstraints();
-            gridBagConstraints9.insets = new Insets(0, 0, 5, 0);
-            gridBagConstraints9.fill = GridBagConstraints.BOTH;
-            gridBagConstraints9.weighty = 1.0;
-            gridBagConstraints9.weightx = 1.0;
-            gridBagConstraints9.gridy = 3;
-            gridBagConstraints9.gridx = 0;
             GridBagConstraints gridBagConstraints10 = new GridBagConstraints();
             gridBagConstraints10.insets = new Insets(0, 0, 5, 0);
             gridBagConstraints10.fill = GridBagConstraints.BOTH;
             gridBagConstraints10.gridy = 0;
             gridBagConstraints10.weightx = 1.0;
-            gridBagConstraints10.weighty = 1.0;
+            gridBagConstraints10.weighty = 0.5;
             gridBagConstraints10.gridx = 0;
             objectInfoPanel = new JPanel();
             GridBagLayout gbl_objectInfoPanel = new GridBagLayout();
-            gbl_objectInfoPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0};
+            gbl_objectInfoPanel.rowWeights = new double[]{0.0, 0.0, 0.0};
             gbl_objectInfoPanel.columnWeights = new double[]{1.0};
             objectInfoPanel.setLayout(gbl_objectInfoPanel);
             objectInfoPanel.add(getJScrollPane4(), gridBagConstraints10);
@@ -1579,7 +1566,6 @@ public class BlockBrowser implements Browser
             gbc_markednessText.gridx = 0;
             gbc_markednessText.gridy = 2;
             objectInfoPanel.add(getMarkednessText(), gbc_markednessText);
-            objectInfoPanel.add(getJScrollPane5(), gridBagConstraints9);
         }
         return objectInfoPanel;
     }
@@ -1665,35 +1651,6 @@ public class BlockBrowser implements Browser
           });*/
         }
         return showColumnsButton;
-    }
-
-    /**
-     * This method initializes jScrollPane	
-     * 	
-     * @return javax.swing.JScrollPane	
-     */
-    private JScrollPane getJScrollPane5()
-    {
-        if (featureScroll == null)
-        {
-            featureScroll = new JScrollPane();
-            featureScroll.setViewportView(getFeatureTable());
-        }
-        return featureScroll;
-    }
-
-    /**
-     * This method initializes featureTable	
-     * 	
-     * @return javax.swing.JTable	
-     */
-    private JTable getFeatureTable()
-    {
-        if (featureTable == null)
-        {
-            featureTable = new JTable();
-        }
-        return featureTable;
     }
 
     /**
