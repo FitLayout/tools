@@ -3,7 +3,6 @@
  */
 package org.fit.layout.tools;
 
-import java.io.File;
 import java.net.URL;
 import java.util.Collections;
 import java.util.HashSet;
@@ -102,7 +101,6 @@ public class BlockBrowser implements Browser
     private ExtractedStyleAnalyzer esa;
     private TagPredictor tpred;
     private Vector<EvalData> evalData;*/
-    private File saveDir = null;
     private URL currentUrl = null;
     private boolean dispFinished = false;
     private boolean areasync = true;
@@ -139,8 +137,6 @@ public class BlockBrowser implements Browser
     private JButton showAreaButton = null;
     private JToolBar lookupToolBar = null;
     private JPanel toolPanel = null;
-    private JToolBar fileToolBar = null;
-    private JButton saveButton = null;
     private JPanel jPanel = null;
     private JScrollPane logicalTreeScroll = null;
     private JTree logicalTree = null;
@@ -151,7 +147,6 @@ public class BlockBrowser implements Browser
     private JTable infoTable = null;
     private JButton showArtAreaButton = null;
     private JButton showColumnsButton = null;
-    private JButton saveLogicalButton = null;
     private JTextField markednessText;
     private JPanel pathsPanel;
     private JScrollPane pathListScroll;
@@ -161,7 +156,6 @@ public class BlockBrowser implements Browser
     private JToggleButton sepLookupButton;
     private JScrollPane probabilityScroll;
     private JTable probTable;
-    private JButton saveRDFButton;
     private JTabbedPane toolTabs;
     private JPanel sourcesTab;
     private JLabel rendererLabel;
@@ -182,7 +176,6 @@ public class BlockBrowser implements Browser
     {
         config = new BrowserConfig();
         areaListeners = new LinkedList<AreaSelectionListener>();
-        saveDir = new File("/home/burgetr/local/rdf");
         proc = new GUIProcessor() {
             protected void treesCompleted()
             {
@@ -338,9 +331,6 @@ public class BlockBrowser implements Browser
         boxTree.setModel(new BoxTreeModel(proc.getPage().getRoot()));
 
         dispFinished = true;
-        saveButton.setEnabled(true);
-        saveLogicalButton.setEnabled(true);
-        saveRDFButton.setEnabled(true);
 	}
 
 	@Override
@@ -372,9 +362,6 @@ public class BlockBrowser implements Browser
     public void displayURL(String urlstring)
     {
         dispFinished = false;
-        saveButton.setEnabled(false);
-        saveLogicalButton.setEnabled(false);
-        saveRDFButton.setEnabled(false);
         if (treeCompWindow != null)
         {
             treeCompWindow.setVisible(false);
@@ -1069,6 +1056,7 @@ public class BlockBrowser implements Browser
         {
             showToolBar = new JToolBar();
             showToolBar.add(getRedrawButton());
+            showToolBar.add(getRefreshButton());
             showToolBar.add(getShowBoxButton());
             showToolBar.add(getShowAreaButton());
             showToolBar.add(getShowArtAreaButton());
@@ -1355,72 +1343,9 @@ public class BlockBrowser implements Browser
             toolPanel.setLayout(new ToolbarLayout());
             toolPanel.add(getShowToolBar());
             toolPanel.add(getLookupToolBar());
-            toolPanel.add(getFileToolBar());
         }
         return toolPanel;
     }
-
-    /**
-	 * This method initializes fileToolBar	
-	 * 	
-	 * @return javax.swing.JToolBar	
-	 */
-	private JToolBar getFileToolBar() {
-		if (fileToolBar == null) {
-			fileToolBar = new JToolBar();
-			fileToolBar.add(getRefreshButton());
-			fileToolBar.add(getSaveButton());
-			fileToolBar.add(getSaveLogicalButton());
-			fileToolBar.add(getSaveRDFButton());
-		}
-		return fileToolBar;
-	}
-
-	/**
-	 * This method initializes saveButton	
-	 * 	
-	 * @return javax.swing.JButton	
-	 */
-	private JButton getSaveButton() {
-		if (saveButton == null) {
-			saveButton = new JButton();
-			saveButton.setText("Save Visual");
-			saveButton.setEnabled(false);
-			/*saveButton.addActionListener(new java.awt.event.ActionListener()
-			{
-				public void actionPerformed(java.awt.event.ActionEvent e)
-				{
-					if (currentUrl != null && dispFinished)
-					{
-	            		JFileChooser chooser = new JFileChooser();
-	            	    FileNameExtensionFilter filter = new FileNameExtensionFilter("XML files", "xml");
-	            	    chooser.setFileFilter(filter);
-	            	    chooser.setMultiSelectionEnabled(false);
-	            	    chooser.setDialogTitle("Save Area Tree");
-	            	    if (saveDir != null)
-	            	    	chooser.setCurrentDirectory(saveDir);
-	            	    int returnVal = chooser.showSaveDialog(mainWindow);
-	            	    if(returnVal == JFileChooser.APPROVE_OPTION)
-	            	    {
-	            	    	saveDir = chooser.getCurrentDirectory();
-	            	    	try {
-		            	    	File file = chooser.getSelectedFile();
-                                PrintWriter xs = new PrintWriter(file, "utf-8");
-		                        XMLOutput xo = new XMLOutput(proc.getAreaTree(), currentUrl);
-		                        xo.dumpTo(xs);
-		                        xs.close();
-	            	    	} catch (FileNotFoundException ex) {
-	            	    		System.err.println("Error: " + ex.getMessage());
-	            	    	} catch (UnsupportedEncodingException ex) {
-                                System.err.println("Error: " + ex.getMessage());
-                            }
-	            	    }
-					}
-				}
-			});*/
-		}
-		return saveButton;
-	}
 
     /**
      * This method initializes jPanel	
@@ -1651,97 +1576,6 @@ public class BlockBrowser implements Browser
           });*/
         }
         return showColumnsButton;
-    }
-
-    /**
-     * This method initializes saveLogicalButton	
-     * 	
-     * @return javax.swing.JButton	
-     */
-    private JButton getSaveLogicalButton()
-    {
-        if (saveLogicalButton == null)
-        {
-            saveLogicalButton = new JButton();
-            saveLogicalButton.setText("Save Logical");
-            saveLogicalButton.setEnabled(false);
-            saveLogicalButton.setToolTipText("Save logical tree to a file");
-            /*saveLogicalButton.addActionListener(new java.awt.event.ActionListener()
-            {
-                public void actionPerformed(java.awt.event.ActionEvent e)
-                {
-                    if (currentUrl != null && dispFinished)
-                    {
-                        JFileChooser chooser = new JFileChooser();
-                        FileNameExtensionFilter filter = new FileNameExtensionFilter("XML files", "xml");
-                        chooser.setFileFilter(filter);
-                        chooser.setMultiSelectionEnabled(false);
-                        chooser.setDialogTitle("Save Logical Tree");
-                        if (saveDir != null)
-                            chooser.setCurrentDirectory(saveDir);
-                        int returnVal = chooser.showSaveDialog(mainWindow);
-                        if(returnVal == JFileChooser.APPROVE_OPTION)
-                        {
-                            saveDir = chooser.getCurrentDirectory();
-                            try {
-                                File file = chooser.getSelectedFile();
-                                PrintWriter xs = new PrintWriter(file, "utf-8");
-                                XMLLogicalOutput xo = new XMLLogicalOutput(proc.getLogicalTree(), currentUrl);
-                                xo.dumpTo(xs);
-                                xs.close();
-                            } catch (FileNotFoundException ex) {
-                                System.err.println("Error: " + ex.getMessage());
-                            } catch (UnsupportedEncodingException ex) {
-                                System.err.println("Error: " + ex.getMessage());
-                            }
-                        }
-                    }
-                }
-            });*/
-        }
-        return saveLogicalButton;
-    }
-
-    private JButton getSaveRDFButton()
-    {
-        if (saveRDFButton == null)
-        {
-            saveRDFButton = new JButton("Save RDF");
-            saveRDFButton.setEnabled(false);
-            /*saveRDFButton.addActionListener(new ActionListener()
-            {
-                public void actionPerformed(ActionEvent arg0)
-                {
-                    if (currentUrl != null && dispFinished)
-                    {
-                        JFileChooser chooser = new JFileChooser();
-                        FileNameExtensionFilter filter = new FileNameExtensionFilter("RDF files", "rdf");
-                        chooser.setFileFilter(filter);
-                        chooser.setMultiSelectionEnabled(false);
-                        chooser.setDialogTitle("Save RDF");
-                        if (saveDir != null)
-                            chooser.setCurrentDirectory(saveDir);
-                        int returnVal = chooser.showSaveDialog(mainWindow);
-                        if(returnVal == JFileChooser.APPROVE_OPTION)
-                        {
-                            saveDir = chooser.getCurrentDirectory();
-                            try {
-                                File file = chooser.getSelectedFile();
-                                PrintWriter xs = new PrintWriter(file, "utf-8");
-                                RDFOutput xo = new RDFOutput(proc.getBoxTree(), proc.getAreaTree(), currentUrl);
-                                xo.dumpTo(xs);
-                                xs.close();
-                            } catch (FileNotFoundException ex) {
-                                System.err.println("Error: " + ex.getMessage());
-                            } catch (UnsupportedEncodingException ex) {
-                                System.err.println("Error: " + ex.getMessage());
-                            }
-                        }
-                    }
-                }
-            });*/
-        }
-        return saveRDFButton;
     }
     
     private JTextField getMarkednessText() 
