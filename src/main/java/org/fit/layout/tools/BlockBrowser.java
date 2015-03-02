@@ -504,6 +504,21 @@ public class BlockBrowser implements Browser
         }*/
     }
     
+    private void showAllBoxes(Box root)
+    {
+        getOutputDisplay().drawExtent(root);
+        for (int i = 0; i < root.getChildCount(); i++)
+            showAllBoxes(root.getChildBox(i));
+    }
+    
+    public void showAreas(Area root, String name)
+    {
+        if (name == null || root.toString().contains(name))
+            getOutputDisplay().drawExtent(root);
+        for (int i = 0; i < root.getChildCount(); i++)
+            showAreas(root.getChildArea(i), name);
+    }
+    
     private void displayAreaInfo(Area area)
     {
         Vector<String> cols = infoTableData("Property", "Value");
@@ -677,19 +692,6 @@ public class BlockBrowser implements Browser
             listener.areaSelected(area);
     }
 
-    @SuppressWarnings("unchecked")
-    public void showAreas(Area node, String name)
-    {
-        /*Enumeration<AreaNode> en = node.postorderEnumeration();
-        while (en.hasMoreElements())
-        {
-            AreaNode child = en.nextElement();
-            if (child.getArea() != null && (name == null || child.getArea().toString().contains(name)))
-                child.getArea().drawExtent((BrowserCanvas) contentCanvas);
-        }
-        contentCanvas.repaint();*/
-    }
-    
     private void updateTagLists(AreaTree tree)
     {
         tagNames = new HashSet<String>();
@@ -1265,15 +1267,9 @@ public class BlockBrowser implements Browser
 				public void actionPerformed(java.awt.event.ActionEvent e)
                 {
                     Box node = (Box) boxTree.getLastSelectedPathComponent();
-                    if (node != null /*&& node.getBox() != null*/)
+                    if (node != null)
                     {
-                        /*Enumeration<?> en = node.postorderEnumeration();
-                        while (en.hasMoreElements())
-                        {
-                            BoxNode child = (BoxNode) en.nextElement();
-                            if (child.getBox() != null)
-                                child.drawExtent((BrowserCanvas) contentCanvas);
-                        }*/
+                        showAllBoxes(node);
                         contentCanvas.repaint();
                     }
                 }
@@ -1302,6 +1298,7 @@ public class BlockBrowser implements Browser
                     if (node != null)
                     {
                         showAreas(node, null);
+                        contentCanvas.repaint();
                     }
                 }
             });
@@ -1536,17 +1533,18 @@ public class BlockBrowser implements Browser
             showArtAreaButton = new JButton();
             showArtAreaButton.setText("Art. areas");
             showArtAreaButton.setToolTipText("Show artificial areas marked with <area>");       
-            /*showArtAreaButton.addActionListener(new java.awt.event.ActionListener()
+            showArtAreaButton.addActionListener(new java.awt.event.ActionListener()
             {
                 public void actionPerformed(java.awt.event.ActionEvent e)
                 {
-                    DefaultMutableTreeNode node = (DefaultMutableTreeNode) areaTree.getLastSelectedPathComponent();
-                    if (node != null && node instanceof AreaNode)
+                    Area node = (Area) areaJTree.getLastSelectedPathComponent();
+                    if (node != null)
                     {
-                        showAreas((AreaNode) node, "<area");
+                        showAreas(node, "<area");
+                        contentCanvas.repaint();
                     }
                 }
-            });*/
+            });
         }
         return showArtAreaButton;
     }
@@ -1563,17 +1561,18 @@ public class BlockBrowser implements Browser
           showColumnsButton = new JButton();
           showColumnsButton.setText("Columns");
           showColumnsButton.setToolTipText("Show columns marked with <column>");
-          /*showColumnsButton.addActionListener(new java.awt.event.ActionListener()
+          showColumnsButton.addActionListener(new java.awt.event.ActionListener()
           {
               public void actionPerformed(java.awt.event.ActionEvent e)
               {
-                  DefaultMutableTreeNode node = (DefaultMutableTreeNode) areaTree.getLastSelectedPathComponent();
-                  if (node != null && node instanceof AreaNode)
+                  Area node = (Area) areaJTree.getLastSelectedPathComponent();
+                  if (node != null)
                   {
-                      showAreas((AreaNode) node, "<column>");
+                      showAreas(node, "<column>");
+                      contentCanvas.repaint();
                   }
               }
-          });*/
+          });
         }
         return showColumnsButton;
     }
