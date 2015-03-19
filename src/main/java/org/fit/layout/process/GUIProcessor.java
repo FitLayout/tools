@@ -97,12 +97,8 @@ public class GUIProcessor extends ScriptableProcessor
     
     public LogicalAreaTree buildLogicalTree(LogicalTreeProvider provider, Map<String, Object> params)
     {
-        setAreaTree(null);
+        setLogicalAreaTree(null);
         initLogicalTree(provider, params);
-        for (AreaTreeOperator op : selectedOperators)
-        {
-            apply(op, null); //no parametres--they should be already set from the GUI
-        }
         treesCompleted();
         return getLogicalAreaTree();
     }
