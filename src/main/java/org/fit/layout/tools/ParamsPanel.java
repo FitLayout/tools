@@ -1,6 +1,7 @@
 package org.fit.layout.tools;
 
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.util.HashMap;
 import java.util.Map;
@@ -43,6 +44,7 @@ public class ParamsPanel extends JPanel implements ChangeListener, DocumentListe
         after = new Vector<Component>();
         fields = new HashMap<String, Component>();
         setLayout(new FlowLayout(FlowLayout.LEFT));
+        clear();
     }
 
     /**
@@ -171,6 +173,8 @@ public class ParamsPanel extends JPanel implements ChangeListener, DocumentListe
     protected void clear()
     {
         removeAll();
+        setMinimumSize(new Dimension(0, 0));
+        setPreferredSize(new Dimension(0, 0));
     }
     
     /**
@@ -178,6 +182,12 @@ public class ParamsPanel extends JPanel implements ChangeListener, DocumentListe
      */
     protected void addFields()
     {
+        if (!before.isEmpty() || !after.isEmpty() || op.getParamNames().length > 0)
+        {
+            setMinimumSize(null);
+            setPreferredSize(null);
+        }
+        
         for (Component comp : before)
             add(comp);
         addParamFields();

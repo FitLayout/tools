@@ -27,6 +27,7 @@ import org.fit.layout.impl.DefaultTag;
 import org.fit.layout.model.Area;
 import org.fit.layout.model.AreaTree;
 import org.fit.layout.model.Box;
+import org.fit.layout.model.LogicalAreaTree;
 import org.fit.layout.model.Page;
 import org.fit.layout.model.Tag;
 import org.fit.layout.process.GUIProcessor;
@@ -92,16 +93,6 @@ public class BlockBrowser implements Browser
     private BrowserConfig config;
     private GUIProcessor proc;
     private Page page;
-    /*private BoxTree btree;
-    private LogicalTree ltree;
-    private FeatureAnalyzer features;
-    private ArticleExtractor ex;
-    private TreeTagger tagger;
-    private SingleClassStyleAnalyzer ssa;
-    private AreaTreeStyleAnalyzer msa;
-    private ExtractedStyleAnalyzer esa;
-    private TagPredictor tpred;
-    private Vector<EvalData> evalData;*/
     private URL currentUrl = null;
     private boolean dispFinished = false;
     private boolean areasync = true;
@@ -138,7 +129,7 @@ public class BlockBrowser implements Browser
     private JButton showAreaButton = null;
     private JToolBar lookupToolBar = null;
     private JPanel toolPanel = null;
-    private JPanel jPanel = null;
+    private JPanel logicalTreePanel = null;
     private JScrollPane logicalTreeScroll = null;
     private JTree logicalTree = null;
     private JButton refreshButton = null;
@@ -220,8 +211,10 @@ public class BlockBrowser implements Browser
     public void refresh()
     {
         boxTree.setModel(new BoxTreeModel(proc.getPage().getRoot()));
-        areaJTree.setModel(new AreaTreeModel(proc.getAreaTree().getRoot()));
-        //logicalTree.setModel(new DefaultTreeModel(proc.getLogicalTree().getRoot()));
+        if (proc.getAreaTree() != null)
+            areaJTree.setModel(new AreaTreeModel(proc.getAreaTree().getRoot()));
+        if (proc.getLogicalAreaTree() != null)
+            logicalTree.setModel(new LogicalTreeModel(proc.getLogicalAreaTree().getRoot()));
     }
     
     //=============================================================================================================
@@ -359,6 +352,12 @@ public class BlockBrowser implements Browser
         updateTagLists(areaTree);
     }
 
+    @Override
+    public void setLogicalTree(LogicalAreaTree logicalTree)
+    {
+        proc.setLogicalAreaTree(logicalTree);
+    }
+
     public GUIProcessor getProcessor()
     {
         return proc;
@@ -395,6 +394,10 @@ public class BlockBrowser implements Browser
                 {
                     segmentPage();
                 }
+                if (logicalAutorunCheckbox.isSelected())
+                {
+                    buildLogicalTree();
+                }
             }
             
             
@@ -409,18 +412,24 @@ public class BlockBrowser implements Browser
      */
     private void segmentPage()
     {
-        AreaTreeProvider provider = segmentatorCombo.getItemAt(segmentatorCombo.getSelectedIndex());
-        proc.segmentPage(provider, null); //the parametres should have been set through the GUI
-        setAreaTree(proc.getAreaTree());
+        if (segmentatorCombo.getSelectedIndex() != -1)
+        {
+            AreaTreeProvider provider = segmentatorCombo.getItemAt(segmentatorCombo.getSelectedIndex());
+            proc.segmentPage(provider, null); //the parametres should have been set through the GUI
+            setAreaTree(proc.getAreaTree());
+        }
     }
     
+    /**
+     * Builds the logical tree the chosen provider and parametres.
+     */
     private void buildLogicalTree()
     {
         if (logicalCombo.getSelectedIndex() != -1)
         {
             LogicalTreeProvider provider = logicalCombo.getItemAt(logicalCombo.getSelectedIndex());
             proc.buildLogicalTree(provider, null); //the parametres should have been set through the GUI
-            //setLogicalTree(proc.getLogicalAreaTree()); TODO
+            setLogicalTree(proc.getLogicalAreaTree());
         }
     }
     
@@ -935,7 +944,7 @@ public class BlockBrowser implements Browser
         {
             sidebarPane = new JTabbedPane();
             sidebarPane.addTab("Area tree", null, getJPanel(), null);
-            sidebarPane.addTab("Logical tree", null, getJPanel4(), null);
+            sidebarPane.addTab("Logical tree", null, getLogicalTreePanel(), null);
             sidebarPane.addTab("Box tree", null, getBoxTreePanel(), null);
             sidebarPane.addTab("Paths", null, getPathsPanel(), null);
         }
@@ -1171,6 +1180,7 @@ public class BlockBrowser implements Browser
                     }
 				}
 			});
+			areaJTree.setModel(new AreaTreeModel(null));
 		}
 		return areaJTree;
 	}
@@ -1367,9 +1377,9 @@ public class BlockBrowser implements Browser
      * 	
      * @return javax.swing.JPanel	
      */
-    private JPanel getJPanel4()
+    private JPanel getLogicalTreePanel()
     {
-        if (jPanel == null)
+        if (logicalTreePanel == null)
         {
             GridBagConstraints gridBagConstraints8 = new GridBagConstraints();
             gridBagConstraints8.fill = GridBagConstraints.BOTH;
@@ -1377,11 +1387,11 @@ public class BlockBrowser implements Browser
             gridBagConstraints8.weightx = 1.0;
             gridBagConstraints8.weighty = 1.0;
             gridBagConstraints8.gridx = 0;
-            jPanel = new JPanel();
-            jPanel.setLayout(new GridBagLayout());
-            jPanel.add(getJScrollPane3(), gridBagConstraints8);
+            logicalTreePanel = new JPanel();
+            logicalTreePanel.setLayout(new GridBagLayout());
+            logicalTreePanel.add(getLogicalTreeScroll(), gridBagConstraints8);
         }
-        return jPanel;
+        return logicalTreePanel;
     }
 
     /**
@@ -1389,7 +1399,7 @@ public class BlockBrowser implements Browser
      * 	
      * @return javax.swing.JScrollPane	
      */
-    private JScrollPane getJScrollPane3()
+    private JScrollPane getLogicalTreeScroll()
     {
         if (logicalTreeScroll == null)
         {
@@ -1426,6 +1436,7 @@ public class BlockBrowser implements Browser
                         	}
                         }
                     });*/
+            logicalTree.setModel(new LogicalTreeModel(null));
         }
         return logicalTree;
     }
@@ -1726,14 +1737,14 @@ public class BlockBrowser implements Browser
             gbc_rendererChoicePanel.weightx = 1.0;
             gbc_rendererChoicePanel.anchor = GridBagConstraints.EAST;
             gbc_rendererChoicePanel.fill = GridBagConstraints.BOTH;
-            gbc_rendererChoicePanel.insets = new Insets(0, 0, 5, 0);
+            gbc_rendererChoicePanel.insets = new Insets(0, 0, 1, 0);
             gbc_rendererChoicePanel.gridx = 0;
             gbc_rendererChoicePanel.gridy = 0;
             sourcesTab.add(getRendererChoicePanel(), gbc_rendererChoicePanel);
             GridBagConstraints gbc_rendererParamsPanel = new GridBagConstraints();
             gbc_rendererParamsPanel.weightx = 1.0;
             gbc_rendererParamsPanel.fill = GridBagConstraints.BOTH;
-            gbc_rendererParamsPanel.insets = new Insets(0, 0, 5, 0);
+            gbc_rendererParamsPanel.insets = new Insets(0, 0, 2, 0);
             gbc_rendererParamsPanel.gridx = 0;
             gbc_rendererParamsPanel.gridy = 1;
             sourcesTab.add(getRendererParamsPanel(), gbc_rendererParamsPanel);
@@ -1741,19 +1752,19 @@ public class BlockBrowser implements Browser
             gbc_segmChoicePanel.weightx = 1.0;
             gbc_segmChoicePanel.anchor = GridBagConstraints.EAST;
             gbc_segmChoicePanel.fill = GridBagConstraints.BOTH;
-            gbc_segmChoicePanel.insets = new Insets(0, 0, 5, 0);
+            gbc_segmChoicePanel.insets = new Insets(0, 0, 1, 0);
             gbc_segmChoicePanel.gridx = 0;
             gbc_segmChoicePanel.gridy = 2;
             sourcesTab.add(getSegmChoicePanel(), gbc_segmChoicePanel);
             GridBagConstraints gbc_segmParamsPanel = new GridBagConstraints();
-            gbc_segmParamsPanel.insets = new Insets(0, 0, 5, 0);
+            gbc_segmParamsPanel.insets = new Insets(0, 0, 2, 0);
             gbc_segmParamsPanel.weightx = 1.0;
             gbc_segmParamsPanel.fill = GridBagConstraints.BOTH;
             gbc_segmParamsPanel.gridx = 0;
             gbc_segmParamsPanel.gridy = 3;
             sourcesTab.add(getSegmParamsPanel(), gbc_segmParamsPanel);
             GridBagConstraints gbc_logicalChoicePanel = new GridBagConstraints();
-            gbc_logicalChoicePanel.insets = new Insets(0, 0, 5, 0);
+            gbc_logicalChoicePanel.insets = new Insets(0, 0, 1, 0);
             gbc_logicalChoicePanel.fill = GridBagConstraints.BOTH;
             gbc_logicalChoicePanel.gridx = 0;
             gbc_logicalChoicePanel.gridy = 4;
