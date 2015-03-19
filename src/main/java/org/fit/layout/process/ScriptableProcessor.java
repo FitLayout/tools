@@ -24,6 +24,7 @@ import org.fit.layout.api.AreaTreeOperator;
 import org.fit.layout.api.AreaTreeProvider;
 import org.fit.layout.api.BoxTreeProvider;
 import org.fit.layout.model.AreaTree;
+import org.fit.layout.model.LogicalAreaTree;
 import org.fit.layout.model.Page;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,6 +67,11 @@ public class ScriptableProcessor extends BaseProcessor
     public List<String> getAreaProviderIds()
     {
         return new ArrayList<String>(getAreaProviders().keySet());
+    }
+    
+    public List<String> getLogicalProviderIds()
+    {
+        return new ArrayList<String>(getLogicalProviders().keySet());
     }
     
     public Page renderPage(String providerName, Map<String, Object> params)
@@ -125,6 +131,20 @@ public class ScriptableProcessor extends BaseProcessor
         }
         treesCompleted();
         return getAreaTree();
+    }
+    
+    @Override
+    public LogicalAreaTree buildLogicalTree()
+    {
+        try
+        {
+            setLogicalAreaTree(null);
+            execInternal("default_logical.js");
+        } catch (ScriptException e) {
+            log.error("Couldn't execute default segmentation script: " + e.getMessage());
+        }
+        treesCompleted();
+        return getLogicalAreaTree();
     }
     
     //======================================================================================================

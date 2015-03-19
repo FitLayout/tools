@@ -10,8 +10,10 @@ import java.util.Map;
 import org.fit.layout.api.AreaTreeOperator;
 import org.fit.layout.api.AreaTreeProvider;
 import org.fit.layout.api.BoxTreeProvider;
+import org.fit.layout.api.LogicalTreeProvider;
 import org.fit.layout.api.ServiceManager;
 import org.fit.layout.model.AreaTree;
+import org.fit.layout.model.LogicalAreaTree;
 import org.fit.layout.model.Page;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,16 +29,19 @@ public abstract class BaseProcessor
     
     private Map<String, BoxTreeProvider> boxProviders;
     private Map<String, AreaTreeProvider> areaProviders;
+    private Map<String, LogicalTreeProvider> logicalProviders;
     private Map<String, AreaTreeOperator> operators;
 
     private Page page;
     private AreaTree atree;
+    private LogicalAreaTree ltree;
     
 
     public BaseProcessor()
     {
         boxProviders = ServiceManager.findBoxTreeProviders();
         areaProviders = ServiceManager.findAreaTreeProviders();
+        logicalProviders = ServiceManager.findLogicalTreeProviders();
         operators = ServiceManager.findAreaTreeOperators();
     }
     
@@ -48,6 +53,11 @@ public abstract class BaseProcessor
     public Map<String, AreaTreeProvider> getAreaProviders()
     {
         return areaProviders;
+    }
+    
+    public Map<String, LogicalTreeProvider> getLogicalProviders()
+    {
+        return logicalProviders;
     }
     
     public Map<String, AreaTreeOperator> getOperators()
@@ -75,11 +85,28 @@ public abstract class BaseProcessor
         this.atree = atree;
     }
 
+    public LogicalAreaTree getLogicalAreaTree()
+    {
+        return ltree;
+    }
+
+    public void setLogicalAreaTree(LogicalAreaTree ltree)
+    {
+        this.ltree = ltree;
+    }
+
     /**
      * Runs the default segmentation process with the default parameter values.
      * @return The resulting area tree or {@code null} for an unsuccessfull segmentation
      */
     public abstract AreaTree segmentPage();
+    
+    /**
+     * Runs the default logical tree builder with the default parameter values.
+     * @return The resulting logical area tree or {@code null} for an unsuccessfull build
+     */
+    public abstract LogicalAreaTree buildLogicalTree();
+    
     
     //======================================================================================================
     
@@ -96,6 +123,13 @@ public abstract class BaseProcessor
         ServiceManager.setServiceParams(provider, params);
         atree = provider.createAreaTree(page);
         return atree;
+    }
+    
+    public LogicalAreaTree initLogicalTree(LogicalTreeProvider provider, Map<String, Object> params)
+    {
+        ServiceManager.setServiceParams(provider, params);
+        ltree = provider.createLogicalTree(atree);
+        return ltree;
     }
     
     public void apply(AreaTreeOperator op, Map<String, Object> params)

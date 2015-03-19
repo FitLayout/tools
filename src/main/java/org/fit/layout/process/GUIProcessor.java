@@ -12,8 +12,10 @@ import javax.script.ScriptException;
 
 import org.fit.layout.api.AreaTreeOperator;
 import org.fit.layout.api.AreaTreeProvider;
+import org.fit.layout.api.LogicalTreeProvider;
 import org.fit.layout.api.ServiceManager;
 import org.fit.layout.model.AreaTree;
+import org.fit.layout.model.LogicalAreaTree;
 import org.fit.layout.model.Page;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,6 +81,31 @@ public class GUIProcessor extends ScriptableProcessor
         return getAreaTree();
     }
     
+    @Override
+    public LogicalAreaTree buildLogicalTree()
+    {
+        if (!getAreaProviders().isEmpty())
+        {
+            //just use the first available provider as the default
+            LogicalTreeProvider provider = getLogicalProviders().values().iterator().next();
+            log.warn("Using default logical area tree provider " + provider.getId());
+            return buildLogicalTree(provider, null);
+        }
+        else
+            return null;
+    }
+    
+    public LogicalAreaTree buildLogicalTree(LogicalTreeProvider provider, Map<String, Object> params)
+    {
+        setAreaTree(null);
+        initLogicalTree(provider, params);
+        for (AreaTreeOperator op : selectedOperators)
+        {
+            apply(op, null); //no parametres--they should be already set from the GUI
+        }
+        treesCompleted();
+        return getLogicalAreaTree();
+    }
     //========================================================================================
     
     @Override

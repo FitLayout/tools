@@ -18,6 +18,7 @@ import org.fit.cssbox.layout.BrowserCanvas;
 import org.fit.cssbox.layout.BrowserConfig;
 import org.fit.layout.api.AreaTreeProvider;
 import org.fit.layout.api.BoxTreeProvider;
+import org.fit.layout.api.LogicalTreeProvider;
 import org.fit.layout.api.OutputDisplay;
 import org.fit.layout.gui.AreaSelectionListener;
 import org.fit.layout.gui.Browser;
@@ -170,6 +171,12 @@ public class BlockBrowser implements Browser
     private JButton segmRunButton;
     private JButton btnOperators;
     private JFrame operatorWindow;
+    private JPanel logicalChoicePanel;
+    private JPanel logicalParamsPanel;
+    private JLabel lblLogicalBuilder;
+    private JComboBox<LogicalTreeProvider> logicalCombo;
+    private JButton logicalRunButton;
+    private JCheckBox logicalAutorunCheckbox;
 
 
     public BlockBrowser()
@@ -406,6 +413,17 @@ public class BlockBrowser implements Browser
         proc.segmentPage(provider, null); //the parametres should have been set through the GUI
         setAreaTree(proc.getAreaTree());
     }
+    
+    private void buildLogicalTree()
+    {
+        if (logicalCombo.getSelectedIndex() != -1)
+        {
+            LogicalTreeProvider provider = logicalCombo.getItemAt(logicalCombo.getSelectedIndex());
+            proc.buildLogicalTree(provider, null); //the parametres should have been set through the GUI
+            //setLogicalTree(proc.getLogicalAreaTree()); TODO
+        }
+    }
+    
     
     /** Creates the appropriate canvas based on the file type */
     private JPanel createContentCanvas()
@@ -1701,8 +1719,8 @@ public class BlockBrowser implements Browser
         {
             sourcesTab = new JPanel();
             GridBagLayout gbl_sourcesTab = new GridBagLayout();
-            gbl_sourcesTab.columnWeights = new double[] { 0.0 };
-            gbl_sourcesTab.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0 };
+            gbl_sourcesTab.columnWeights = new double[] { 1.0 };
+            gbl_sourcesTab.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 1.0, 1.0 };
             sourcesTab.setLayout(gbl_sourcesTab);
             GridBagConstraints gbc_rendererChoicePanel = new GridBagConstraints();
             gbc_rendererChoicePanel.weightx = 1.0;
@@ -1728,19 +1746,34 @@ public class BlockBrowser implements Browser
             gbc_segmChoicePanel.gridy = 2;
             sourcesTab.add(getSegmChoicePanel(), gbc_segmChoicePanel);
             GridBagConstraints gbc_segmParamsPanel = new GridBagConstraints();
+            gbc_segmParamsPanel.insets = new Insets(0, 0, 5, 0);
             gbc_segmParamsPanel.weightx = 1.0;
             gbc_segmParamsPanel.fill = GridBagConstraints.BOTH;
             gbc_segmParamsPanel.gridx = 0;
             gbc_segmParamsPanel.gridy = 3;
             sourcesTab.add(getSegmParamsPanel(), gbc_segmParamsPanel);
+            GridBagConstraints gbc_logicalChoicePanel = new GridBagConstraints();
+            gbc_logicalChoicePanel.insets = new Insets(0, 0, 5, 0);
+            gbc_logicalChoicePanel.fill = GridBagConstraints.BOTH;
+            gbc_logicalChoicePanel.gridx = 0;
+            gbc_logicalChoicePanel.gridy = 4;
+            sourcesTab.add(getLogicalChoicePanel(), gbc_logicalChoicePanel);
+            GridBagConstraints gbc_logicalParamsPanel = new GridBagConstraints();
+            gbc_logicalParamsPanel.fill = GridBagConstraints.BOTH;
+            gbc_logicalParamsPanel.gridx = 0;
+            gbc_logicalParamsPanel.gridy = 5;
+            sourcesTab.add(getLogicalParamsPanel(), gbc_logicalParamsPanel);
 
-            BoxTreeProvider p = (BoxTreeProvider) rendererCombo
-                    .getSelectedItem();
-            if (p != null) ((ParamsPanel) rendererParamsPanel).setOperation(p);
-            AreaTreeProvider ap = (AreaTreeProvider) segmentatorCombo
-                    .getSelectedItem();
-            if (ap != null) ((ParamsPanel) segmParamsPanel).setOperation(ap);
-
+            BoxTreeProvider p = (BoxTreeProvider) rendererCombo.getSelectedItem();
+            if (p != null)
+                ((ParamsPanel) rendererParamsPanel).setOperation(p);
+            AreaTreeProvider ap = (AreaTreeProvider) segmentatorCombo.getSelectedItem();
+            if (ap != null)
+                ((ParamsPanel) segmParamsPanel).setOperation(ap);
+            LogicalTreeProvider lp = (LogicalTreeProvider) logicalCombo.getSelectedItem();
+            if (lp != null)
+                ((ParamsPanel) logicalParamsPanel).setOperation(lp);
+            
         }
         return sourcesTab;
     }
@@ -1846,8 +1879,7 @@ public class BlockBrowser implements Browser
                         ((ParamsPanel) segmParamsPanel).setOperation(ap);
                 }
             });
-            Vector<AreaTreeProvider> providers = new Vector<AreaTreeProvider>(
-                    proc.getAreaProviders().values());
+            Vector<AreaTreeProvider> providers = new Vector<AreaTreeProvider>(proc.getAreaProviders().values());
             DefaultComboBoxModel<AreaTreeProvider> model = new DefaultComboBoxModel<AreaTreeProvider>(providers);
             segmentatorCombo.setModel(model);
         }
@@ -1897,6 +1929,83 @@ public class BlockBrowser implements Browser
         return btnOperators;
     }
     
+    private JPanel getLogicalChoicePanel()
+    {
+        if (logicalChoicePanel == null)
+        {
+            logicalChoicePanel = new JPanel();
+            FlowLayout flowLayout = (FlowLayout) logicalChoicePanel.getLayout();
+            flowLayout.setAlignment(FlowLayout.LEFT);
+            logicalChoicePanel.add(getLblLogicalBuilder());
+            logicalChoicePanel.add(getLogicalCombo());
+            logicalChoicePanel.add(getLogicalRunButton());
+            logicalChoicePanel.add(getLogicalAutorunCheckbox());
+        }
+        return logicalChoicePanel;
+    }
+
+    private JPanel getLogicalParamsPanel()
+    {
+        if (logicalParamsPanel == null)
+        {
+            logicalParamsPanel = new ParamsPanel();
+        }
+        return logicalParamsPanel;
+    }
+
+    private JLabel getLblLogicalBuilder()
+    {
+        if (lblLogicalBuilder == null)
+        {
+            lblLogicalBuilder = new JLabel("Logical builder");
+        }
+        return lblLogicalBuilder;
+    }
+
+    private JComboBox<LogicalTreeProvider> getLogicalCombo()
+    {
+        if (logicalCombo == null)
+        {
+            logicalCombo = new JComboBox<LogicalTreeProvider>();
+            logicalCombo.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) 
+                {
+                    LogicalTreeProvider lp = (LogicalTreeProvider) logicalCombo.getSelectedItem();
+                    if (lp != null)
+                        ((ParamsPanel) logicalParamsPanel).setOperation(lp);
+                }
+            });
+            Vector<LogicalTreeProvider> providers = new Vector<LogicalTreeProvider>(proc.getLogicalProviders().values());
+            DefaultComboBoxModel<LogicalTreeProvider> model = new DefaultComboBoxModel<LogicalTreeProvider>(providers);
+            logicalCombo.setModel(model);
+            
+        }
+        return logicalCombo;
+    }
+
+    private JButton getLogicalRunButton()
+    {
+        if (logicalRunButton == null)
+        {
+            logicalRunButton = new JButton("Run");
+            logicalRunButton.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) 
+                {
+                    buildLogicalTree();
+                }
+            });
+        }
+        return logicalRunButton;
+    }
+
+    private JCheckBox getLogicalAutorunCheckbox()
+    {
+        if (logicalAutorunCheckbox == null)
+        {
+            logicalAutorunCheckbox = new JCheckBox("Run automatically");
+        }
+        return logicalAutorunCheckbox;
+    }
     
     public static void main(String[] args)
     {
