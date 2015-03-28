@@ -346,6 +346,12 @@ public class BlockBrowser implements Browser
     }
 
     @Override
+    public LogicalAreaTree getLogicalTree()
+    {
+        return proc.getLogicalAreaTree();
+    }
+
+    @Override
     public void setAreaTree(AreaTree areaTree)
     {
         proc.setAreaTree(areaTree);
@@ -1404,7 +1410,7 @@ public class BlockBrowser implements Browser
         if (logicalTreeScroll == null)
         {
             logicalTreeScroll = new JScrollPane();
-            logicalTreeScroll.setViewportView(getLogicalTree());
+            logicalTreeScroll.setViewportView(getLogicalJTree());
         }
         return logicalTreeScroll;
     }
@@ -1414,7 +1420,7 @@ public class BlockBrowser implements Browser
      * 	
      * @return javax.swing.JTree	
      */
-    private JTree getLogicalTree()
+    private JTree getLogicalJTree()
     {
         if (logicalTree == null)
         {
