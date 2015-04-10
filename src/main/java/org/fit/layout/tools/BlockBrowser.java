@@ -1919,7 +1919,7 @@ public class BlockBrowser implements Browser
         return segmRunButton;
     }
     
-    private JCheckBox getSegmAutorunCheckbox()
+    protected JCheckBox getSegmAutorunCheckbox()
     {
         if (segmAutorunCheckbox == null)
         {
@@ -2015,7 +2015,7 @@ public class BlockBrowser implements Browser
         return logicalRunButton;
     }
 
-    private JCheckBox getLogicalAutorunCheckbox()
+    protected JCheckBox getLogicalAutorunCheckbox()
     {
         if (logicalAutorunCheckbox == null)
         {
