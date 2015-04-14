@@ -31,6 +31,8 @@ import org.fit.layout.model.LogicalAreaTree;
 import org.fit.layout.model.Page;
 import org.fit.layout.model.Tag;
 import org.fit.layout.process.GUIProcessor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.JSplitPane;
 import javax.swing.JToolBar;
@@ -86,6 +88,8 @@ import javax.swing.JCheckBox;
  */
 public class BlockBrowser implements Browser
 {
+    private static Logger log = LoggerFactory.getLogger(BlockBrowser.class);
+    
     public static BlockBrowser browser;
 
     public static final float TAG_PROBABILITY_THRESHOLD = 0.3f; 
@@ -757,7 +761,7 @@ public class BlockBrowser implements Browser
         while (it.hasNext())
         {
             BrowserPlugin plugin = it.next();
-            System.out.println("Init plugin: " + plugin.getClass().getName());
+            log.info("Init plugin: {}", plugin.getClass().getName());
             plugin.init(this);
         }
     }
