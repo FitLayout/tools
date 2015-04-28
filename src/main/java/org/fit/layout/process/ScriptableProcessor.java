@@ -23,6 +23,8 @@ import javax.script.ScriptException;
 import org.fit.layout.api.AreaTreeOperator;
 import org.fit.layout.api.AreaTreeProvider;
 import org.fit.layout.api.BoxTreeProvider;
+import org.fit.layout.api.ScriptObject;
+import org.fit.layout.api.ServiceManager;
 import org.fit.layout.model.AreaTree;
 import org.fit.layout.model.LogicalAreaTree;
 import org.fit.layout.model.Page;
@@ -157,6 +159,12 @@ public class ScriptableProcessor extends BaseProcessor
             ScriptEngineManager factory = new ScriptEngineManager();
             engine = factory.getEngineByName("JavaScript");
             engine.put("proc", this);
+            
+            Map<String, ScriptObject> scriptObjects = ServiceManager.findScriptObjects();
+            for (Map.Entry<String, ScriptObject> obj : scriptObjects.entrySet())
+            {
+                engine.put(obj.getKey(), obj.getValue());
+            }
         }
         return engine;
     }
