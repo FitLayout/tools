@@ -23,6 +23,7 @@ import javax.script.ScriptException;
 import org.fit.layout.api.AreaTreeOperator;
 import org.fit.layout.api.AreaTreeProvider;
 import org.fit.layout.api.BoxTreeProvider;
+import org.fit.layout.api.LogicalTreeProvider;
 import org.fit.layout.api.ScriptObject;
 import org.fit.layout.api.ServiceManager;
 import org.fit.layout.model.AreaTree;
@@ -121,6 +122,22 @@ public class ScriptableProcessor extends BaseProcessor
         
     }
     
+    public LogicalAreaTree initLogicalTree(String providerName, Map<String, Object> params)
+    {
+        LogicalTreeProvider provider = getLogicalProviders().get(providerName);
+        if (provider != null)
+        {
+            return initLogicalTree(provider, params);
+        }
+        else
+        {
+            log.error("Unknown logical tree provider: " + providerName);
+            return null;
+        }
+    }
+
+    //========================================================================
+    
     @Override
     public AreaTree segmentPage()
     {
@@ -179,6 +196,9 @@ public class ScriptableProcessor extends BaseProcessor
         ctx.setReader(rin);
         ctx.setWriter(wout);
         ctx.setErrorWriter(werr);
+        
+        for (ScriptObject obj : ServiceManager.findScriptObjects().values())
+            obj.setIO(in, out, err);
     }
     
     public void flushIO()
