@@ -47,6 +47,16 @@
 		<appender-ref ref="jstyleparser" />
 	</logger>
 
+	<logger name="org.fit.segm" additivity="false">
+		<level value="warn" />
+		<appender-ref ref="cssbox" />
+	</logger>
+	
+	<logger name="org.fit.layout.eswc" additivity="false">
+		<level value="warn" />
+		<appender-ref ref="cssbox" />
+	</logger>
+
 
 	<root>
 		<appender-ref ref="cssbox" />
