@@ -53,7 +53,7 @@
 	</logger>
 	
 	<logger name="org.fit.layout.eswc" additivity="false">
-		<level value="warn" />
+		<level value="debug" />
 		<appender-ref ref="cssbox" />
 	</logger>
 
