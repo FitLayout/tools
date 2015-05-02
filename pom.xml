@@ -49,6 +49,7 @@
 									<mainClass>org.fit.layout.tools.BlockBrowser</mainClass>
 								</transformer>
 							</transformers>
+							<finalName>LayoutTools</finalName>
 						</configuration>
 					</execution>
 				</executions>
