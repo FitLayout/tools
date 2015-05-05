@@ -1,7 +1,8 @@
 println('Init started');
 
 println("Providers:")
-println(proc.providerIds);
+println(proc.boxProviderIds);
+println(proc.areaProviderIds);
 println("Operators:")
 println(proc.operatorIds);
 
