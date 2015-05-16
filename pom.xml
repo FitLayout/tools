@@ -1,15 +1,50 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	
+
 	<!--
 		Make runnable JAR: mvn package
 	 -->
 	
-	<groupId>cz.vutbr.fit.layout</groupId>
+	<parent>
+		<groupId>cz.vutbr.fit.layout</groupId>
+		<artifactId>parent</artifactId>
+		<version>0.0.2-SNAPSHOT</version>
+		<relativePath>../parent/pom.xml</relativePath>
+	</parent>
+
+	<modelVersion>4.0.0</modelVersion>
+	
 	<artifactId>layout-tools</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	
 	<name>LayoutTools</name>
+	<description>
+		An extensible web page segmentation and analysis framework - Runnable tools
+	</description>
+	<url>http://www.fit.vutbr.cz/~burgetr/FITLayout/</url>
+
+	<licenses>
+		<license>
+			<name>GNU Lesser General Public License 3.0</name>
+			<url>http://www.gnu.org/licenses/lgpl-3.0.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<developers>
+		<developer>
+			<name>Radek Burget</name>
+			<roles>
+				<role>Main developer &amp; project leader</role>
+			</roles>
+		</developer>
+	</developers>
+
+	<scm>
+		<url>https://github.com/FitLayout/tools</url>
+		<connection>scm:git:git@github.com:FitLayout/tools.git</connection>
+		<developerConnection>scm:git:git@github.com:FitLayout/tools.git</developerConnection>
+		<tag>HEAD</tag>
+    </scm>
 	
 	<build>
 		<sourceDirectory>src/main/java</sourceDirectory>
@@ -22,14 +57,6 @@
 			</resource>
 		</resources>
 		<plugins>
-			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.1</version>
-				<configuration>
-					<source>1.7</source>
-					<target>1.7</target>
-				</configuration>
-			</plugin>
 			<plugin>
 				<!-- merges the service descriptions in META-INF/services -->
 				<groupId>org.apache.maven.plugins</groupId>
@@ -54,7 +81,6 @@
 					</execution>
 				</executions>
 			</plugin>
-			
     	</plugins>
 		
 	</build>
@@ -73,22 +99,22 @@
 		<dependency>
 			<groupId>cz.vutbr.fit.layout</groupId>
 			<artifactId>layout-cssbox</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>cz.vutbr.fit.layout</groupId>
 			<artifactId>layout-segmentation</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>cz.vutbr.fit.layout</groupId>
 			<artifactId>layout-classify</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>cz.vutbr.fit.layout</groupId>
 			<artifactId>layout-storage</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>${project.version}</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>slf4j-log4j12</artifactId>
@@ -99,12 +125,10 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>1.7.7</version>
 		</dependency>
 		<dependency>
 		    <groupId>ch.qos.logback</groupId>
 		    <artifactId>logback-classic</artifactId>
-		    <version>1.1.2</version>
 		</dependency>
 		<dependency>
 			<groupId>jline</groupId>
