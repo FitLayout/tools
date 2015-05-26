@@ -14,7 +14,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	
 	<artifactId>layout-tools</artifactId>
-	<version>0.0.2</version>
+	<version>0.0.3-SNAPSHOT</version>
 	
 	<name>LayoutTools</name>
 	<description>
@@ -43,7 +43,7 @@
 		<url>https://github.com/FitLayout/tools</url>
 		<connection>scm:git:git@github.com:FitLayout/tools.git</connection>
 		<developerConnection>scm:git:git@github.com:FitLayout/tools.git</developerConnection>
-		<tag>layout-tools-0.0.2</tag>
+		<tag>HEAD</tag>
     </scm>
 	
 	<build>
