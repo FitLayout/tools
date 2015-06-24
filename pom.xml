@@ -7,14 +7,13 @@
 	<parent>
 		<groupId>cz.vutbr.fit.layout</groupId>
 		<artifactId>parent</artifactId>
-		<version>0.0.2</version>
+		<version>0.0.3-SNAPSHOT</version>
 		<relativePath>../parent/pom.xml</relativePath>
 	</parent>
 
 	<modelVersion>4.0.0</modelVersion>
 	
 	<artifactId>layout-tools</artifactId>
-	<version>0.0.3-SNAPSHOT</version>
 	
 	<name>LayoutTools</name>
 	<description>
@@ -98,22 +97,18 @@
 		<dependency>
 			<groupId>cz.vutbr.fit.layout</groupId>
 			<artifactId>layout-cssbox</artifactId>
-			<version>0.0.2</version>
 		</dependency>
 		<dependency>
 			<groupId>cz.vutbr.fit.layout</groupId>
 			<artifactId>layout-segmentation</artifactId>
-			<version>0.0.2</version>
 		</dependency>
 		<dependency>
 			<groupId>cz.vutbr.fit.layout</groupId>
 			<artifactId>layout-classify</artifactId>
-			<version>0.0.2</version>
 		</dependency>
 		<dependency>
 			<groupId>cz.vutbr.fit.layout</groupId>
 			<artifactId>layout-storage</artifactId>
-			<version>0.0.2</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>slf4j-log4j12</artifactId>
