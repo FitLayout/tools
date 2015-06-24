@@ -224,7 +224,12 @@ public class ParamsPanel extends JPanel implements ChangeListener, DocumentListe
                     comp = cb;
                     break;
                 case FLOAT:
-                    SpinnerNumberModel model = new SpinnerNumberModel(0.0, -1000.0, 1000.0, 0.1);
+                    Object[] range = op.getParamRange(name);
+                    SpinnerNumberModel model;
+                    if (range == null)
+                        model = new SpinnerNumberModel(0.0, -1000.0, 1000.0, 0.1);
+                    else
+                        model = new SpinnerNumberModel(0.0, (float) range[0], (float) range[1], 0.1);
                     JSpinner js = new JSpinner(model);
                     if (value != null && (value instanceof Integer || value instanceof Float || value instanceof Double))
                         js.setValue(value);
@@ -232,7 +237,12 @@ public class ParamsPanel extends JPanel implements ChangeListener, DocumentListe
                     comp = js;
                     break;
                 case INTEGER:
-                    SpinnerNumberModel imodel = new SpinnerNumberModel(0, -1000, 1000, 1);
+                    Object[] irange = op.getParamRange(name);
+                    SpinnerNumberModel imodel;
+                    if (irange == null)
+                        imodel = new SpinnerNumberModel(0, -1000, 1000, 1);
+                    else
+                        imodel = new SpinnerNumberModel(0, (int) irange[0], (int) irange[1], 1);
                     JSpinner jsi = new JSpinner(imodel);
                     if (value != null && value instanceof Integer)
                         jsi.setValue(value);
@@ -240,7 +250,9 @@ public class ParamsPanel extends JPanel implements ChangeListener, DocumentListe
                     comp = jsi;
                     break;
                 case STRING:
-                    JTextField tf = new JTextField(64);
+                    Object[] srange = op.getParamRange(name);
+                    int maxlen = (srange == null) ? 0 : (int) srange[1];
+                    JTextField tf = new JTextField(maxlen);
                     if (value != null)
                         tf.setText(value.toString());
                     tf.getDocument().addDocumentListener(this);
