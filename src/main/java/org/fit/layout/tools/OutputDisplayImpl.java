@@ -9,12 +9,14 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
+import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.util.Iterator;
 import java.util.Set;
 
 import org.fit.layout.api.OutputDisplay;
 import org.fit.layout.model.Area;
+import org.fit.layout.model.Border;
 import org.fit.layout.model.Box;
 import org.fit.layout.model.Page;
 import org.fit.layout.model.Rectangular;
@@ -92,17 +94,47 @@ public class OutputDisplayImpl implements OutputDisplay
         }
         else //element boxes
         {
+            Rectangular r = box.getBounds();
+            //background color
             Color bg = box.getBackgroundColor();
             if (bg != null)
             {
                 g.setColor(bg);
-                Rectangular r = box.getBounds();
                 g.fillRect(r.getX1(), r.getY1(), r.getWidth() - 1, r.getHeight() - 1);
             }
-            //TODO borders
+            //borders
+            if (box.hasTopBorder())
+            {
+                final Border bst = box.getBorderStyle(Border.Side.TOP);
+                drawBorder(g, r.getX1(), r.getY1(), r.getX2(), r.getY1(), bst.getWidth(), 0, 0, bst, false);
+            }
+            if (box.hasRightBorder())
+            {
+                final Border bst = box.getBorderStyle(Border.Side.RIGHT);
+                drawBorder(g, r.getX2(), r.getY1(), r.getX2(), r.getY2(), bst.getWidth(), -bst.getWidth() + 1, 0, bst, true);
+            }
+            if (box.hasBottomBorder())
+            {
+                final Border bst = box.getBorderStyle(Border.Side.BOTTOM);
+                drawBorder(g, r.getX1(), r.getY2(), r.getX2(), r.getY2(), bst.getWidth(), 0, -bst.getWidth() + 1, bst, true);
+            }
+            if (box.hasLeftBorder())
+            {
+                final Border bst = box.getBorderStyle(Border.Side.LEFT);
+                drawBorder(g, r.getX1(), r.getY1(), r.getX1(), r.getY2(), bst.getWidth(), 0, 0, bst, false);
+            }
         }
 
     }
+    
+    private void drawBorder(Graphics2D g, int x1, int y1, int x2, int y2,
+            int width, int right, int down, Border style, boolean reverse)
+    {
+        g.setColor(style.getColor());
+        g.setStroke(new BorderStroke(width, style.getStyle(), reverse));
+        g.draw(new Line2D.Double(x1 + right, y1 + down, x2 + right, y2 + down));
+    }
+
     
     //=================================================================================
 
