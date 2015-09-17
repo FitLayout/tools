@@ -457,11 +457,14 @@ public class BlockBrowser implements Browser
     {
         if (lookupButton.isSelected())
         {
-            Area node = proc.getAreaTree().getAreaAt(x, y);
-            if (node != null)
+            if (proc.getAreaTree() != null)
             {
-                showAreaInTree(node);
-                showAreaInLogicalTree(node);
+                Area node = proc.getAreaTree().getAreaAt(x, y);
+                if (node != null)
+                {
+                    showAreaInTree(node);
+                    showAreaInLogicalTree(node);
+                }
             }
             //lookupButton.setSelected(false);
         }
