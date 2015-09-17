@@ -5,6 +5,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Vector;
 
 import javax.swing.DefaultComboBoxModel;
@@ -223,6 +224,14 @@ public class OperatorConfigWindow extends JFrame
     private void updateLists()
     {
         Vector<AreaTreeOperator> avail = new Vector<AreaTreeOperator>(proc.getOperators().values());
+        Collections.sort(avail, new Comparator<AreaTreeOperator>() {
+            @Override
+            public int compare(AreaTreeOperator o1, AreaTreeOperator o2)
+            {
+                return o1.getName().compareTo(o2.getName());
+            }
+        });
+        
         Vector<AreaTreeOperator> used = proc.getSelectedOperators();
         for (AreaTreeOperator op : used)
             avail.remove(op);
