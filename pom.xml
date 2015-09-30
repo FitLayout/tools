@@ -104,6 +104,10 @@
 		</dependency>
 		<dependency>
 			<groupId>cz.vutbr.fit.layout</groupId>
+			<artifactId>layout-logical</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>cz.vutbr.fit.layout</groupId>
 			<artifactId>layout-classify</artifactId>
 		</dependency>
 		<dependency>
