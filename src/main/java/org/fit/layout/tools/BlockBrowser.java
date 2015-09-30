@@ -48,7 +48,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
-import javax.swing.SwingConstants;
 
 import java.awt.GridLayout;
 
@@ -75,7 +74,6 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.TreePath;
 
 import java.awt.Insets;
-import java.awt.Font;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
@@ -143,7 +141,6 @@ public class BlockBrowser implements Browser
     private JTable infoTable = null;
     private JButton showArtAreaButton = null;
     private JButton showColumnsButton = null;
-    private JTextField markednessText;
     private JPanel pathsPanel;
     private JScrollPane pathListScroll;
     private JScrollPane extractionScroll;
@@ -1512,7 +1509,7 @@ public class BlockBrowser implements Browser
             gridBagConstraints10.gridx = 0;
             objectInfoPanel = new JPanel();
             GridBagLayout gbl_objectInfoPanel = new GridBagLayout();
-            gbl_objectInfoPanel.rowWeights = new double[]{0.0, 0.0, 0.0};
+            gbl_objectInfoPanel.rowWeights = new double[]{0.0, 0.0};
             gbl_objectInfoPanel.columnWeights = new double[]{1.0};
             objectInfoPanel.setLayout(gbl_objectInfoPanel);
             objectInfoPanel.add(getJScrollPane4(), gridBagConstraints10);
@@ -1524,12 +1521,6 @@ public class BlockBrowser implements Browser
             gbc_probabilityScroll.gridx = 0;
             gbc_probabilityScroll.gridy = 1;
             objectInfoPanel.add(getProbabilityScroll(), gbc_probabilityScroll);
-            GridBagConstraints gbc_markednessText = new GridBagConstraints();
-            gbc_markednessText.insets = new Insets(0, 0, 5, 0);
-            gbc_markednessText.fill = GridBagConstraints.HORIZONTAL;
-            gbc_markednessText.gridx = 0;
-            gbc_markednessText.gridy = 2;
-            objectInfoPanel.add(getMarkednessText(), gbc_markednessText);
         }
         return objectInfoPanel;
     }
@@ -1617,20 +1608,6 @@ public class BlockBrowser implements Browser
           });
         }
         return showColumnsButton;
-    }
-    
-    private JTextField getMarkednessText() 
-    {
-        if (markednessText == null) 
-        {
-            markednessText = new JTextField();
-            markednessText.setHorizontalAlignment(SwingConstants.CENTER);
-            markednessText.setText("---");
-            markednessText.setFont(new Font("Dialog", Font.PLAIN, 18));
-            markednessText.setEditable(false);
-            markednessText.setColumns(10);
-        }
-        return markednessText;
     }
 
     private JPanel getPathsPanel()
