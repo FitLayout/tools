@@ -27,6 +27,7 @@ import org.fit.layout.impl.DefaultTag;
 import org.fit.layout.model.Area;
 import org.fit.layout.model.AreaTree;
 import org.fit.layout.model.Box;
+import org.fit.layout.model.LogicalArea;
 import org.fit.layout.model.LogicalAreaTree;
 import org.fit.layout.model.Page;
 import org.fit.layout.model.Tag;
@@ -531,14 +532,21 @@ public class BlockBrowser implements Browser
     
     private void showAreaInLogicalTree(Area node)
     {
-        /*LogicalNode lnode = proc.getLogicalTree().findArea(node);
+        LogicalArea lnode = proc.getLogicalAreaTree().getRoot().findArea(node);
         if (lnode != null)
         {
-            TreePath select = new TreePath(lnode.getPath());
+            //find the path to root
+            int len = 0;
+            for (LogicalArea a = lnode; a != null; a = a.getParentArea())
+                len++;
+            LogicalArea[] path = new LogicalArea[len];
+            for (LogicalArea a = lnode; a != null; a = a.getParentArea())
+                path[--len] = a;
+            TreePath select = new TreePath(path);
             logicalTree.setSelectionPath(select);
             //logicalTree.expandPath(select);
-            logicalTree.scrollPathToVisible(new TreePath(lnode.getPath()));
-        }*/
+            logicalTree.scrollPathToVisible(new TreePath(path));
+        }
     }
     
     private void showAllBoxes(Box root)
@@ -729,6 +737,20 @@ public class BlockBrowser implements Browser
             listener.areaSelected(area);
     }
 
+    private void showLogicalArea(LogicalArea lnode)
+    {
+        boolean first = true;
+        for (Area area : lnode.getAreas())
+        {
+            if (first)
+                showArea(area);
+            else
+                ((BrowserPanel) contentCanvas).getOutputDisplay().drawExtent(area);
+            first = false;
+        }
+        contentCanvas.repaint();
+    }
+    
     private void updateTagLists(AreaTree tree)
     {
         tagNames = new HashSet<String>();
@@ -1429,23 +1451,23 @@ public class BlockBrowser implements Browser
         if (logicalTree == null)
         {
             logicalTree = new JTree();
-            /*logicalTree.addTreeSelectionListener(new javax.swing.event.TreeSelectionListener()
+            logicalTree.addTreeSelectionListener(new javax.swing.event.TreeSelectionListener()
                     {
                         public void valueChanged(javax.swing.event.TreeSelectionEvent e)
                         {
                         	if (areasync)
                         	{
-	                            DefaultMutableTreeNode node = (DefaultMutableTreeNode) logicalTree.getLastSelectedPathComponent();
-	                            if (node != null && node instanceof LogicalNode)
+	                            LogicalArea node = (LogicalArea) logicalTree.getLastSelectedPathComponent();
+	                            if (node != null)
 	                            {
-	                            	showNode((LogicalNode) node);
+	                            	showLogicalArea((LogicalArea) node);
                             		logsync = false;
-                            		showAreaInTree(((LogicalNode) node).getFirstAreaNode());
+                            		showAreaInTree(((LogicalArea) node).getFirstArea());
                             		logsync = true;
 	                            }
                         	}
                         }
-                    });*/
+                    });
             logicalTree.setModel(new LogicalTreeModel(null));
         }
         return logicalTree;
