@@ -532,20 +532,23 @@ public class BlockBrowser implements Browser
     
     private void showAreaInLogicalTree(Area node)
     {
-        LogicalArea lnode = proc.getLogicalAreaTree().getRoot().findArea(node);
-        if (lnode != null)
+        if (proc.getLogicalAreaTree() != null && proc.getLogicalAreaTree().getRoot() != null)
         {
-            //find the path to root
-            int len = 0;
-            for (LogicalArea a = lnode; a != null; a = a.getParentArea())
-                len++;
-            LogicalArea[] path = new LogicalArea[len];
-            for (LogicalArea a = lnode; a != null; a = a.getParentArea())
-                path[--len] = a;
-            TreePath select = new TreePath(path);
-            logicalTree.setSelectionPath(select);
-            //logicalTree.expandPath(select);
-            logicalTree.scrollPathToVisible(new TreePath(path));
+            LogicalArea lnode = proc.getLogicalAreaTree().getRoot().findArea(node);
+            if (lnode != null)
+            {
+                //find the path to root
+                int len = 0;
+                for (LogicalArea a = lnode; a != null; a = a.getParentArea())
+                    len++;
+                LogicalArea[] path = new LogicalArea[len];
+                for (LogicalArea a = lnode; a != null; a = a.getParentArea())
+                    path[--len] = a;
+                TreePath select = new TreePath(path);
+                logicalTree.setSelectionPath(select);
+                //logicalTree.expandPath(select);
+                logicalTree.scrollPathToVisible(new TreePath(path));
+            }
         }
     }
     

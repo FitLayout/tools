@@ -9,6 +9,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
+import java.awt.Stroke;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.util.Iterator;
@@ -103,6 +104,7 @@ public class OutputDisplayImpl implements OutputDisplay
                 g.fillRect(r.getX1(), r.getY1(), r.getWidth() - 1, r.getHeight() - 1);
             }
             //borders
+            Stroke oldStroke = g.getStroke();
             if (box.hasTopBorder())
             {
                 final Border bst = box.getBorderStyle(Border.Side.TOP);
@@ -123,6 +125,7 @@ public class OutputDisplayImpl implements OutputDisplay
                 final Border bst = box.getBorderStyle(Border.Side.LEFT);
                 drawBorder(g, r.getX1(), r.getY1(), r.getX1(), r.getY2(), bst.getWidth(), 0, 0, bst, false);
             }
+            g.setStroke(oldStroke);
         }
 
     }
