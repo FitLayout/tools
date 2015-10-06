@@ -173,6 +173,7 @@ public class ParamsPanel extends JPanel implements ChangeListener, DocumentListe
     protected void clear()
     {
         removeAll();
+        fields.clear();
         setMinimumSize(new Dimension(0, 0));
         setPreferredSize(new Dimension(0, 0));
     }
