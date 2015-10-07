@@ -803,7 +803,7 @@ public class BlockBrowser implements Browser
         if (mainWindow == null)
         {
             mainWindow = new JFrame();
-            mainWindow.setTitle("Visual Block Browser");
+            mainWindow.setTitle("FITLayout Browser");
             mainWindow.setVisible(true);
             mainWindow.setBounds(new Rectangle(0, 0, 1489, 256));
             mainWindow.setMinimumSize(new Dimension(1200, 256));
