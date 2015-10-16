@@ -594,8 +594,8 @@ public class BlockBrowser implements Browser
         //vals.add(infoTableData("Level", String.valueOf(a.getLevel())));
         vals.add(infoTableData("Borders", borderString(area)));
         vals.add(infoTableData("Bg separated", (area.isBackgroundSeparated()) ? "true" : "false"));
-        //vals.add(infoTableData("Is hor. sep.", (area.isHorizontalSeparator()) ? "true" : "false"));
-        //vals.add(infoTableData("Is vert. sep.", (area.isVerticalSeparator()) ? "true" : "false"));
+        vals.add(infoTableData("Is hor. sep.", (area.isHorizontalSeparator()) ? "true" : "false"));
+        vals.add(infoTableData("Is vert. sep.", (area.isVerticalSeparator()) ? "true" : "false"));
         vals.add(infoTableData("Avg. fsize", String.valueOf(area.getFontSize())));
         vals.add(infoTableData("Avg. fweight", String.valueOf(area.getFontWeight())));
         vals.add(infoTableData("Avg. fstyle", String.valueOf(area.getFontStyle())));
