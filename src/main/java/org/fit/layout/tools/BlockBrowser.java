@@ -23,6 +23,7 @@ import org.fit.layout.api.OutputDisplay;
 import org.fit.layout.gui.AreaSelectionListener;
 import org.fit.layout.gui.Browser;
 import org.fit.layout.gui.BrowserPlugin;
+import org.fit.layout.impl.DefaultContentRect;
 import org.fit.layout.impl.DefaultTag;
 import org.fit.layout.model.Area;
 import org.fit.layout.model.AreaTree;
@@ -420,6 +421,7 @@ public class BlockBrowser implements Browser
      */
     private void segmentPage()
     {
+        DefaultContentRect.resetId(); //reset the default ID generator to obtain the same IDs for every segmentation
         if (segmentatorCombo.getSelectedIndex() != -1)
         {
             AreaTreeProvider provider = segmentatorCombo.getItemAt(segmentatorCombo.getSelectedIndex());
