@@ -20,6 +20,7 @@ import org.fit.layout.api.AreaTreeProvider;
 import org.fit.layout.api.BoxTreeProvider;
 import org.fit.layout.api.LogicalTreeProvider;
 import org.fit.layout.api.OutputDisplay;
+import org.fit.layout.api.ServiceManager;
 import org.fit.layout.gui.AreaSelectionListener;
 import org.fit.layout.gui.Browser;
 import org.fit.layout.gui.BrowserPlugin;
@@ -1794,13 +1795,13 @@ public class BlockBrowser implements Browser
 
             BoxTreeProvider p = (BoxTreeProvider) rendererCombo.getSelectedItem();
             if (p != null)
-                ((ParamsPanel) rendererParamsPanel).setOperation(p);
+                ((ParamsPanel) rendererParamsPanel).setOperation(p, null);
             AreaTreeProvider ap = (AreaTreeProvider) segmentatorCombo.getSelectedItem();
             if (ap != null)
-                ((ParamsPanel) segmParamsPanel).setOperation(ap);
+                ((ParamsPanel) segmParamsPanel).setOperation(ap, null);
             LogicalTreeProvider lp = (LogicalTreeProvider) logicalCombo.getSelectedItem();
             if (lp != null)
-                ((ParamsPanel) logicalParamsPanel).setOperation(lp);
+                ((ParamsPanel) logicalParamsPanel).setOperation(lp, null);
             
         }
         return sourcesTab;
@@ -1826,7 +1827,7 @@ public class BlockBrowser implements Browser
                 {
                     BoxTreeProvider p = (BoxTreeProvider) rendererCombo.getSelectedItem();
                     if (p != null)
-                        ((ParamsPanel) rendererParamsPanel).setOperation(p);
+                        ((ParamsPanel) rendererParamsPanel).setOperation(p, null);
                 }
             });
             Vector<BoxTreeProvider> providers = new Vector<BoxTreeProvider>(proc.getBoxProviders().values());
@@ -1904,7 +1905,7 @@ public class BlockBrowser implements Browser
                 {
                     AreaTreeProvider ap = (AreaTreeProvider) segmentatorCombo.getSelectedItem();
                     if (ap != null)
-                        ((ParamsPanel) segmParamsPanel).setOperation(ap);
+                        ((ParamsPanel) segmParamsPanel).setOperation(ap, null);
                 }
             });
             Vector<AreaTreeProvider> providers = new Vector<AreaTreeProvider>(proc.getAreaProviders().values());
@@ -2000,7 +2001,7 @@ public class BlockBrowser implements Browser
                 {
                     LogicalTreeProvider lp = (LogicalTreeProvider) logicalCombo.getSelectedItem();
                     if (lp != null)
-                        ((ParamsPanel) logicalParamsPanel).setOperation(lp);
+                        ((ParamsPanel) logicalParamsPanel).setOperation(lp, null);
                 }
             });
             Vector<LogicalTreeProvider> providers = new Vector<LogicalTreeProvider>(proc.getLogicalProviders().values());

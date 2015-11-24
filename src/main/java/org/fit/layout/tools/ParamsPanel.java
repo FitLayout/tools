@@ -19,6 +19,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import org.fit.layout.api.ParametrizedOperation;
+import org.fit.layout.api.ServiceManager;
 
 
 /**
@@ -31,6 +32,8 @@ public class ParamsPanel extends JPanel implements ChangeListener, DocumentListe
     private static final long serialVersionUID = 1L;
     
     private ParametrizedOperation op;
+    private Map<String, Object> params;
+    private boolean directMode;
     private Vector<Component> before;
     private Vector<Component> after;
     private Map<String, Component> fields;
@@ -40,6 +43,8 @@ public class ParamsPanel extends JPanel implements ChangeListener, DocumentListe
     {
         super();
         op = null;
+        params = null;
+        directMode = true;
         before = new Vector<Component>();
         after = new Vector<Component>();
         fields = new HashMap<String, Component>();
@@ -60,10 +65,23 @@ public class ParamsPanel extends JPanel implements ChangeListener, DocumentListe
     /**
      * Assigns the parametrized operation and creates the input fields for all its parametres.
      * @param op The parametrized operation.
+     * @param params The parameter map. When set, the panel will operate on the given
+     * parameter map. When set to {@code null}, the panel will operate directly on
+     * the operation parametres. 
      */
-    public void setOperation(ParametrizedOperation op)
+    public void setOperation(ParametrizedOperation op, Map<String, Object> params)
     {
         this.op = op;
+        if (params == null)
+        {
+            this.params = ServiceManager.getServiceParams(op);
+            directMode = true;
+        }
+        else
+        {
+            this.params = params;
+            directMode = false;
+        }
         clear();
         addFields();
         updateUI();
@@ -161,7 +179,9 @@ public class ParamsPanel extends JPanel implements ChangeListener, DocumentListe
     {
         for (String param : fields.keySet())
         {
-            op.setParam(param, getParam(param));
+            params.put(param, getParam(param));
+            if (directMode)
+                op.setParam(param, getParam(param));
         }
     }
     
@@ -183,7 +203,7 @@ public class ParamsPanel extends JPanel implements ChangeListener, DocumentListe
      */
     protected void addFields()
     {
-        if (!before.isEmpty() || !after.isEmpty() || op.getParamNames().length > 0)
+        if (!before.isEmpty() || !after.isEmpty() || !params.isEmpty())
         {
             setMinimumSize(null);
             setPreferredSize(null);
@@ -201,19 +221,19 @@ public class ParamsPanel extends JPanel implements ChangeListener, DocumentListe
      */
     protected void addParamFields()
     {
-        String[] params = op.getParamNames();
+        String[] paramNames = op.getParamNames();
         ParametrizedOperation.ValueType[] types = op.getParamTypes();
         
-        for (int i = 0; i < params.length; i++)
+        for (int i = 0; i < paramNames.length; i++)
         {
             if (types[i] != ParametrizedOperation.ValueType.BOOLEAN)
             {
-                JLabel lbl = new JLabel(params[i]);
+                JLabel lbl = new JLabel(paramNames[i]);
                 add(lbl);
             }
             
-            String name = params[i];
-            Object value = op.getParam(name); 
+            String name = paramNames[i];
+            Object value = params.get(name); 
             Component comp = null;
             switch (types[i])
             {

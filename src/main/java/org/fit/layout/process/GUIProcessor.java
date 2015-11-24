@@ -29,18 +29,25 @@ public class GUIProcessor extends ScriptableProcessor
     private static Logger log = LoggerFactory.getLogger(GUIProcessor.class);
     
     private Vector<AreaTreeOperator> selectedOperators;
+    private Vector<Map<String, Object>> operatorParams;
     private boolean configMode = false;
     
     public GUIProcessor()
     {
         super();
         selectedOperators = new Vector<AreaTreeOperator>();
+        operatorParams = new Vector<Map<String, Object>>();
         loadConfig();
     }
     
     public Vector<AreaTreeOperator> getSelectedOperators()
     {
         return selectedOperators;
+    }
+
+    public Vector<Map<String, Object>> getOperatorParams()
+    {
+        return operatorParams;
     }
 
     public void loadConfig()
@@ -73,9 +80,9 @@ public class GUIProcessor extends ScriptableProcessor
     {
         setAreaTree(null);
         initAreaTree(provider, params);
-        for (AreaTreeOperator op : selectedOperators)
+        for (int i = 0; i < selectedOperators.size(); i++)
         {
-            apply(op, null); //no parametres--they should be already set from the GUI
+            apply(selectedOperators.elementAt(i), operatorParams.elementAt(i));
         }
         treesCompleted();
         return getAreaTree();
@@ -134,6 +141,7 @@ public class GUIProcessor extends ScriptableProcessor
             {
                 ServiceManager.setServiceParams(op, params);
                 selectedOperators.add(op);
+                operatorParams.add(ServiceManager.getServiceParams(op));
             }
         }
     }

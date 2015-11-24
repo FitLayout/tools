@@ -18,6 +18,7 @@ import javax.swing.JScrollPane;
 import javax.swing.border.EmptyBorder;
 
 import org.fit.layout.api.AreaTreeOperator;
+import org.fit.layout.api.ServiceManager;
 import org.fit.layout.process.GUIProcessor;
 
 import java.awt.event.ActionListener;
@@ -30,8 +31,8 @@ public class OperatorConfigWindow extends JFrame
 {
     private static final long serialVersionUID = 1L;
     private GUIProcessor proc;
-    private AreaTreeOperator aop;
-    private AreaTreeOperator uop;
+    private int aopIndex;
+    private int uopIndex;
     private JPanel contentPane;
     private JList<AreaTreeOperator> usedList;
     private JList<AreaTreeOperator> availList;
@@ -87,8 +88,9 @@ public class OperatorConfigWindow extends JFrame
             {
                 if (usedList.getSelectedValue() != null)
                 {
-                    uop = usedList.getSelectedValue();
-                    paramsPanel.setOperation(uop);
+                    AreaTreeOperator uop = usedList.getSelectedValue();
+                    uopIndex = usedList.getSelectedIndex();
+                    paramsPanel.setOperation(uop, proc.getOperatorParams().elementAt(uopIndex));
                 }
             }
         });
@@ -115,6 +117,8 @@ public class OperatorConfigWindow extends JFrame
                 if (i > 0)
                 {
                     Collections.swap(proc.getSelectedOperators(), i, i - 1);
+                    Collections.swap(proc.getOperatorParams(), i, i - 1);
+                    uopIndex = i - 1;
                     updateLists();
                 }
             }
@@ -132,6 +136,8 @@ public class OperatorConfigWindow extends JFrame
                 if (i != -1 && i < proc.getSelectedOperators().size() - 1)
                 {
                     Collections.swap(proc.getSelectedOperators(), i + 1, i);
+                    Collections.swap(proc.getOperatorParams(), i + 1, i);
+                    uopIndex = i + 1;
                     updateLists();
                 }
             }
@@ -150,6 +156,7 @@ public class OperatorConfigWindow extends JFrame
                 if (op != null)
                 {
                     proc.getSelectedOperators().add(op);
+                    proc.getOperatorParams().add(ServiceManager.getServiceParams(op));
                     updateLists();
                 }
             }
@@ -167,7 +174,9 @@ public class OperatorConfigWindow extends JFrame
                 AreaTreeOperator op = usedList.getSelectedValue();
                 if (op != null)
                 {
-                    proc.getSelectedOperators().remove(op);
+                    int index = usedList.getSelectedIndex();
+                    proc.getSelectedOperators().remove(index);
+                    proc.getOperatorParams().remove(index);
                     updateLists();
                 }
             }
@@ -192,8 +201,8 @@ public class OperatorConfigWindow extends JFrame
         availList.addListSelectionListener(new ListSelectionListener() {
             public void valueChanged(ListSelectionEvent e) 
             {
-                if (availList.getSelectedValue() != null)
-                    aop = availList.getSelectedValue();
+                if (availList.getSelectedIndex() != -1)
+                    aopIndex = availList.getSelectedIndex();
             }
         });
         availScroll.setViewportView(availList);
@@ -231,19 +240,15 @@ public class OperatorConfigWindow extends JFrame
                 return o1.getName().compareTo(o2.getName());
             }
         });
-        
         Vector<AreaTreeOperator> used = proc.getSelectedOperators();
-        for (AreaTreeOperator op : used)
-            avail.remove(op);
-        
         availList.setModel(new DefaultComboBoxModel<AreaTreeOperator>(avail));
         usedList.setModel(new DefaultComboBoxModel<AreaTreeOperator>(used));
         
         //try to restore selection
-        if (aop != null)
-            availList.setSelectedValue(aop, true);
-        if (uop != null)
-            usedList.setSelectedValue(uop, true);
+        if (aopIndex != -1)
+            availList.setSelectedIndex(aopIndex);
+        if (uopIndex != -1)
+            usedList.setSelectedIndex(uopIndex);
     }
     
     protected JList<AreaTreeOperator> getUsedList()
