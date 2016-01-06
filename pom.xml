@@ -112,7 +112,7 @@
 		</dependency>
 		<dependency>
 			<groupId>cz.vutbr.fit.layout</groupId>
-			<artifactId>layout-storage</artifactId>
+			<artifactId>layout-storage-rdf</artifactId>
 			<exclusions>
 				<exclusion>
 					<artifactId>slf4j-log4j12</artifactId>
