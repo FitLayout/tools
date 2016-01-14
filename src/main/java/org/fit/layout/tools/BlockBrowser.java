@@ -191,7 +191,7 @@ public class BlockBrowser implements Browser
     public void setLocation(String url)
     {
         ((ParamsPanel) rendererParamsPanel).setParam("url", url);
-        displayURL(url);
+        displaySelectedURL();
     }
     
     public String getLocation()
@@ -375,7 +375,7 @@ public class BlockBrowser implements Browser
     
     //=============================================================================================================
     
-    public void displayURL(String urlstring)
+    public void displaySelectedURL()
     {
         dispFinished = false;
         if (treeCompWindow != null)
@@ -386,13 +386,6 @@ public class BlockBrowser implements Browser
         }
         
         try {
-            if (!urlstring.startsWith("http:") &&
-                !urlstring.startsWith("ftp:") &&
-                !urlstring.startsWith("file:"))
-                    urlstring = "http://" + urlstring;
-
-            //page = proc.renderPage(urlstring, contentScroll.getSize());
-            
             int i = rendererCombo.getSelectedIndex();
             if (i != -1)
             {
@@ -409,8 +402,6 @@ public class BlockBrowser implements Browser
                     buildLogicalTree();
                 }
             }
-            
-            
         } catch (Exception e) {
             System.err.println("*** Error: "+e.getMessage());
             e.printStackTrace();
@@ -962,9 +953,7 @@ public class BlockBrowser implements Browser
             {
                 public void actionPerformed(java.awt.event.ActionEvent e)
                 {
-                    Object urlval = ((ParamsPanel) rendererParamsPanel).getParam("url");
-                    if (urlval != null)
-                        displayURL(urlval.toString());
+                    displaySelectedURL();
                 }
             });
         }
