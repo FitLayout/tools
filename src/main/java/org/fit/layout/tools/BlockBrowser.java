@@ -20,7 +20,6 @@ import org.fit.layout.api.AreaTreeProvider;
 import org.fit.layout.api.BoxTreeProvider;
 import org.fit.layout.api.LogicalTreeProvider;
 import org.fit.layout.api.OutputDisplay;
-import org.fit.layout.api.ServiceManager;
 import org.fit.layout.gui.AreaSelectionListener;
 import org.fit.layout.gui.Browser;
 import org.fit.layout.gui.BrowserPlugin;
@@ -97,7 +96,6 @@ public class BlockBrowser implements Browser
     
     private BrowserConfig config;
     private GUIProcessor proc;
-    private Page page;
     private URL currentUrl = null;
     private boolean dispFinished = false;
     private boolean areasync = true;
@@ -287,7 +285,7 @@ public class BlockBrowser implements Browser
 	public void setPage(Page page) 
     {
     	
-    	this.page = page;
+    	proc.setPage(page);
     	contentCanvas = createContentCanvas();
         
         contentCanvas.addMouseListener(new MouseListener() {
@@ -340,7 +338,7 @@ public class BlockBrowser implements Browser
 	@Override
 	public Page getPage() 
 	{
-		return page;
+		return proc.getPage();
 	}
     
     @Override
@@ -390,7 +388,7 @@ public class BlockBrowser implements Browser
             if (i != -1)
             {
                 BoxTreeProvider btp = rendererCombo.getItemAt(i);
-                page = proc.renderPage(btp, ((ParamsPanel) rendererParamsPanel).getParams());
+                Page page = proc.renderPage(btp, ((ParamsPanel) rendererParamsPanel).getParams());
                 setPage(page);
                 
                 if (segmAutorunCheckbox.isSelected())
@@ -440,7 +438,7 @@ public class BlockBrowser implements Browser
     private JPanel createContentCanvas()
     {
         if (contentCanvas != null)
-            contentCanvas = new BrowserPanel(page);
+            contentCanvas = new BrowserPanel(proc.getPage());
         return contentCanvas;
     }
     
