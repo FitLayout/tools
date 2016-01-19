@@ -179,7 +179,7 @@ public class BlockBrowser implements Browser
         proc = new GUIProcessor() {
             protected void treesCompleted()
             {
-                refresh();
+                refreshView();
             }
         };
     }
@@ -207,10 +207,10 @@ public class BlockBrowser implements Browser
         return config.getLoadImages();
     }
     
-    /**
-     * Refresh the trees.
-     */
-    public void refresh()
+    //=============================================================================================================
+    
+    @Override
+    public void refreshView()
     {
         boxTree.setModel(new BoxTreeModel(proc.getPage().getRoot()));
         if (proc.getAreaTree() != null)
@@ -218,8 +218,6 @@ public class BlockBrowser implements Browser
         if (proc.getLogicalAreaTree() != null)
             logicalTree.setModel(new LogicalTreeModel(proc.getLogicalAreaTree().getRoot()));
     }
-    
-    //=============================================================================================================
     
     @Override
     public void addToolBar(JToolBar toolbar)
@@ -1482,7 +1480,7 @@ public class BlockBrowser implements Browser
             {
                 public void actionPerformed(java.awt.event.ActionEvent e)
                 {
-                    refresh();
+                    refreshView();
                 }
             });
         }
