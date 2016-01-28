@@ -717,6 +717,13 @@ public class BlockBrowser implements Browser
         return ret;
     }
     
+    private void notifyAreaSelection(Area area)
+    {
+        //notify area listeners
+        for (AreaSelectionListener listener : areaListeners)
+            listener.areaSelected(area);
+    }
+    
     private void showArea(Area area)
     {
         ((BrowserPanel) contentCanvas).getOutputDisplay().drawExtent(area);
@@ -724,10 +731,6 @@ public class BlockBrowser implements Browser
         
         //show the info table
         displayAreaInfo(area);
-
-        //notify area listeners
-        for (AreaSelectionListener listener : areaListeners)
-            listener.areaSelected(area);
     }
 
     private void showLogicalArea(LogicalArea lnode)
@@ -1200,6 +1203,7 @@ public class BlockBrowser implements Browser
                         	showAreaInLogicalTree(node);
                         	areasync = true;
 	                    }
+	                    notifyAreaSelection(node);
                     }
 				}
 			});
