@@ -16,6 +16,7 @@ import org.fit.layout.model.Area;
 import org.fit.layout.model.AreaTree;
 import org.fit.layout.model.Border;
 import org.fit.layout.model.Box;
+import org.fit.layout.model.Box.Type;
 import org.fit.layout.model.Rectangular;
 
 /**
@@ -41,7 +42,7 @@ public class HTMLOutputOperator extends BaseOperator
     
     public HTMLOutputOperator()
     {
-        produceHeader = false;
+        produceHeader = true;
         filename = "out.html";
     }
 
@@ -186,13 +187,18 @@ public class HTMLOutputOperator extends BaseOperator
         Vector<Box> boxes = a.getBoxes();
         for (Box box : boxes)
         {
-            indent(level, p);
-            String stag = "<span"
-                            + " style=\"" + getBoxStyle(a, box) + "\"" 
-                            + ">";
-            p.print(stag);
-            p.print(HTMLEntities(box.getText()));
-            p.println("</span>");
+            //Dump only the text boxes. The style of the element boxes should be
+            //already taken into account in the areas.
+            if (box.getType() == Type.TEXT_CONTENT)
+            {
+                indent(level, p);
+                String stag = "<span"
+                                + " style=\"" + getBoxStyle(a, box) + "\"" 
+                                + ">";
+                p.print(stag);
+                p.print(HTMLEntities(box.getText()));
+                p.println("</span>");
+            }
         }
     }
     
@@ -213,22 +219,31 @@ public class HTMLOutputOperator extends BaseOperator
             if (btop != null)
                 py += btop.getWidth();
         }
-            
+
+        int bw = 0;
+        int bh = 0;
         Style style = new Style();
         style.put("position", "absolute");
-        style.put("left", a.getX1() - px, UNIT);
-        style.put("top", a.getY1() - py, UNIT);
-        style.put("width", a.getWidth(), UNIT);
-        style.put("height", a.getHeight(), UNIT);
         String bgcol = colorString(a.getBackgroundColor());
         if (!bgcol.isEmpty())
             style.put("background", bgcol);
         for (Border.Side side : Border.Side.values())
         {
-            String brd = getBorderStyle(a.getBorderStyle(side));
+            Border bstyle = a.getBorderStyle(side);
+            String brd = getBorderStyle(bstyle);
             if (!brd.isEmpty())
+            {
                 style.put("border-" + side.toString(), brd);
+                if (side == Border.Side.LEFT || side == Border.Side.RIGHT)
+                    bw += bstyle.getWidth();
+                else if (side == Border.Side.TOP || side == Border.Side.BOTTOM)
+                    bh += bstyle.getWidth();
+            }
         }
+        style.put("left", a.getX1() - px, UNIT);
+        style.put("top", a.getY1() - py, UNIT);
+        style.put("width", a.getWidth() - bw, UNIT);
+        style.put("height", a.getHeight() - bh, UNIT);
         
         return style.toString();
     }
