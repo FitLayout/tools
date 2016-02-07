@@ -23,6 +23,7 @@ import org.fit.layout.api.OutputDisplay;
 import org.fit.layout.gui.AreaSelectionListener;
 import org.fit.layout.gui.Browser;
 import org.fit.layout.gui.BrowserPlugin;
+import org.fit.layout.gui.TreeListener;
 import org.fit.layout.impl.DefaultContentRect;
 import org.fit.layout.impl.DefaultTag;
 import org.fit.layout.model.Area;
@@ -104,6 +105,7 @@ public class BlockBrowser implements Browser
     private Set<String> tagNames; //all known area names in the area tree
     
     private List<AreaSelectionListener> areaListeners;
+    private List<TreeListener> treeListeners;
 
     private JFrame mainWindow = null;  //  @jve:decl-index=0:visual-constraint="-239,28"
     private JPanel container = null;
@@ -176,6 +178,7 @@ public class BlockBrowser implements Browser
     {
         config = new BrowserConfig();
         areaListeners = new LinkedList<AreaSelectionListener>();
+        treeListeners = new LinkedList<TreeListener>();
         proc = new GUIProcessor() {
             protected void treesCompleted()
             {
@@ -280,6 +283,12 @@ public class BlockBrowser implements Browser
     }
     
     @Override
+    public void addTreeListener(TreeListener listener)
+    {
+        treeListeners.add(listener);
+    }
+    
+    @Override
 	public void setPage(Page page) 
     {
     	
@@ -329,7 +338,7 @@ public class BlockBrowser implements Browser
         contentScroll.setViewportView(contentCanvas);
         
         boxTree.setModel(new BoxTreeModel(proc.getPage().getRoot()));
-
+        notifyBoxTreeUpdate();
         dispFinished = true;
 	}
 
@@ -356,12 +365,14 @@ public class BlockBrowser implements Browser
     {
         proc.setAreaTree(areaTree);
         updateTagLists(areaTree);
+        notifyAreaTreeUpdate();
     }
 
     @Override
     public void setLogicalTree(LogicalAreaTree logicalTree)
     {
         proc.setLogicalAreaTree(logicalTree);
+        notifyLogicalAreaTreeUpdate();
     }
 
     public GUIProcessor getProcessor()
@@ -722,6 +733,24 @@ public class BlockBrowser implements Browser
         //notify area listeners
         for (AreaSelectionListener listener : areaListeners)
             listener.areaSelected(area);
+    }
+    
+    private void notifyBoxTreeUpdate()
+    {
+        for (TreeListener listener : treeListeners)
+            listener.pageRendered(getPage());
+    }
+    
+    private void notifyAreaTreeUpdate()
+    {
+        for (TreeListener listener : treeListeners)
+            listener.areaTreeUpdated(getAreaTree());
+    }
+    
+    private void notifyLogicalAreaTreeUpdate()
+    {
+        for (TreeListener listener : treeListeners)
+            listener.logicalAreaTreeUpdated(getLogicalTree());
     }
     
     private void showArea(Area area)
