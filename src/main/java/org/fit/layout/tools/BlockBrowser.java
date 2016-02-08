@@ -6,11 +6,9 @@ package org.fit.layout.tools;
 import java.net.URL;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.Vector;
 
@@ -20,6 +18,7 @@ import org.fit.layout.api.AreaTreeProvider;
 import org.fit.layout.api.BoxTreeProvider;
 import org.fit.layout.api.LogicalTreeProvider;
 import org.fit.layout.api.OutputDisplay;
+import org.fit.layout.api.ServiceManager;
 import org.fit.layout.gui.AreaSelectionListener;
 import org.fit.layout.gui.Browser;
 import org.fit.layout.gui.BrowserPlugin;
@@ -810,11 +809,8 @@ public class BlockBrowser implements Browser
     
     public void initPlugins()
     {
-        ServiceLoader<BrowserPlugin> loader = ServiceLoader.load(BrowserPlugin.class);
-        Iterator<BrowserPlugin> it = loader.iterator();
-        while (it.hasNext())
+        for (BrowserPlugin plugin : ServiceManager.findBrowserPlugins())
         {
-            BrowserPlugin plugin = it.next();
             log.info("Init plugin: {}", plugin.getClass().getName());
             plugin.init(this);
         }
