@@ -268,6 +268,13 @@ public class BlockBrowser implements Browser
     }
 
     @Override
+    public void redrawPage()
+    {
+        if (contentCanvas != null && contentCanvas instanceof BrowserPanel)
+            ((BrowserPanel) contentCanvas).redrawPage();
+    }
+
+    @Override
     public Area getSelectedArea()
     {
         if (areaJTree == null)
@@ -1166,8 +1173,8 @@ public class BlockBrowser implements Browser
             {
                 public void actionPerformed(java.awt.event.ActionEvent e)
                 {
-                    ((BrowserPanel) contentCanvas).redrawPage();
-                    contentCanvas.repaint();
+                    redrawPage();
+                    updateDisplay();
                 }
             });
         }
