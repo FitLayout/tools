@@ -24,6 +24,7 @@ import org.fit.layout.api.AreaTreeOperator;
 import org.fit.layout.api.AreaTreeProvider;
 import org.fit.layout.api.BoxTreeProvider;
 import org.fit.layout.api.LogicalTreeProvider;
+import org.fit.layout.api.ParametrizedOperation;
 import org.fit.layout.api.ScriptObject;
 import org.fit.layout.api.ServiceManager;
 import org.fit.layout.model.AreaTree;
@@ -75,6 +76,15 @@ public class ScriptableProcessor extends BaseProcessor
     public List<String> getLogicalProviderIds()
     {
         return new ArrayList<String>(getLogicalProviders().keySet());
+    }
+    
+    public void setServiceParams(String serviceName, Map<String, Object> params)
+    {
+        ParametrizedOperation op = ServiceManager.findParmetrizedService(serviceName);
+        if (op != null)
+            ServiceManager.setServiceParams(op, params);
+        else
+            log.error("setServiceParams: Unknown service: {}", serviceName);
     }
     
     public Page renderPage(String providerName, Map<String, Object> params)

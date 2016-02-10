@@ -179,9 +179,16 @@ public class BlockBrowser implements Browser
         areaListeners = new LinkedList<AreaSelectionListener>();
         treeListeners = new LinkedList<TreeListener>();
         proc = new GUIProcessor() {
+            @Override
             protected void treesCompleted()
             {
                 refreshView();
+            }
+            @Override
+            public void setServiceParams(String serviceName, Map<String, Object> params)
+            {
+                super.setServiceParams(serviceName, params);
+                reloadServiceParams();
             }
         };
     }
@@ -384,6 +391,12 @@ public class BlockBrowser implements Browser
     public GUIProcessor getProcessor()
     {
         return proc;
+    }
+    
+    public void reloadServiceParams()
+    {
+        if (rendererParamsPanel instanceof ParamsPanel)
+            ((ParamsPanel) rendererParamsPanel).reloadParams();
     }
     
     //=============================================================================================================

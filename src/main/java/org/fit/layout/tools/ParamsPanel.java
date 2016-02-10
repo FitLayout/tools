@@ -173,6 +173,16 @@ public class ParamsPanel extends JPanel implements ChangeListener, DocumentListe
     }
     
     /**
+     * Sets the values for all inputs in the given parameter map.
+     * @param params The map of parametres
+     */
+    public void setParams(Map<String, Object> params)
+    {
+        for (Map.Entry<String, Object> entry : params.entrySet())
+            setParam(entry.getKey(), entry.getValue());
+    }
+    
+    /**
      * Saves the current parameter values to the operation.
      */
     public void saveParams()
@@ -183,6 +193,15 @@ public class ParamsPanel extends JPanel implements ChangeListener, DocumentListe
             if (directMode)
                 op.setParam(param, getParam(param));
         }
+    }
+    
+    public void reloadParams()
+    {
+        boolean a = autosave;
+        autosave = false;
+        this.params = ServiceManager.getServiceParams(op);
+        setParams(this.params);
+        autosave = a;
     }
     
     //======================================================================================
