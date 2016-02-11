@@ -395,8 +395,15 @@ public class BlockBrowser implements Browser
     
     public void reloadServiceParams()
     {
-        if (rendererParamsPanel instanceof ParamsPanel)
-            ((ParamsPanel) rendererParamsPanel).reloadParams();
+        reloadServicePanel(rendererParamsPanel);
+        reloadServicePanel(segmParamsPanel);
+        reloadServicePanel(logicalParamsPanel);
+    }
+    
+    private void reloadServicePanel(JPanel panel)
+    {
+        if (panel instanceof ParamsPanel)
+            ((ParamsPanel) panel).reloadParams();
     }
     
     //=============================================================================================================
