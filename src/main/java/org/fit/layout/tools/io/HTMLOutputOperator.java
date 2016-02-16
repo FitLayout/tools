@@ -155,6 +155,7 @@ public class HTMLOutputOperator extends BaseOperator
         String tagName = "div";
         
         String stag = "<" + tagName
+                        + " id=\"a" + a.getId() + "\""
                         + " style=\"" + getAreaStyle(a) + "\""
                         + ">";
 
@@ -193,6 +194,7 @@ public class HTMLOutputOperator extends BaseOperator
             {
                 indent(level, p);
                 String stag = "<span"
+                                + " id=\"b" + box.getId() + "\""
                                 + " style=\"" + getBoxStyle(a, box) + "\"" 
                                 + ">";
                 p.print(stag);
