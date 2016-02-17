@@ -291,7 +291,7 @@ public class ParamsPanel extends JPanel implements ChangeListener, DocumentListe
                     break;
                 case STRING:
                     Object[] srange = op.getParamRange(name);
-                    int maxlen = (srange == null) ? 0 : (int) srange[1];
+                    int maxlen = (srange == null) ? 10 : (int) srange[1];
                     JTextField tf = new JTextField(maxlen);
                     if (value != null)
                         tf.setText(value.toString());
