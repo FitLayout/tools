@@ -17,6 +17,8 @@ import org.fit.layout.model.AreaTree;
 import org.fit.layout.model.Border;
 import org.fit.layout.model.Box;
 import org.fit.layout.model.Box.Type;
+import org.fit.layout.model.ContentRect;
+import org.fit.layout.model.Page;
 import org.fit.layout.model.Rectangular;
 
 /**
@@ -32,24 +34,29 @@ public class HTMLOutputOperator extends BaseOperator
     /** Should we produce the HTML header and footer? */
     protected boolean produceHeader;
     
+    /** Should we produce the box tree only or should we rely on the area tree? */
+    protected boolean boxTreeOnly;
+    
     /** Path to the output file/ */
     protected String filename;
     
-    protected final String[] paramNames = { "filename", "produceHeader" };
-    protected final ValueType[] paramTypes = { ValueType.STRING, ValueType.BOOLEAN };
+    protected final String[] paramNames = { "filename", "produceHeader", "boxTreeOnly" };
+    protected final ValueType[] paramTypes = { ValueType.STRING, ValueType.BOOLEAN, ValueType.BOOLEAN };
 
 
     
     public HTMLOutputOperator()
     {
         produceHeader = true;
+        boxTreeOnly = false;
         filename = "out.html";
     }
 
-    public HTMLOutputOperator(String filename, boolean produceHeader)
+    public HTMLOutputOperator(String filename, boolean produceHeader, boolean boxTreeOnly)
     {
         this.filename = filename;
         this.produceHeader = produceHeader;
+        this.boxTreeOnly = boxTreeOnly;
     }
 
     @Override
@@ -92,7 +99,17 @@ public class HTMLOutputOperator extends BaseOperator
         this.produceHeader = produceHeader;
     }
 
-    public String getFilename()
+    public boolean getBoxTreeOnly() 
+    {
+		return boxTreeOnly;
+	}
+
+	public void setBoxTreeOnly(boolean boxTreeOnly) 
+	{
+		this.boxTreeOnly = boxTreeOnly;
+	}
+
+	public String getFilename()
     {
         return filename;
     }
@@ -116,7 +133,10 @@ public class HTMLOutputOperator extends BaseOperator
         try
         {
             PrintWriter out = new PrintWriter(filename);
-            dumpTo(atree, out);
+            if (boxTreeOnly)
+                dumpTo(atree.getPage(), out);
+            else
+                dumpTo(atree, out);
             out.close();
         } catch (FileNotFoundException e) {
             System.err.println("Couldn't create output HTML file " + filename);
@@ -126,7 +146,9 @@ public class HTMLOutputOperator extends BaseOperator
     //=====================================================================================================
     
     /**
-     * Formats the complete tag tree to an output stream
+     * Formats the complete area tree to an output stream.
+     * @param tree the area tree to be printed
+     * @param out a writer to be used for output
      */
     public void dumpTo(AreaTree tree, PrintWriter out)
     {
@@ -137,10 +159,37 @@ public class HTMLOutputOperator extends BaseOperator
             out.println("<head>");
             out.println("<title>" + tree.getRoot().getPage().getTitle() + "</title>");
             out.println("<meta charset=\"utf-8\">");
+            out.println("<meta name=\"generator\" content=\"FITLayout - area tree dump\">");
             out.println("</head>");
             out.println("<body>");
         }
-        recursiveDump(tree.getRoot(), 1, out);
+        recursiveDumpArea(tree.getRoot(), 1, out);
+        if (produceHeader)
+        {
+            out.println("</body>");
+            out.println("</html>");
+        }
+    }
+    
+    /**
+     * Formats the complete box tree to an output stream.
+     * @param tree the area tree to be printed
+     * @param out a writer to be used for output
+     */
+    public void dumpTo(Page page, PrintWriter out)
+    {
+        if (produceHeader)
+        {
+            out.println("<!DOCTYPE html>");
+            out.println("<html>");
+            out.println("<head>");
+            out.println("<title>" + page.getTitle() + "</title>");
+            out.println("<meta charset=\"utf-8\">");
+            out.println("<meta name=\"generator\" content=\"FITLayout - box tree dump\">");
+            out.println("</head>");
+            out.println("<body>");
+        }
+        recursiveDumpBoxes(page.getRoot(), 1, out);
         if (produceHeader)
         {
             out.println("</body>");
@@ -150,7 +199,7 @@ public class HTMLOutputOperator extends BaseOperator
     
     //=====================================================================
     
-    private void recursiveDump(Area a, int level, java.io.PrintWriter p)
+    private void recursiveDumpArea(Area a, int level, java.io.PrintWriter p)
     {
         String tagName = "div";
         
@@ -167,7 +216,7 @@ public class HTMLOutputOperator extends BaseOperator
             p.println(stag);
             
             for (int i = 0; i < a.getChildCount(); i++)
-                recursiveDump(a.getChildArea(i), level+1, p);
+                recursiveDumpArea(a.getChildArea(i), level+1, p);
             
             indent(level, p);
             p.println(etag);
@@ -176,14 +225,14 @@ public class HTMLOutputOperator extends BaseOperator
         {
             indent(level, p);
             p.println(stag);
-            dumpBoxes(a, p, level+1);
+            dumpAreaBoxes(a, p, level+1);
             indent(level, p);
             p.println(etag);
         }
         
     }
     
-    private void dumpBoxes(Area a, java.io.PrintWriter p, int level)
+    private void dumpAreaBoxes(Area a, java.io.PrintWriter p, int level)
     {
         Vector<Box> boxes = a.getBoxes();
         for (Box box : boxes)
@@ -201,6 +250,39 @@ public class HTMLOutputOperator extends BaseOperator
                 p.print(HTMLEntities(box.getText()));
                 p.println("</span>");
             }
+        }
+    }
+    
+    private void recursiveDumpBoxes(Box box, int level, java.io.PrintWriter p)
+    {
+        if (box.getType() == Type.TEXT_CONTENT)
+        {
+            indent(level, p);
+            String stag = "<span"
+                            + " id=\"b" + box.getId() + "\""
+                            + " style=\"" + getBoxStyle(box.getParentBox(), box) + "\"" 
+                            + ">";
+            p.print(stag);
+            p.print(HTMLEntities(box.getText()));
+            p.println("</span>");
+        }
+        else
+        {
+            Style style = getBoxStyle(box.getParentBox(), box);
+            style.put("width", getContentWidth(box), "px");
+            style.put("height", getContentHeight(box), "px");
+            String stag = "<div"
+                            + " id=\"b" + box.getId() + "\""
+                            + " style=\"" + style + "\"" 
+                            + ">";
+            indent(level, p);
+            p.println(stag);
+            
+            for (int i = 0; i < box.getChildCount(); i++)
+            	recursiveDumpBoxes(box.getChildBox(i), level + 1, p);
+            
+            indent(level, p);
+            p.println("</div>");
         }
     }
     
@@ -250,7 +332,7 @@ public class HTMLOutputOperator extends BaseOperator
         return style.toString();
     }
     
-    protected String getBoxStyle(Area parent, Box box)
+    protected Style getBoxStyle(ContentRect parent, Box box)
     {
         int px = 0;
         int py = 0;
@@ -259,13 +341,20 @@ public class HTMLOutputOperator extends BaseOperator
             px = parent.getX1() + parent.getBorderStyle(Border.Side.LEFT).getWidth();
             py = parent.getY1() + parent.getBorderStyle(Border.Side.TOP).getWidth();
         }
-            
-        Rectangular pos = box.getVisualBounds();
+        return getBoxStyle(box, px, py);
+    }
+
+	protected Style getBoxStyle(Box box, int px, int py) 
+	{
+		Rectangular pos = box.getVisualBounds();
         Style style = new Style();
         style.put("position", "absolute");
         style.put("top", (pos.getY1() - py), UNIT);
         style.put("left", (pos.getX1() - px), UNIT);
         style.put("color", (colorString(box.getColor())));
+        String bgcol = colorString(box.getBackgroundColor());
+        if (!bgcol.isEmpty())
+            style.put("background", bgcol);
         style.put("font-family", box.getFontFamily());
         style.put("font-size", box.getFontSize(), UNIT);
         style.put("font-weight", ((box.getFontWeight() < 0.5f)?"normal":"bold"));
@@ -284,9 +373,8 @@ public class HTMLOutputOperator extends BaseOperator
             if (!brd.isEmpty())
                 style.put("border-" + side.toString(), brd);
         }
-        
-        return style.toString();
-    }
+		return style;
+	}
     
     private String getBorderStyle(Border border)
     {
@@ -300,6 +388,16 @@ public class HTMLOutputOperator extends BaseOperator
         }
         else
             return "";
+    }
+    
+    private int getContentWidth(Box box)
+    {
+        return box.getWidth() - box.getLeftBorder() - box.getRightBorder();
+    }
+    
+    private int getContentHeight(Box box)
+    {
+        return box.getHeight() - box.getTopBorder() - box.getBottomBorder();
     }
     
     private void indent(int level, java.io.PrintWriter p)
