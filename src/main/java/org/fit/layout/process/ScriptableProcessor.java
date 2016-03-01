@@ -224,7 +224,9 @@ public class ScriptableProcessor extends BaseProcessor
     
     public boolean execInternal(String scriptName) throws ScriptException
     {
-        InputStream is = ClassLoader.getSystemResourceAsStream(scriptName);
+        if (!scriptName.startsWith("/"))
+            scriptName = "/" + scriptName;
+        InputStream is = ScriptableProcessor.class.getResourceAsStream(scriptName);
         if (is != null)
         {
             getEngine().eval(new InputStreamReader(is));
