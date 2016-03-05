@@ -187,6 +187,14 @@ public class ScriptableProcessor extends BaseProcessor
             engine = factory.getEngineByName("JavaScript");
             engine.put("proc", this);
             
+            //rhino compatibility workaround, println should be replaced by print in all occurences
+            try
+            {
+                engine.eval("if (typeof println == 'undefined') this.println = print;");
+            } catch (ScriptException e) {
+                e.printStackTrace();
+            }
+            
             Map<String, ScriptObject> scriptObjects = ServiceManager.findScriptObjects();
             for (Map.Entry<String, ScriptObject> obj : scriptObjects.entrySet())
             {
