@@ -1857,7 +1857,7 @@ public class BlockBrowser implements Browser
         return rendererLabel;
     }
 
-    private JComboBox<BoxTreeProvider> getRendererCombo()
+    protected JComboBox<BoxTreeProvider> getRendererCombo()
     {
         if (rendererCombo == null)
         {
@@ -1935,7 +1935,7 @@ public class BlockBrowser implements Browser
         return lblSegmentator;
     }
 
-    private JComboBox<AreaTreeProvider> getSegmentatorCombo()
+    protected JComboBox<AreaTreeProvider> getSegmentatorCombo()
     {
         if (segmentatorCombo == null)
         {
@@ -2032,7 +2032,7 @@ public class BlockBrowser implements Browser
         return lblLogicalBuilder;
     }
 
-    private JComboBox<LogicalTreeProvider> getLogicalCombo()
+    protected JComboBox<LogicalTreeProvider> getLogicalCombo()
     {
         if (logicalCombo == null)
         {
