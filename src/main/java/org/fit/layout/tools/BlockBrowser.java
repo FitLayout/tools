@@ -600,7 +600,10 @@ public class BlockBrowser implements Browser
         
         Vector<Vector <String>> vals = new Vector<Vector <String>>();
         //vals.add(infoTableData("Layout", area.getLayoutType().toString()));
-        vals.add(infoTableData("GP", area.getTopology().getPosition().toString()));
+        if (area.getParentArea() == null)
+            vals.add(infoTableData("GP", "---"));
+        else
+            vals.add(infoTableData("GP", area.getParentArea().getTopology().getPosition(area).toString()));
         vals.add(infoTableData("Tags", tagProbabilityString(area.getTags())));
         //if (proc.getVisualClassifier() != null)
         //    vals.add(infoTableData("V. class", proc.getVisualClassifier().classifyArea(area)));
@@ -609,7 +612,7 @@ public class BlockBrowser implements Browser
         //vals.add(infoTableData("Importance", String.valueOf(area.getImportance())));
         //vals.add(infoTableData("Separated", (area.isSeparated()) ? "true" : "false"));
         //vals.add(infoTableData("Atomic", (area.isAtomic()) ? "true" : "false"));
-        vals.add(infoTableData("Indent scale", area.getTopology().getMinIndent() + " - " + area.getTopology().getMaxIndent()));
+        //vals.add(infoTableData("Indent scale", area.getTopology().getMinIndent() + " - " + area.getTopology().getMaxIndent()));
         //vals.add(infoTableData("Indent value", String.valueOf(proc.getFeatures().getIndentation(area))));
         //vals.add(infoTableData("Centered", (area.isCentered()) ? "true" : "false"));
         //vals.add(infoTableData("Coherent", (area.isCoherent()) ? "true" : "false"));
