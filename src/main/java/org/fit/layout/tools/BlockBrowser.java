@@ -22,6 +22,7 @@ import org.fit.layout.api.ServiceManager;
 import org.fit.layout.gui.AreaSelectionListener;
 import org.fit.layout.gui.Browser;
 import org.fit.layout.gui.BrowserPlugin;
+import org.fit.layout.gui.RectangleSelectionListener;
 import org.fit.layout.gui.TreeListener;
 import org.fit.layout.impl.DefaultContentRect;
 import org.fit.layout.impl.DefaultTag;
@@ -31,6 +32,7 @@ import org.fit.layout.model.Box;
 import org.fit.layout.model.LogicalArea;
 import org.fit.layout.model.LogicalAreaTree;
 import org.fit.layout.model.Page;
+import org.fit.layout.model.Rectangular;
 import org.fit.layout.model.Tag;
 import org.fit.layout.process.GUIProcessor;
 import org.slf4j.Logger;
@@ -70,6 +72,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.FlowLayout;
+import java.awt.Graphics;
 
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
@@ -93,6 +96,7 @@ public class BlockBrowser implements Browser
     public static BlockBrowser browser;
 
     public static final float TAG_PROBABILITY_THRESHOLD = 0.3f; 
+    private static final Color selectionColor = new Color(127, 127, 255, 127);
     
     private BrowserConfig config;
     private GUIProcessor proc;
@@ -100,11 +104,15 @@ public class BlockBrowser implements Browser
     private boolean dispFinished = false;
     private boolean areasync = true;
     private boolean logsync = true;
+    private boolean rectSelection = false; //rectangle area selection in progress
+    private int rectX1, rectY1; //rectangle selection start point
+    private Selection selection; //selection box
     private Set<String> tagTypes; //all known tag types in the area tree
     private Set<String> tagNames; //all known area names in the area tree
     
     private List<AreaSelectionListener> areaListeners;
     private List<TreeListener> treeListeners;
+    private List<RectangleSelectionListener> rectangleListeners;
 
     private JFrame mainWindow = null;  //  @jve:decl-index=0:visual-constraint="-239,28"
     private JPanel container = null;
@@ -176,8 +184,9 @@ public class BlockBrowser implements Browser
     public BlockBrowser()
     {
         config = new BrowserConfig();
-        areaListeners = new LinkedList<AreaSelectionListener>();
-        treeListeners = new LinkedList<TreeListener>();
+        areaListeners = new LinkedList<>();
+        treeListeners = new LinkedList<>();
+        rectangleListeners = new LinkedList<>();
         proc = new GUIProcessor() {
             @Override
             protected void treesCompleted()
@@ -302,6 +311,18 @@ public class BlockBrowser implements Browser
     }
     
     @Override
+    public void addRectangleSelectionListener(RectangleSelectionListener listener)
+    {
+        rectangleListeners.add(listener);
+    }
+
+    @Override
+    public void removeRectangleSelectionListener(RectangleSelectionListener listener)
+    {
+        rectangleListeners.remove(listener);
+    }
+
+    @Override
 	public void setPage(Page page) 
     {
     	
@@ -314,8 +335,14 @@ public class BlockBrowser implements Browser
                 System.out.println("Click: " + e.getX() + ":" + e.getY());
                 canvasClick(e.getX(), e.getY());
             }
-            public void mousePressed(MouseEvent e) { }
-            public void mouseReleased(MouseEvent e) { }
+            public void mousePressed(MouseEvent e) 
+            { 
+                canvasPress(e.getX(), e.getY());
+            }
+            public void mouseReleased(MouseEvent e)
+            {
+                canvasRelease(e.getX(), e.getY());
+            }
             public void mouseEntered(MouseEvent e) { }
             public void mouseExited(MouseEvent e) 
             {
@@ -323,7 +350,10 @@ public class BlockBrowser implements Browser
             }
         });
         contentCanvas.addMouseMotionListener(new MouseMotionListener() {
-            public void mouseDragged(MouseEvent e) { }
+            public void mouseDragged(MouseEvent e)
+            { 
+                canvasDrag(e.getX(), e.getY());
+            }
             public void mouseMoved(MouseEvent e) 
             { 
                 String s = "Absolute: " + e.getX() + ":" + e.getY();
@@ -346,6 +376,7 @@ public class BlockBrowser implements Browser
                     }*/
                 }
                 statusText.setText(s);
+                canvasMove(e.getX(), e.getY());
             }
         });
         contentScroll.setViewportView(contentCanvas);
@@ -473,7 +504,14 @@ public class BlockBrowser implements Browser
     private JPanel createContentCanvas()
     {
         if (contentCanvas != null)
+        {
             contentCanvas = new BrowserPanel(proc.getPage());
+            contentCanvas.setLayout(null);
+            selection = new Selection();
+            contentCanvas.add(selection);
+            selection.setVisible(false);
+            selection.setLocation(0, 0);
+        }
         return contentCanvas;
     }
     
@@ -523,6 +561,64 @@ public class BlockBrowser implements Browser
             }
             extractButton.setSelected(false);
         }*/
+    }
+    
+    private void canvasPress(int x, int y)
+    {
+        selection.setVisible(false);
+        if (!rectangleListeners.isEmpty())
+        {
+            rectSelection = true;
+            rectX1 = x;
+            rectY1 = y;
+            selection.setLocation(x, y);
+            selection.setSize(0, 0);
+            selection.setVisible(true);
+        }
+    }
+    
+    private void canvasRelease(int x, int y)
+    {
+        if (rectSelection)
+        {
+            rectSelection = false;
+            Rectangular rect = new Rectangular(rectX1, rectY1, x, y);
+            for (RectangleSelectionListener listener : rectangleListeners)
+                listener.rectangleCreated(rect);
+        }
+    }
+    
+    private void canvasMove(int x, int y)
+    {
+    }
+    
+    private void canvasDrag(int x, int y)
+    {
+        if (rectSelection)
+        {
+            int x1 = Math.min(x, rectX1);
+            int y1 = Math.min(y, rectY1);
+            int x2 = Math.max(x, rectX1);
+            int y2 = Math.max(y, rectY1);
+            selection.setLocation(x1, y1);
+            selection.setSize(x2 - x1, y2 - y1);
+            updateDisplay();
+        }
+    }
+    
+    @Override
+    public void setSelection(Rectangular rect)
+    {
+        selection.setLocation(rect.getX1(), rect.getY1());
+        selection.setSize(rect.getWidth(), rect.getHeight());
+        selection.setVisible(true);
+    }
+
+    @Override
+    public void clearSelection()
+    {
+        selection.setSize(0, 0);
+        selection.setVisible(false);
     }
     
     private void showBoxInTree(Box node)
@@ -2079,6 +2175,17 @@ public class BlockBrowser implements Browser
             logicalAutorunCheckbox = new JCheckBox("Run automatically");
         }
         return logicalAutorunCheckbox;
+    }
+
+    private class Selection extends JPanel
+    {
+        private static final long serialVersionUID = 1L;
+        public void paintComponent(Graphics g)
+        {
+            //super.paintComponent(g);
+            g.setColor(selectionColor);
+            g.fillRect(0, 0, getWidth(), getHeight());
+        }
     }
     
     public static void main(String[] args)
