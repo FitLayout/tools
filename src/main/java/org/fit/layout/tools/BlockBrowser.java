@@ -48,6 +48,7 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
@@ -237,6 +238,24 @@ public class BlockBrowser implements Browser
             logicalTree.setModel(new LogicalTreeModel(proc.getLogicalAreaTree().getRoot()));
     }
     
+    @Override
+    public void displayErrorMessage(String text)
+    {
+        JOptionPane.showMessageDialog(mainWindow,
+                text,
+                "Error",
+                JOptionPane.ERROR_MESSAGE);
+    }
+
+    @Override
+    public void displayInfoMessage(String text)
+    {
+        JOptionPane.showMessageDialog(mainWindow,
+                text,
+                "Info",
+                JOptionPane.INFORMATION_MESSAGE);
+    }
+
     @Override
     public void addToolBar(JToolBar toolbar)
     {
