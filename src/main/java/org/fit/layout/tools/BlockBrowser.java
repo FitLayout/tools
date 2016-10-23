@@ -2129,6 +2129,8 @@ public class BlockBrowser implements Browser
             logicalChoicePanel.add(getLogicalCombo());
             logicalChoicePanel.add(getLogicalRunButton());
             logicalChoicePanel.add(getLogicalAutorunCheckbox());
+            if (getLogicalCombo().getModel().getSize() == 0)
+                logicalChoicePanel.setVisible(false);
         }
         return logicalChoicePanel;
     }
@@ -2167,7 +2169,6 @@ public class BlockBrowser implements Browser
             Vector<LogicalTreeProvider> providers = new Vector<LogicalTreeProvider>(proc.getLogicalProviders().values());
             DefaultComboBoxModel<LogicalTreeProvider> model = new DefaultComboBoxModel<LogicalTreeProvider>(providers);
             logicalCombo.setModel(model);
-            
         }
         return logicalCombo;
     }
