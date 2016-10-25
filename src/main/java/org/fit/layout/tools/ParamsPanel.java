@@ -197,11 +197,14 @@ public class ParamsPanel extends JPanel implements ChangeListener, DocumentListe
     
     public void reloadParams()
     {
-        boolean a = autosave;
-        autosave = false;
-        this.params = ServiceManager.getServiceParams(op);
-        setParams(this.params);
-        autosave = a;
+        if (op != null)
+        {
+            boolean a = autosave;
+            autosave = false;
+            this.params = ServiceManager.getServiceParams(op);
+            setParams(this.params);
+            autosave = a;
+        }
     }
     
     //======================================================================================
