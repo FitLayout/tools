@@ -6,6 +6,7 @@
 package org.fit.layout.process;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -24,12 +25,15 @@ import org.fit.layout.api.AreaTreeOperator;
 import org.fit.layout.api.AreaTreeProvider;
 import org.fit.layout.api.BoxTreeProvider;
 import org.fit.layout.api.LogicalTreeProvider;
+import org.fit.layout.api.OutputDisplay;
 import org.fit.layout.api.ParametrizedOperation;
 import org.fit.layout.api.ScriptObject;
 import org.fit.layout.api.ServiceManager;
+import org.fit.layout.model.Area;
 import org.fit.layout.model.AreaTree;
 import org.fit.layout.model.LogicalAreaTree;
 import org.fit.layout.model.Page;
+import org.fit.layout.tools.ImageOutputDisplay;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -174,6 +178,48 @@ public class ScriptableProcessor extends BaseProcessor
         }
         treesCompleted();
         return getLogicalAreaTree();
+    }
+    
+    /**
+     * Draws the current page to an image file.
+     * @param path The path to the destination image file.
+     */
+    public void drawToImage(String path)
+    {
+        try
+        {
+            ImageOutputDisplay disp = new ImageOutputDisplay(getPage().getWidth(), getPage().getHeight());
+            disp.drawPage(getPage());
+            disp.saveTo(path);
+        } catch (IOException e) {
+            log.error("Couldn't write to " + path + ": " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Draws the page to an image file and marks selected areas in the image.
+     * @param path The path to the destination image file.
+     * @param areaNames A substring of the names of areas that should be marked in the image. When set to {@code null}, all the areas are marked.
+     */
+    public void drawToImageWithAreas(String path, String areaNames)
+    {
+        try
+        {
+            ImageOutputDisplay disp = new ImageOutputDisplay(getPage().getWidth(), getPage().getHeight());
+            disp.drawPage(getPage());
+            showAreas(disp, getAreaTree().getRoot(), areaNames);
+            disp.saveTo(path);
+        } catch (IOException e) {
+            log.error("Couldn't write to " + path + ": " + e.getMessage());
+        }
+    }
+    
+    private void showAreas(OutputDisplay disp, Area root, String nameSubstring)
+    {
+        if (nameSubstring == null || root.toString().contains(nameSubstring))
+            disp.drawExtent(root);
+        for (int i = 0; i < root.getChildCount(); i++)
+            showAreas(disp, root.getChildArea(i), nameSubstring);
     }
     
     //======================================================================================================

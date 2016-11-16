@@ -46,6 +46,11 @@ public class OutputDisplayImpl implements OutputDisplay
         return g;
     }
 
+    public void setGraphics(Graphics2D g)
+    {
+        this.g = g;
+    }
+    
     @Override
     public void drawPage(Page page)
     {
