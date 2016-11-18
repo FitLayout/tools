@@ -233,9 +233,19 @@ public class BlockBrowser implements Browser
     {
         boxTree.setModel(new BoxTreeModel(proc.getPage().getRoot()));
         if (proc.getAreaTree() != null)
+        {
+            TreePath path = areaJTree.getSelectionPath();
             areaJTree.setModel(new AreaTreeModel(proc.getAreaTree().getRoot()));
+            if (path != null)
+                areaJTree.setSelectionPath(path);
+        }
         if (proc.getLogicalAreaTree() != null)
+        {
+            TreePath path = logicalTree.getSelectionPath();
             logicalTree.setModel(new LogicalTreeModel(proc.getLogicalAreaTree().getRoot()));
+            if (path != null)
+                logicalTree.setSelectionPath(path);
+        }
     }
     
     @Override
