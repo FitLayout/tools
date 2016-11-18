@@ -1682,6 +1682,7 @@ public class BlockBrowser implements Browser
         if (infoSplitter == null)
         {
             infoSplitter = new JSplitPane();
+            infoSplitter.setResizeWeight(1.0);
             infoSplitter.setDividerLocation(1050);
             infoSplitter.setLeftComponent(getContentPanel());
             infoSplitter.setRightComponent(getObjectInfoPanel());
