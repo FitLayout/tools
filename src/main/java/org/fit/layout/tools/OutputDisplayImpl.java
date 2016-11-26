@@ -138,9 +138,12 @@ public class OutputDisplayImpl implements OutputDisplay
     private void drawBorder(Graphics2D g, int x1, int y1, int x2, int y2,
             int width, int right, int down, Border style, boolean reverse)
     {
-        g.setColor(style.getColor());
-        g.setStroke(new BorderStroke(width, style.getStyle(), reverse));
-        g.draw(new Line2D.Double(x1 + right, y1 + down, x2 + right, y2 + down));
+        if (style.getWidth() >= 1)
+        {
+            g.setColor(style.getColor());
+            g.setStroke(new BorderStroke(width, style.getStyle(), reverse));
+            g.draw(new Line2D.Double(x1 + right, y1 + down, x2 + right, y2 + down));
+        }
     }
 
     
