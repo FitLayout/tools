@@ -1,5 +1,6 @@
 package org.fit.layout.tools;
 
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -32,6 +33,7 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.event.ListSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
@@ -212,6 +214,8 @@ public class OperatorConfigWindow extends JFrame
         contentPane.add(availScroll, gbc_availScroll);
         
         availList = new JTree();
+        availList.setCellRenderer(new TooltipTreeRenderer());
+        javax.swing.ToolTipManager.sharedInstance().registerComponent(availList);
         availScroll.setViewportView(availList);
         
         paramsPanel = new ParamsPanel();
@@ -306,5 +310,34 @@ public class OperatorConfigWindow extends JFrame
     }
     protected ParamsPanel getParamsPanel() {
         return paramsPanel;
+    }
+
+
+    public class TooltipTreeRenderer extends DefaultTreeCellRenderer
+    {
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public Component getTreeCellRendererComponent(JTree tree, Object value,
+                boolean sel, boolean expanded, boolean leaf, int row,
+                boolean hasFocus)
+        {
+            AreaTreeOperator op = null;
+            if (value instanceof DefaultMutableTreeNode)
+            {
+                Object o = ((DefaultMutableTreeNode) value).getUserObject();
+                if (o instanceof AreaTreeOperator)
+                    op = (AreaTreeOperator) o;
+            }
+            else if (value instanceof AreaTreeOperator)
+                op = (AreaTreeOperator) value;
+            
+            final Component rc = super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
+            if (op != null)
+                this.setToolTipText(op.getDescription());
+            else
+                this.setToolTipText(null);
+            return rc;
+        }
     }
 }
