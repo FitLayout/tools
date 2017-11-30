@@ -4,8 +4,13 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import javax.swing.DefaultComboBoxModel;
@@ -15,6 +20,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTree;
 import javax.swing.border.EmptyBorder;
 
 import org.fit.layout.api.AreaTreeOperator;
@@ -25,17 +31,20 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
 import javax.swing.event.ListSelectionListener;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeModel;
+import javax.swing.tree.TreePath;
 import javax.swing.event.ListSelectionEvent;
 
 public class OperatorConfigWindow extends JFrame
 {
     private static final long serialVersionUID = 1L;
     private GUIProcessor proc;
-    private int aopIndex;
     private int uopIndex;
     private JPanel contentPane;
     private JList<AreaTreeOperator> usedList;
-    private JList<AreaTreeOperator> availList;
+    private JTree availList;
     private ParamsPanel paramsPanel;
 
     public OperatorConfigWindow(GUIProcessor proc)
@@ -48,7 +57,7 @@ public class OperatorConfigWindow extends JFrame
     public void initWindow()
     {
         setTitle("Area Operators");
-        setBounds(100, 100, 800, 300);
+        setBounds(100, 100, 1200, 600);
         setMinimumSize(new Dimension(450, 300));
         contentPane = new JPanel();
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -119,7 +128,7 @@ public class OperatorConfigWindow extends JFrame
                     Collections.swap(proc.getSelectedOperators(), i, i - 1);
                     Collections.swap(proc.getOperatorParams(), i, i - 1);
                     uopIndex = i - 1;
-                    updateLists();
+                    updateUsedList();
                 }
             }
         });
@@ -138,7 +147,7 @@ public class OperatorConfigWindow extends JFrame
                     Collections.swap(proc.getSelectedOperators(), i + 1, i);
                     Collections.swap(proc.getOperatorParams(), i + 1, i);
                     uopIndex = i + 1;
-                    updateLists();
+                    updateUsedList();
                 }
             }
         });
@@ -152,12 +161,17 @@ public class OperatorConfigWindow extends JFrame
         btnLeft.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) 
             {
-                AreaTreeOperator op = availList.getSelectedValue();
-                if (op != null)
+                TreePath selPath = availList.getSelectionPath();
+                if (selPath != null)
                 {
-                    proc.getSelectedOperators().add(op);
-                    proc.getOperatorParams().add(ServiceManager.getServiceParams(op));
-                    updateLists();
+                    Object sel = ((DefaultMutableTreeNode) selPath.getLastPathComponent()).getUserObject();
+                    if (sel instanceof AreaTreeOperator)
+                    {
+                        AreaTreeOperator op = (AreaTreeOperator) sel;
+                        proc.getSelectedOperators().add(op);
+                        proc.getOperatorParams().add(ServiceManager.getServiceParams(op));
+                        updateLists();
+                    }
                 }
             }
         });
@@ -197,14 +211,7 @@ public class OperatorConfigWindow extends JFrame
         gbc_availScroll.gridy = 1;
         contentPane.add(availScroll, gbc_availScroll);
         
-        availList = new JList<AreaTreeOperator>();
-        availList.addListSelectionListener(new ListSelectionListener() {
-            public void valueChanged(ListSelectionEvent e) 
-            {
-                if (availList.getSelectedIndex() != -1)
-                    aopIndex = availList.getSelectedIndex();
-            }
-        });
+        availList = new JTree();
         availScroll.setViewportView(availList);
         
         paramsPanel = new ParamsPanel();
@@ -240,15 +247,52 @@ public class OperatorConfigWindow extends JFrame
                 return o1.getName().compareTo(o2.getName());
             }
         });
+        availList.setModel(createAvailTree(avail));
+        for (int i = 0; i < availList.getRowCount(); i++) {
+            availList.expandRow(i);
+        }
+        updateUsedList();
+    }
+
+    private void updateUsedList()
+    {
         Vector<AreaTreeOperator> used = proc.getSelectedOperators();
-        availList.setModel(new DefaultComboBoxModel<AreaTreeOperator>(avail));
         usedList.setModel(new DefaultComboBoxModel<AreaTreeOperator>(used));
         
         //try to restore selection
-        if (aopIndex != -1)
-            availList.setSelectedIndex(aopIndex);
         if (uopIndex != -1)
             usedList.setSelectedIndex(uopIndex);
+    }
+    
+    private TreeModel createAvailTree(Collection<AreaTreeOperator> ops)
+    {
+        //create category map
+        Map<String, List<AreaTreeOperator>> opmap = new HashMap<>();
+        for (AreaTreeOperator op : ops)
+        {
+            String cat = op.getCategory();
+            List<AreaTreeOperator> oplist = opmap.get(cat);
+            if (oplist == null)
+            {
+                oplist = new ArrayList<>();
+                opmap.put(cat, oplist);
+            }
+            oplist.add(op);
+        }
+        //create the tree
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode("Operators");
+        List<String> keys = new ArrayList<>(opmap.keySet());
+        Collections.sort(keys);
+        for (String cat : keys)
+        {
+            DefaultMutableTreeNode catnode = new DefaultMutableTreeNode(cat);
+            List<AreaTreeOperator> oplist = opmap.get(cat);
+            for (AreaTreeOperator op : oplist)
+                catnode.add(new DefaultMutableTreeNode(op));
+            root.add(catnode);
+        }
+        //create the model
+        return new DefaultTreeModel(root);
     }
     
     protected JList<AreaTreeOperator> getUsedList()
@@ -256,7 +300,7 @@ public class OperatorConfigWindow extends JFrame
         return usedList;
     }
 
-    protected JList<AreaTreeOperator> getAvailList()
+    protected JTree getAvailList()
     {
         return availList;
     }
