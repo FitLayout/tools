@@ -78,6 +78,12 @@ public class HTMLOutputOperator extends BaseOperator
     }
 
     @Override
+    public String getCategory()
+    {
+        return "output";
+    }
+
+    @Override
     public String[] getParamNames()
     {
         return paramNames;
