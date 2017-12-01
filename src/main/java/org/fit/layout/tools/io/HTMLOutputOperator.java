@@ -7,11 +7,16 @@ package org.fit.layout.tools.io;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import org.fit.layout.api.Parameter;
 import org.fit.layout.impl.BaseOperator;
+import org.fit.layout.impl.ParameterBoolean;
+import org.fit.layout.impl.ParameterString;
 import org.fit.layout.model.Area;
 import org.fit.layout.model.AreaTree;
 import org.fit.layout.model.Border;
@@ -40,10 +45,6 @@ public class HTMLOutputOperator extends BaseOperator
     /** Path to the output file/ */
     protected String filename;
     
-    protected final String[] paramNames = { "filename", "produceHeader", "boxTreeOnly" };
-    protected final ValueType[] paramTypes = { ValueType.STRING, ValueType.BOOLEAN, ValueType.BOOLEAN };
-
-
     
     public HTMLOutputOperator()
     {
@@ -84,17 +85,15 @@ public class HTMLOutputOperator extends BaseOperator
     }
 
     @Override
-    public String[] getParamNames()
+    public List<Parameter> defineParams()
     {
-        return paramNames;
+        List<Parameter> ret = new ArrayList<>(3);
+        ret.add(new ParameterString("filename"));
+        ret.add(new ParameterBoolean("produceHeader"));
+        ret.add(new ParameterBoolean("boxTreeOnly"));
+        return ret;
     }
-
-    @Override
-    public ValueType[] getParamTypes()
-    {
-        return paramTypes;
-    }
-
+    
     public boolean getProduceHeader()
     {
         return produceHeader;

@@ -18,8 +18,13 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+import org.fit.layout.api.Parameter;
 import org.fit.layout.api.ParametrizedOperation;
 import org.fit.layout.api.ServiceManager;
+import org.fit.layout.impl.ParameterBoolean;
+import org.fit.layout.impl.ParameterFloat;
+import org.fit.layout.impl.ParameterInt;
+import org.fit.layout.impl.ParameterString;
 
 
 /**
@@ -243,64 +248,52 @@ public class ParamsPanel extends JPanel implements ChangeListener, DocumentListe
      */
     protected void addParamFields()
     {
-        String[] paramNames = op.getParamNames();
-        ParametrizedOperation.ValueType[] types = op.getParamTypes();
-        
-        for (int i = 0; i < paramNames.length; i++)
+        for (Parameter param : op.getParams())
         {
-            if (types[i] != ParametrizedOperation.ValueType.BOOLEAN)
+            if (!(param instanceof ParameterBoolean))
             {
-                JLabel lbl = new JLabel(paramNames[i]);
+                JLabel lbl = new JLabel(param.getName());
                 add(lbl);
             }
             
-            String name = paramNames[i];
+            String name = param.getName();
             Object value = params.get(name); 
             Component comp = null;
-            switch (types[i])
+            if (param instanceof ParameterBoolean)
             {
-                case BOOLEAN:
-                    JCheckBox cb = new JCheckBox(name);
-                    if (value != null && value instanceof Boolean)
-                        cb.setSelected((Boolean) value);
-                    cb.addChangeListener(this);
-                    comp = cb;
-                    break;
-                case FLOAT:
-                    Object[] range = op.getParamRange(name);
-                    SpinnerNumberModel model;
-                    if (range == null)
-                        model = new SpinnerNumberModel(0.0, -1000.0, 1000.0, 0.1);
-                    else
-                        model = new SpinnerNumberModel(0.0, (float) range[0], (float) range[1], 0.1);
-                    JSpinner js = new JSpinner(model);
-                    if (value != null && (value instanceof Integer || value instanceof Float || value instanceof Double))
-                        js.setValue(value);
-                    js.addChangeListener(this);
-                    comp = js;
-                    break;
-                case INTEGER:
-                    Object[] irange = op.getParamRange(name);
-                    SpinnerNumberModel imodel;
-                    if (irange == null)
-                        imodel = new SpinnerNumberModel(0, -1000, 1000, 1);
-                    else
-                        imodel = new SpinnerNumberModel(0, (int) irange[0], (int) irange[1], 1);
-                    JSpinner jsi = new JSpinner(imodel);
-                    if (value != null && value instanceof Integer)
-                        jsi.setValue(value);
-                    jsi.addChangeListener(this);
-                    comp = jsi;
-                    break;
-                case STRING:
-                    Object[] srange = op.getParamRange(name);
-                    int maxlen = (srange == null) ? 10 : (int) srange[1];
-                    JTextField tf = new JTextField(maxlen);
-                    if (value != null)
-                        tf.setText(value.toString());
-                    tf.getDocument().addDocumentListener(this);
-                    comp = tf;
-                    break;
+                JCheckBox cb = new JCheckBox(name);
+                if (value != null && value instanceof Boolean)
+                    cb.setSelected((Boolean) value);
+                cb.addChangeListener(this);
+                comp = cb;
+            }
+            else if (param instanceof ParameterFloat)
+            {
+                SpinnerNumberModel model;
+                model = new SpinnerNumberModel(((ParameterFloat) param).getMinValue(), ((ParameterFloat) param).getMinValue(), ((ParameterFloat) param).getMaxValue(), 0.1);
+                JSpinner js = new JSpinner(model);
+                if (value != null && (value instanceof Integer || value instanceof Float || value instanceof Double))
+                    js.setValue(value);
+                js.addChangeListener(this);
+                comp = js;
+            }
+            else if (param instanceof ParameterInt)
+            {
+                SpinnerNumberModel imodel;
+                imodel = new SpinnerNumberModel(((ParameterInt) param).getMinValue(), ((ParameterInt) param).getMinValue(), ((ParameterInt) param).getMaxValue(), 1);
+                JSpinner jsi = new JSpinner(imodel);
+                if (value != null && value instanceof Integer)
+                    jsi.setValue(value);
+                jsi.addChangeListener(this);
+                comp = jsi;
+            }
+            else if (param instanceof ParameterString)
+            {
+                JTextField tf = new JTextField(((ParameterString) param).getMaxLength());
+                if (value != null)
+                    tf.setText(value.toString());
+                tf.getDocument().addDocumentListener(this);
+                comp = tf;
             }
             fields.put(name, comp);
             add(comp);
