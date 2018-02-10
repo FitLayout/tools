@@ -61,7 +61,7 @@ public class OutputDisplayImpl implements OutputDisplay
     {
         drawBox(root);
         for (int i = 0; i < root.getChildCount(); i++)
-            recursivelyDrawBoxes(root.getChildBox(i));
+            recursivelyDrawBoxes(root.getChildAt(i));
     }
     
     @Override

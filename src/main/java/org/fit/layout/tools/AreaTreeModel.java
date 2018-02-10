@@ -33,7 +33,7 @@ public class AreaTreeModel implements TreeModel
     @Override
     public Object getChild(Object parent, int index)
     {
-        return ((Area) parent).getChildArea(index);
+        return ((Area) parent).getChildAt(index);
     }
 
     @Override
@@ -60,7 +60,7 @@ public class AreaTreeModel implements TreeModel
         Area p = (Area) parent;
         for (int i = 0; i < p.getChildCount(); i++)
         {
-            if (p.getChildArea(i) == child)
+            if (p.getChildAt(i) == child)
                 return i;
         }
         return -1;

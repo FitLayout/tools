@@ -654,10 +654,10 @@ public class BlockBrowser implements Browser
     {
         //find the path to root
         int len = 0;
-        for (Box b = node; b != null; b = b.getParentBox())
+        for (Box b = node; b != null; b = b.getParent())
             len++;
         Box[] path = new Box[len];
-        for (Box b = node; b != null; b = b.getParentBox())
+        for (Box b = node; b != null; b = b.getParent())
             path[--len] = b;
         
         TreePath select = new TreePath(path);
@@ -670,10 +670,10 @@ public class BlockBrowser implements Browser
     {
         //find the path to root
         int len = 0;
-        for (Area a = node; a != null; a = a.getParentArea())
+        for (Area a = node; a != null; a = a.getParent())
             len++;
         Area[] path = new Area[len];
-        for (Area a = node; a != null; a = a.getParentArea())
+        for (Area a = node; a != null; a = a.getParent())
             path[--len] = a;
         
         TreePath select = new TreePath(path);
@@ -691,10 +691,10 @@ public class BlockBrowser implements Browser
             {
                 //find the path to root
                 int len = 0;
-                for (LogicalArea a = lnode; a != null; a = a.getParentArea())
+                for (LogicalArea a = lnode; a != null; a = a.getParent())
                     len++;
                 LogicalArea[] path = new LogicalArea[len];
-                for (LogicalArea a = lnode; a != null; a = a.getParentArea())
+                for (LogicalArea a = lnode; a != null; a = a.getParent())
                     path[--len] = a;
                 TreePath select = new TreePath(path);
                 logicalTree.setSelectionPath(select);
@@ -708,7 +708,7 @@ public class BlockBrowser implements Browser
     {
         getOutputDisplay().drawExtent(root);
         for (int i = 0; i < root.getChildCount(); i++)
-            showAllBoxes(root.getChildBox(i));
+            showAllBoxes(root.getChildAt(i));
     }
     
     public void showAreas(Area root, String name)
@@ -716,7 +716,7 @@ public class BlockBrowser implements Browser
         if (name == null || root.toString().contains(name))
             getOutputDisplay().drawExtent(root);
         for (int i = 0; i < root.getChildCount(); i++)
-            showAreas(root.getChildArea(i), name);
+            showAreas(root.getChildAt(i), name);
     }
     
     private void displayAreaInfo(Area area)
@@ -725,10 +725,10 @@ public class BlockBrowser implements Browser
         
         Vector<Vector <String>> vals = new Vector<Vector <String>>();
         //vals.add(infoTableData("Layout", area.getLayoutType().toString()));
-        if (area.getParentArea() == null)
+        if (area.getParent() == null)
             vals.add(infoTableData("GP", "---"));
         else
-            vals.add(infoTableData("GP", area.getParentArea().getTopology().getPosition(area).toString()));
+            vals.add(infoTableData("GP", area.getParent().getTopology().getPosition(area).toString()));
         vals.add(infoTableData("Tags", tagProbabilityString(area.getTags())));
         //if (proc.getVisualClassifier() != null)
         //    vals.add(infoTableData("V. class", proc.getVisualClassifier().classifyArea(area)));
@@ -946,7 +946,7 @@ public class BlockBrowser implements Browser
             tagTypes.add(tag.getType());
         }
         for (int i = 0; i < root.getChildCount(); i++)
-            recursiveUpdateTagLists(root.getChildArea(i));
+            recursiveUpdateTagLists(root.getChildAt(i));
     }
     
     //===========================================================================

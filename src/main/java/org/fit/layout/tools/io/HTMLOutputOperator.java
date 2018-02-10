@@ -221,7 +221,7 @@ public class HTMLOutputOperator extends BaseOperator
             p.println(stag);
             
             for (int i = 0; i < a.getChildCount(); i++)
-                recursiveDumpArea(a.getChildArea(i), level+1, p);
+                recursiveDumpArea(a.getChildAt(i), level+1, p);
             
             indent(level, p);
             p.println(etag);
@@ -265,7 +265,7 @@ public class HTMLOutputOperator extends BaseOperator
             indent(level, p);
             String stag = "<span"
                             + " id=\"b" + box.getId() + "\""
-                            + " style=\"" + getBoxStyle(box.getParentBox(), box) + "\"" 
+                            + " style=\"" + getBoxStyle(box.getParent(), box) + "\"" 
                             + ">";
             p.print(stag);
             p.print(HTMLEntities(box.getText()));
@@ -273,7 +273,7 @@ public class HTMLOutputOperator extends BaseOperator
         }
         else
         {
-            Style style = getBoxStyle(box.getParentBox(), box);
+            Style style = getBoxStyle(box.getParent(), box);
             style.put("width", getContentWidth(box), "px");
             style.put("height", getContentHeight(box), "px");
             String stag = "<div"
@@ -284,7 +284,7 @@ public class HTMLOutputOperator extends BaseOperator
             p.println(stag);
             
             for (int i = 0; i < box.getChildCount(); i++)
-            	recursiveDumpBoxes(box.getChildBox(i), level + 1, p);
+            	recursiveDumpBoxes(box.getChildAt(i), level + 1, p);
             
             indent(level, p);
             p.println("</div>");
@@ -293,7 +293,7 @@ public class HTMLOutputOperator extends BaseOperator
     
     protected String getAreaStyle(Area a)
     {
-        Area parent = a.getParentArea();
+        Area parent = a.getParent();
         int px = 0;
         int py = 0;
         if (parent != null)

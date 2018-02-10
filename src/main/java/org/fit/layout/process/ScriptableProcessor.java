@@ -219,7 +219,7 @@ public class ScriptableProcessor extends BaseProcessor
         if (nameSubstring == null || root.toString().contains(nameSubstring))
             disp.drawExtent(root);
         for (int i = 0; i < root.getChildCount(); i++)
-            showAreas(disp, root.getChildArea(i), nameSubstring);
+            showAreas(disp, root.getChildAt(i), nameSubstring);
     }
     
     //======================================================================================================

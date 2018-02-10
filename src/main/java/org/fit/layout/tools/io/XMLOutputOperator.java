@@ -164,7 +164,7 @@ public class XMLOutputOperator extends BaseOperator
             p.println(stag);
             
             for (int i = 0; i < a.getChildCount(); i++)
-                recursiveDump(a.getChildArea(i), level+1, p);
+                recursiveDump(a.getChildAt(i), level+1, p);
             
             indent(level, p);
             p.println(etag);

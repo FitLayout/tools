@@ -33,7 +33,7 @@ public class BoxTreeModel implements TreeModel
     @Override
     public Object getChild(Object parent, int index)
     {
-        return ((Box) parent).getChildBox(index);
+        return ((Box) parent).getChildAt(index);
     }
 
     @Override
@@ -60,7 +60,7 @@ public class BoxTreeModel implements TreeModel
         Box p = (Box) parent;
         for (int i = 0; i < p.getChildCount(); i++)
         {
-            if (p.getChildBox(i) == child)
+            if (p.getChildAt(i) == child)
                 return i;
         }
         return -1;

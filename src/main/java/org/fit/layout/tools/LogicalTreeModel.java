@@ -33,7 +33,7 @@ public class LogicalTreeModel implements TreeModel
     @Override
     public Object getChild(Object parent, int index)
     {
-        return ((LogicalArea) parent).getChildArea(index);
+        return ((LogicalArea) parent).getChildAt(index);
     }
 
     @Override
@@ -60,7 +60,7 @@ public class LogicalTreeModel implements TreeModel
         LogicalArea p = (LogicalArea) parent;
         for (int i = 0; i < p.getChildCount(); i++)
         {
-            if (p.getChildArea(i) == child)
+            if (p.getChildAt(i) == child)
                 return i;
         }
         return -1;
