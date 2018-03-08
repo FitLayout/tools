@@ -1791,8 +1791,8 @@ public class BlockBrowser implements Browser
         if (showColumnsButton == null)
         {
           showColumnsButton = new JButton();
-          showColumnsButton.setText("Columns");
-          showColumnsButton.setToolTipText("Show columns marked with <column>");
+          showColumnsButton.setText("Chunks");
+          showColumnsButton.setToolTipText("Show chunk areas marked with <chunk:*>");
           showColumnsButton.addActionListener(new java.awt.event.ActionListener()
           {
               public void actionPerformed(java.awt.event.ActionEvent e)
@@ -1800,7 +1800,7 @@ public class BlockBrowser implements Browser
                   Area node = (Area) areaJTree.getLastSelectedPathComponent();
                   if (node != null)
                   {
-                      showAreas(node, "<column>");
+                      showAreas(node, "<chunk");
                       contentCanvas.repaint();
                   }
               }
