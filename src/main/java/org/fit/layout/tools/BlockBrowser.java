@@ -5,6 +5,7 @@ package org.fit.layout.tools;
 
 import java.net.URL;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,6 +23,7 @@ import org.fit.layout.api.ServiceManager;
 import org.fit.layout.gui.AreaSelectionListener;
 import org.fit.layout.gui.Browser;
 import org.fit.layout.gui.BrowserPlugin;
+import org.fit.layout.gui.CanvasClickListener;
 import org.fit.layout.gui.RectangleSelectionListener;
 import org.fit.layout.gui.TreeListener;
 import org.fit.layout.impl.DefaultContentRect;
@@ -114,6 +116,8 @@ public class BlockBrowser implements Browser
     private List<AreaSelectionListener> areaListeners;
     private List<TreeListener> treeListeners;
     private List<RectangleSelectionListener> rectangleListeners;
+    private List<CanvasClickListener> canvasClickAlwaysListeners;
+    private Map<JToggleButton, CanvasClickListener> canvasClickToggleListeners;
 
     private JFrame mainWindow = null;  //  @jve:decl-index=0:visual-constraint="-239,28"
     private JPanel container = null;
@@ -135,9 +139,6 @@ public class BlockBrowser implements Browser
 	private JPanel areaTreePanel = null;
 	private JScrollPane areaTreeScroll = null;
 	private JTree areaJTree = null;
-    private JToggleButton lookupButton = null;
-    private JToggleButton extractButton = null;
-    private JToggleButton boxLookupButton = null;
     private JButton showBoxButton = null;
     private JButton showAreaButton = null;
     private JToolBar lookupToolBar = null;
@@ -157,7 +158,6 @@ public class BlockBrowser implements Browser
     private JScrollPane extractionScroll;
     private JTable extractionTable;
     private JFrame treeCompWindow;
-    private JToggleButton sepLookupButton;
     private JScrollPane probabilityScroll;
     private JTable probTable;
     private JTabbedPane toolTabs;
@@ -188,6 +188,8 @@ public class BlockBrowser implements Browser
         areaListeners = new LinkedList<>();
         treeListeners = new LinkedList<>();
         rectangleListeners = new LinkedList<>();
+        canvasClickAlwaysListeners = new LinkedList<>();
+        canvasClickToggleListeners = new HashMap<>();
         proc = new GUIProcessor() {
             @Override
             protected void treesCompleted()
@@ -343,6 +345,21 @@ public class BlockBrowser implements Browser
     public void addTreeListener(TreeListener listener)
     {
         treeListeners.add(listener);
+    }
+    
+    @Override
+    public void addCanvasClickListener(String toggleButtonTitle, CanvasClickListener listener, boolean select)
+    {
+        if (toggleButtonTitle == null)
+            canvasClickAlwaysListeners.add(listener);
+        else
+        {
+            JToggleButton button = createClickToggleButton(toggleButtonTitle);
+            if (select)
+                button.setSelected(true); //select the first button
+            canvasClickToggleListeners.put(button, listener);
+            getLookupToolBar().add(button);
+        }
     }
     
     @Override
@@ -550,10 +567,42 @@ public class BlockBrowser implements Browser
         return contentCanvas;
     }
     
+    private JToggleButton createClickToggleButton(String label)
+    {
+        JToggleButton button = new JToggleButton(label);
+        button.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent arg0) {
+                if (button.isSelected())
+                {
+                    for (JToggleButton other : canvasClickToggleListeners.keySet())
+                    {
+                        if (other != button)
+                            other.setSelected(false);
+                    }
+                }
+            }
+        });
+        //button.setText(label);
+        button.setToolTipText("Show " + label.toLowerCase() + " when the canvas is clicked");
+        return button;
+    }
+
+
+    
     /** This is called when the browser canvas is clicked */
     private void canvasClick(int x, int y)
     {
-        if (lookupButton.isSelected())
+        //always called listeners
+        for (CanvasClickListener listener : canvasClickAlwaysListeners)
+            listener.canvasClicked(x, y);
+        //selected listener by toggle buttons
+        for (JToggleButton button : canvasClickToggleListeners.keySet())
+        {
+            if (button.isSelected())
+                canvasClickToggleListeners.get(button).canvasClicked(x, y);
+        }
+        
+        /*if (lookupButton.isSelected())
         {
             if (proc.getAreaTree() != null)
             {
@@ -573,7 +622,7 @@ public class BlockBrowser implements Browser
                 showBoxInTree(node);
             //boxLookupButton.setSelected(false);
         }
-        /*if (sepLookupButton.isSelected())
+        if (sepLookupButton.isSelected())
         {
             showSeparatorAt(x, y);
         }
@@ -971,6 +1020,37 @@ public class BlockBrowser implements Browser
         }
     }
     
+    /**
+     * A place for adding custom GUI component to the main window
+     */
+    protected void initGUI()
+    {
+        //add the default selection buttons
+        addCanvasClickListener("Boxes", new CanvasClickListener()
+        {
+            @Override
+            public void canvasClicked(int x, int y)
+            {
+                Box node = proc.getPage().getBoxAt(x, y);
+                if (node != null)
+                    showBoxInTree(node);
+            }
+        }, false);
+        addCanvasClickListener("Areas", new CanvasClickListener()
+        {
+            @Override
+            public void canvasClicked(int x, int y)
+            {
+                Area node = proc.getAreaTree().getAreaAt(x, y);
+                if (node != null)
+                {
+                    showAreaInTree(node);
+                    showAreaInLogicalTree(node);
+                }
+            }
+        }, true);
+    }
+    
     //===========================================================================
     
     /**
@@ -996,6 +1076,7 @@ public class BlockBrowser implements Browser
                     System.exit(0);
                 }
             });
+            initGUI();
         }
         return mainWindow;
     }
@@ -1399,99 +1480,6 @@ public class BlockBrowser implements Browser
 		return areaJTree;
 	}
 
-
-	/**
-     * This method initializes lookupButton	
-     * 	
-     * @return javax.swing.JToggleButton	
-     */
-    private JToggleButton getLookupButton()
-    {
-        if (lookupButton == null)
-        {
-            lookupButton = new JToggleButton();
-            lookupButton.setSelected(true);
-            lookupButton.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent arg0) {
-                    if (lookupButton.isSelected())
-                    {
-                        boxLookupButton.setSelected(false);
-                        sepLookupButton.setSelected(false);
-                        extractButton.setSelected(false);
-                    }
-                }
-            });
-            lookupButton.setText("Area");
-            lookupButton.setToolTipText("Find areas");
-        }
-        return lookupButton;
-    }
-
-    private JToggleButton getSepLookupButton() {
-        if (sepLookupButton == null) {
-            sepLookupButton = new JToggleButton("Sep");
-            sepLookupButton.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent arg0) {
-                    lookupButton.setSelected(false);
-                    boxLookupButton.setSelected(false);
-                    extractButton.setSelected(false);
-                }
-            });
-        }
-        return sepLookupButton;
-    }
-    
-    /**
-     * This method initializes extractButton	
-     * 	
-     * @return javax.swing.JToggleButton	
-     */
-    private JToggleButton getExtractButton()
-    {
-        if (extractButton == null)
-        {
-            extractButton = new JToggleButton();
-            extractButton.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    if (extractButton.isSelected())
-                    {
-                        boxLookupButton.setSelected(false);
-                        sepLookupButton.setSelected(false);
-                        lookupButton.setSelected(false);
-                    }
-                }
-            });
-            extractButton.setText("Extract");
-        }
-        return extractButton;
-    }
-
-    /**
-     * This method initializes boxLookupButton	
-     * 	
-     * @return javax.swing.JToggleButton	
-     */
-    private JToggleButton getBoxLookupButton()
-    {
-        if (boxLookupButton == null)
-        {
-            boxLookupButton = new JToggleButton();
-            boxLookupButton.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    if (boxLookupButton.isSelected())
-                    {
-                        lookupButton.setSelected(false);
-                        sepLookupButton.setSelected(false);
-                        extractButton.setSelected(false);
-                    }
-                }
-            });
-            boxLookupButton.setText("Box");
-            boxLookupButton.setToolTipText("Find boxes");
-        }
-        return boxLookupButton;
-    }
-
     /**
      * This method initializes showBoxButton	
      * 	
@@ -1558,10 +1546,7 @@ public class BlockBrowser implements Browser
         if (lookupToolBar == null)
         {
             lookupToolBar = new JToolBar();
-            lookupToolBar.add(getBoxLookupButton());
-            lookupToolBar.add(getLookupButton());
-            lookupToolBar.add(getSepLookupButton());
-            lookupToolBar.add(getExtractButton());
+            //the default buttons are added in initGUI()
         }
         return lookupToolBar;
     }
