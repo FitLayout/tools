@@ -328,6 +328,12 @@ public class BlockBrowser implements Browser
     }
 
     @Override
+    public void displayAreaDetails(Area area)
+    {
+        displayAreaInfo(area);
+    }
+
+    @Override
     public void addAreaSelectionListener(AreaSelectionListener listener)
     {
         areaListeners.add(listener);
