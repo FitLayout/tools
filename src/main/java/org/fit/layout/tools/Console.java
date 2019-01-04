@@ -15,9 +15,11 @@ import java.io.Writer;
 
 import javax.script.ScriptException;
 
-import jline.console.ConsoleReader;
-
 import org.fit.layout.process.ScriptableProcessor;
+import org.jline.reader.EndOfFileException;
+import org.jline.reader.LineReader;
+import org.jline.reader.LineReaderBuilder;
+import org.jline.reader.UserInterruptException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,8 +47,7 @@ public class Console
         Writer werr = new OutputStreamWriter(err);
         proc.setIO(rin, wout, werr);
         
-        ConsoleReader reader = new ConsoleReader(in, out);
-        reader.setPrompt(prompt());
+        LineReader reader = LineReaderBuilder.builder().build();
         
         try
         {
@@ -59,14 +60,20 @@ public class Console
         {
             proc.flushIO();
             out.println();
-            String cmd = reader.readLine();
-            if (cmd == null)
-                break;
             try
             {
-                proc.execCommand(cmd);
+                String cmd = reader.readLine(prompt());
+                Object result = proc.execCommand(cmd);
+                if (result != null)
+                    out.println(result.toString());
+                else
+                    out.println("undefined");
             } catch (ScriptException e) {
-                log.error(e.getMessage());
+                err.println(e.getMessage());
+            } catch (UserInterruptException e) {
+                // Ignore
+            } catch (EndOfFileException e) {
+                break;
             }
         }
         out.println();

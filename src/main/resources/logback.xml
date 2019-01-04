@@ -67,6 +67,11 @@
 		<appender-ref ref="cssbox" />
 	</logger>
 
+	<logger name="org.fit.layout.patterns.PatternGenerator" additivity="false">
+		<level value="warn" />
+		<appender-ref ref="cssbox" />
+	</logger>
+
 	<root>
 		<appender-ref ref="cssbox" />
 	</root>

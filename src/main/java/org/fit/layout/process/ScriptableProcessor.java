@@ -293,10 +293,9 @@ public class ScriptableProcessor extends BaseProcessor
         }
     }
 
-    public boolean execCommand(String command) throws ScriptException
+    public Object execCommand(String command) throws ScriptException
     {
-        getEngine().eval(command);
-        return true;
+        return getEngine().eval(command);
     }
 
 }
