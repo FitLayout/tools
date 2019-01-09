@@ -48,6 +48,8 @@ public class Console
         proc.setIO(rin, wout, werr);
         
         LineReader reader = LineReaderBuilder.builder().build();
+        String histfile = System.getProperty("user.home") + "/.fitlayout/console_history";
+        reader.setVariable(LineReader.HISTORY_FILE, histfile);
         
         try
         {
