@@ -6,6 +6,8 @@
 package org.fit.layout.process;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -220,6 +222,18 @@ public class ScriptableProcessor extends BaseProcessor
             disp.drawExtent(root);
         for (int i = 0; i < root.getChildCount(); i++)
             showAreas(disp, root.getChildAt(i), nameSubstring);
+    }
+    
+    public void logToFile(String path, String text)
+    {
+        try(FileWriter fw = new FileWriter(path, true);
+                BufferedWriter bw = new BufferedWriter(fw);
+                PrintWriter out = new PrintWriter(bw))
+            {
+                out.println(text);
+            } catch (IOException e) {
+                werr.println(e.getMessage());
+            }        
     }
     
     //======================================================================================================
