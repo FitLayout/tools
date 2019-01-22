@@ -6,11 +6,14 @@
 package org.fit.layout.tools;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.io.Writer;
 
 import javax.script.ScriptException;
@@ -76,6 +79,8 @@ public class Console
                 // Ignore
             } catch (EndOfFileException e) {
                 break;
+            } catch (Exception e) {
+                err.println("Internal exception: " + e.getMessage());
             }
         }
         out.println();
@@ -109,9 +114,33 @@ public class Console
         proc.execInternal("init.js");
     }
     
+    //=============================================================================================
+    
     public void exit()
     {
         System.exit(0);
+    }
+    
+    public void logToFile(String path, String text)
+    {
+        try(FileWriter fw = new FileWriter(path, true);
+                BufferedWriter bw = new BufferedWriter(fw);
+                PrintWriter out = new PrintWriter(bw))
+            {
+                out.println(text);
+            } catch (IOException e) {
+                System.err.println(e.getMessage());
+            }        
+    }
+    
+    public void truncateFile(String path)
+    {
+        try(FileWriter fw = new FileWriter(path, false))
+            {
+                
+            } catch (IOException e) {
+                System.err.println(e.getMessage());
+            }        
     }
     
     //=============================================================================================
