@@ -81,6 +81,7 @@ public class Console
                 break;
             } catch (Exception e) {
                 err.println("Internal exception: " + e.getMessage());
+                e.printStackTrace(err);
             }
         }
         out.println();
