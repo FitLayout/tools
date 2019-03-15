@@ -2113,6 +2113,7 @@ public class BlockBrowser implements Browser
                 {
                     if (operatorWindow == null)
                         operatorWindow = new OperatorConfigWindow(proc);
+                    operatorWindow.pack();
                     operatorWindow.setVisible(true);
                 }
             });
