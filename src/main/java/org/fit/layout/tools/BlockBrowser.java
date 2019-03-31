@@ -812,6 +812,8 @@ public class BlockBrowser implements Browser
         //vals.add(infoTableData("Decl. fsize", String.valueOf(area.getDeclaredFontSize())));
         //vals.add(infoTableData("Luminosity", String.valueOf(area.getColorLuminosity())));
         //vals.add(infoTableData("Start color", colorString(a.getBoxes().firstElement().getStartColor())));
+        if (area.getBoxes().size() > 0)
+            vals.add(infoTableData("First box clr", colorString(area.getBoxes().get(0).getColor())));
         vals.add(infoTableData("Bg color", colorString(area.getBackgroundColor())));
         vals.add(infoTableData("Efficient bg", colorString(area.getEffectiveBackgroundColor())));
         
