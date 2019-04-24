@@ -1043,9 +1043,24 @@ public class BlockBrowser implements Browser
             @Override
             public void canvasClicked(int x, int y)
             {
-                Area node = proc.getAreaTree().getAreaAt(x, y);
-                if (node != null)
+                List<Area> nodes = proc.getAreaTree().getAreasAt(x, y);
+                if (!nodes.isEmpty())
                 {
+                    System.out.println("All: " + nodes);
+                    Area node = nodes.get(nodes.size() - 1);
+                    if (getSelectedArea() != null)
+                    {
+                        int i = nodes.indexOf(getSelectedArea());
+                        if (i != -1) //already selected; try the previous one
+                        {
+                            if (i == 0)
+                                i = nodes.size() - 1;
+                            else
+                                i = i - 1;
+                            node = nodes.get(i);
+                        }
+                    }
+                    System.out.println("Using: " + node);
                     showAreaInTree(node);
                     showAreaInLogicalTree(node);
                 }
